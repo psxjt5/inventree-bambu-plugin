@@ -1,13 +1,25 @@
 """Machine drivers and support for Bambu Lab 3D printers."""
 
 from plugin import InvenTreePlugin
+from plugin.machine import BaseMachineType
+from plugin.machine.machine_types import BaseDriver, BaseMachine
+
 
 from plugin.mixins import SettingsMixin, UserInterfaceMixin
 
 from . import PLUGIN_VERSION
 
+# Backwards compatibility imports
+try:
+    from plugin.mixins import MachineDriverMixin, SettingsMixin, UserInterfaceMixin
+except ImportError:
 
-class InvenTreeBambuLabMachines(SettingsMixin, UserInterfaceMixin, InvenTreePlugin):
+    class MachineDriverMixin:
+        """Dummy mixin for backwards compatibility."""
+
+        pass
+
+class InvenTreeBambuLabMachines(MachineDriverMixin, SettingsMixin, UserInterfaceMixin, InvenTreePlugin):
 
     """InvenTreeBambuLabMachines - custom InvenTree plugin."""
 
@@ -29,87 +41,86 @@ class InvenTreeBambuLabMachines(SettingsMixin, UserInterfaceMixin, InvenTreePlug
 
     # Render custom UI elements to the plugin settings page
     ADMIN_SOURCE = "Settings.js:renderPluginSettings"
+
+    def get_machine_drivers(self):
+        return [BambuLabPrinterDriver]
     
     
-    # Plugin settings (from SettingsMixin)
-    # Ref: https://docs.inventree.org/en/latest/plugins/mixins/settings/
-    SETTINGS = {
-        # Define your plugin settings here...
-        'CUSTOM_VALUE': {
-            'name': 'Custom Value',
-            'description': 'A custom value',
-            'validator': int,
-            'default': 42,
+class BambuLabPrinterDriver(BaseDriver):
+    """Bambu Lab 3D Printer driver"""
+
+    SLUG = "bambulab"
+    NAME = "BambuLab 3D Printer"
+    DESCRIPTION = "Driver for Bambu Lab 3D printers"
+
+    MACHINE_CLASS = BaseMachine  # important!
+
+    def __init__(self, *args, **kwargs):
+
+        self.MACHINE_SETTINGS = {
+            "IP_ADDRESS": {
+                "name": "IP Address",
+                "description": "Printer IP address",
+                "default": "",
+                "required": True,
+            },
+            "ACCESS_TOKEN": {
+                "name": "Access Token",
+                "description": "Printer API token",
+                "default": "",
+                "required": True,
+            },
         }
-    }
-    
-    
-    
-    
-    
-    
 
-    # User interface elements (from UserInterfaceMixin)
-    # Ref: https://docs.inventree.org/en/latest/plugins/mixins/ui/
-    
-    # Custom UI panels
-    def get_ui_panels(self, request, context: dict, **kwargs):
-        """Return a list of custom panels to be rendered in the InvenTree user interface."""
+        super().__init__(*args, **kwargs)
 
-        panels = []
+    def init_machine(self, machine: BaseMachine):
+        """Called when machine is initialized"""
 
-        # Only display this panel for the 'part' target
-        if context.get('target_model') == 'part':
-            panels.append({
-                'key': 'inventreebambulabmachines-panel',
-                'title': 'InvenTreeBambuLabMachines',
-                'description': 'Custom panel description',
-                'icon': 'ti:mood-smile:outline',
-                'source': self.plugin_static_file('Panel.js:renderInvenTreeBambuLabMachinesPanel'),
-                'context': {
-                    # Provide additional context data to the panel
-                    'settings': self.get_settings_dict(),
-                    'foo': 'bar'
-                }
-            })
+        if self.test_connection(machine):
+            machine.set_status("idle")
+        else:
+            machine.set_status("offline")
+
+    def test_connection(self, machine: BaseMachine) -> bool:
+        import requests
+
+        ip = machine.get_setting("IP_ADDRESS")
+        token = machine.get_setting("ACCESS_TOKEN")
+
+        try:
+            r = requests.get(
+                f"http://{ip}/status",
+                headers={"Authorization": f"Bearer {token}"},
+                timeout=3,
+            )
+            return r.status_code == 200
+        except Exception:
+            return False
         
-        return panels
-    
+    def get_status(self, machine: BaseMachine):
+        import requests
 
-    # Custom dashboard items
-    def get_ui_dashboard_items(self, request, context: dict, **kwargs):
-        """Return a list of custom dashboard items to be rendered in the InvenTree user interface."""
+        ip = machine.get_setting("IP_ADDRESS")
+        token = machine.get_setting("ACCESS_TOKEN")
 
-        # Example: only display for 'staff' users
-        if not request.user or not request.user.is_staff:
-            return []
-        
-        items = []
+        try:
+            r = requests.get(
+                f"http://{ip}/status",
+                headers={"Authorization": f"Bearer {token}"},
+                timeout=5,
+            )
+            data = r.json()
 
-        items.append({
-            'key': 'inventreebambulabmachines-dashboard',
-            'title': 'InvenTreeBambuLabMachines Dashboard Item',
-            'description': 'Custom dashboard item',
-            'icon': 'ti:dashboard:outline',
-            'source': self.plugin_static_file('Dashboard.js:renderInvenTreeBambuLabMachinesDashboardItem'),
-            'context': {
-                # Provide additional context data to the dashboard item
-                'settings': self.get_settings_dict(),
-                'bar': 'foo'
+            return {
+                "state": "online",
+                "progress": data.get("progress"),
+                "hotend_temp": data.get("hotend_temp"),
+                "bed_temp": data.get("bed_temp"),
             }
-        })
 
-        return items
-    
-
-    def get_ui_spotlight_actions(self, request, context, **kwargs):
-        """Return a list of custom spotlight actions to be made available."""
-        return [
-            {
-                'key': 'sample-spotlight-action',
-                'title': 'Hello Action',
-                'description': 'Hello from InvenTreeBambuLabMachines',
-                'icon': 'ti:heart-handshake:outline',
-                'source': self.plugin_static_file('Spotlight.js:InvenTreeBambuLabMachinesSpotlightAction'),
+        except Exception as e:
+            return {
+                "state": "offline",
+                "error": str(e),
             }
-        ]
