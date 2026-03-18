@@ -46,6 +46,7 @@ class BambuLabPrinterDriver(MachineDriverMixin):
 
     SLUG = "bambulab"
     NAME = "BambuLab 3D Printer"
+    MACHINE_NAME = "Bambu Lab 3D Printer"
     DESCRIPTION = "Driver for Bambu Lab 3D printers"
 
     def __init__(self, *args, **kwargs):
