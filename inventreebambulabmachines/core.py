@@ -1,7 +1,6 @@
 """Machine drivers and support for Bambu Lab 3D printers."""
 
 from plugin import InvenTreePlugin
-from plugin.machine import BaseMachineType
 from plugin.machine.machine_types import LabelPrinterBaseDriver, LabelPrinterMachine
 
 from . import PLUGIN_VERSION
@@ -31,6 +30,7 @@ class InvenTreeBambuLabMachines(InvenTreePlugin):
     ADMIN_SOURCE = "Settings.js:renderPluginSettings"
 
     def get_machine_drivers(self):
+        print("REGISTERING BAMBU DRIVER")
         return [BambuLabPrinterDriver]
     
     
