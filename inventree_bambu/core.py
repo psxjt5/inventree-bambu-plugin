@@ -107,7 +107,7 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
             device = data["print"]["device"]
             job = data["print"]
             
-            state_str = data["print"]["upgrade_state"]["status"]
+            state_str = data["print"].get("gcode_state", "UNKNOWN")
             layer = job.get("layer_num", 0)
             total = job.get("total_layer_num", 0)
             progress = int(layer / total * 100) if total else 0
