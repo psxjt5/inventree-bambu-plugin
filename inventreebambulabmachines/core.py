@@ -1,10 +1,8 @@
 """Machine drivers and support for Bambu Lab 3D printers."""
 
+from plugin.machine.machine_types import BaseMachine
+from plugin.mixins import MachineDriverMixin
 from plugin import InvenTreePlugin
-from plugin.machine.machine_types import BaseMachineDriver, BaseMachine
-
-
-from plugin.mixins import SettingsMixin, UserInterfaceMixin
 
 from . import PLUGIN_VERSION
 
@@ -45,7 +43,7 @@ class InvenTreeBambuLabMachines(MachineDriverMixin, SettingsMixin, UserInterface
         return [BambuLabPrinterDriver]
     
     
-class BambuLabPrinterDriver(BaseMachineDriver):
+class BambuLabPrinterDriver(MachineDriverMixin):
     """Bambu Lab 3D Printer driver"""
 
     SLUG = "bambulab"
