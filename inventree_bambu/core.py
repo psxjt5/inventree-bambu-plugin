@@ -73,8 +73,8 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
     def test_connection(self, machine) -> bool:
         import requests
 
-        ip = machine.get_setting("IP_ADDRESS")
-        token = machine.get_setting("ACCESS_TOKEN")
+        ip = machine.get_setting("IP_ADDRESS", "M")
+        token = machine.get_setting("ACCESS_TOKEN", "M")
 
         try:
             r = requests.get(
@@ -89,8 +89,8 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
     def get_status(self, machine):
         import requests
 
-        ip = machine.get_setting("IP_ADDRESS")
-        token = machine.get_setting("ACCESS_TOKEN")
+        ip = machine.get_setting("IP_ADDRESS", "M")
+        token = machine.get_setting("ACCESS_TOKEN", "M")
 
         try:
             r = requests.get(
