@@ -34,6 +34,10 @@ class InvenTreeBambuPlugin(MachineDriverMixin, InvenTreePlugin):
         print("Registering Bambu Lab Printing Driver")
         return [BambuLabPrinterDriver]
     
+    def get_machine_types(self) -> list:
+        print("Registering 3D Printer Type")
+        return [ThreeDPrinterMachine]
+    
     
 class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
     """Bambu Lab 3D Printer driver"""
