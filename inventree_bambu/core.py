@@ -1,7 +1,6 @@
 """Machine drivers and support for Bambu Lab 3D printers."""
 
 from plugin import InvenTreePlugin
-from plugin.machine.machine_types import LabelPrinterBaseDriver, LabelPrinterMachine
 from plugin.mixins import MachineDriverMixin
 from threed_printer import ThreeDPrinterBaseDriver, ThreeDPrinterMachine
 
