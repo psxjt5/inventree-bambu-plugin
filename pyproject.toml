@@ -8,7 +8,7 @@ requires = ["setuptools", "twine", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "inventree-inventreebambulabmachines"
+name = "inventree-bambu-plugin"
 description = "Machine drivers and support for Bambu Lab 3D printers."
 dynamic = ["version"]
 authors = [
@@ -30,13 +30,13 @@ classifiers = [
 Homepage = "https://github.com/psxjt5/inventree-bambu-plugin"
 
 [project.entry-points."inventree_plugins"]
-InvenTreeBambuLabMachines = "inventreebambulabmachines.core:InvenTreeBambuLabMachines"
+InvenTreeBambuPlugin = "inventree_bambu.core:InvenTreeBambuPlugin"
 
 [tool.setuptools.packages.find]
 where = [""]
 
 [tool.setuptools.dynamic]
-version = {attr = "inventreebambulabmachines.PLUGIN_VERSION"} 
+version = {attr = "inventree_bambu.PLUGIN_VERSION"} 
 
 [tool.ruff]
 exclude = [
@@ -50,4 +50,4 @@ exclude = [
     ".env",
 ]
 
-src=["inventreebambulabmachines"]
+src=["inventree_bambu"]

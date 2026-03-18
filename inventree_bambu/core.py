@@ -6,14 +6,14 @@ from plugin.machine.machine_types import LabelPrinterBaseDriver, LabelPrinterMac
 from . import PLUGIN_VERSION
 
 
-class InvenTreeBambuLabMachines(InvenTreePlugin):
+class InvenTreeBambuPlugin(InvenTreePlugin):
 
-    """InvenTreeBambuLabMachines - custom InvenTree plugin."""
+    """InvenTreeBambuPlugin - custom InvenTree plugin."""
 
     # Plugin metadata
-    TITLE = "InvenTreeBambuLabMachines"
-    NAME = "InvenTreeBambuLabMachines"
-    SLUG = "inventreebambulabmachines"
+    TITLE = "InvenTreeBambuPlugin"
+    NAME = "InvenTreeBambuPlugin"
+    SLUG = "inventreebambuplugin"
     DESCRIPTION = "Machine drivers and support for Bambu Lab 3D printers."
     VERSION = PLUGIN_VERSION
 
