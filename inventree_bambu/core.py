@@ -45,27 +45,22 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
     SLUG = "bambulab"
     NAME = "BambuLab 3D Printer"
     MACHINE_NAME = "Bambu Lab 3D Printer"
-    MACHINE_CLASS = ThreeDPrinterMachine
     DESCRIPTION = "Driver for Bambu Lab 3D printers"
 
-    def __init__(self, *args, **kwargs):
-
-        self.MACHINE_SETTINGS = {
-            "IP_ADDRESS": {
-                "name": "IP Address",
-                "description": "Printer IP address",
-                "default": "",
-                "required": True,
-            },
-            "ACCESS_TOKEN": {
-                "name": "Access Token",
-                "description": "Printer API token",
-                "default": "",
-                "required": True,
-            },
-        }
-
-        super().__init__(*args, **kwargs)
+    MACHINE_SETTINGS = {
+        "IP_ADDRESS": {
+            "name": "IP Address",
+            "description": "Printer IP address",
+            "default": "",
+            "required": True,
+        },
+        "ACCESS_TOKEN": {
+            "name": "Access Token",
+            "description": "Printer API token",
+            "default": "",
+            "required": True,
+        },
+    }
 
     def init_machine(self, machine):
         """Called when machine is initialized"""
