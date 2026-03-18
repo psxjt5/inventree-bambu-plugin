@@ -4,7 +4,7 @@
 #- Ref: https://github.com/inventree/plugin_creator
 
 [build-system]
-requires = ["setuptools", "twine", "wheel"]
+requires = ["setuptools", "twine", "wheel", "paho-mqtt"]
 build-backend = "setuptools.build_meta"
 
 [project]
