@@ -2,6 +2,7 @@
 
 from plugin import InvenTreePlugin
 from plugin.machine import BaseMachineType
+from plugin.machine.machine_types import BaseMachine
 
 from . import PLUGIN_VERSION
 
@@ -39,6 +40,7 @@ class BambuLabPrinterDriver(BaseMachineType):
     SLUG = "bambulab"
     NAME = "BambuLab 3D Printer"
     MACHINE_NAME = "Bambu Lab 3D Printer"
+    MACHINE_CLASS = BaseMachine
     DESCRIPTION = "Driver for Bambu Lab 3D printers"
 
     def __init__(self, *args, **kwargs):
