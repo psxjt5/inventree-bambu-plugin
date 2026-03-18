@@ -72,14 +72,14 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
         self.latest_mqtt_message = None
 
         if self.test_connection(machine):
-            machine.set_status(ThreeDPrinterStatus.IDLE.value)
+            machine.set_status(ThreeDPrinterStatus.IDLE)
             threading.Thread(
                 target=self._mqtt_thread,
                 args=(machine,),
                 daemon=True
             ).start()
         else:
-            machine.set_status(ThreeDPrinterStatus.UNKNOWN.value)
+            machine.set_status(ThreeDPrinterStatus.UNKNOWN)
 
     def test_connection(self, machine) -> bool:
         """Check if the printer is reachable over MQTT."""
@@ -128,7 +128,7 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
 
         try:
             data = json.loads(self.latest_mqtt_message)
-            state_str = data["print"]["upgrade_state"]["status"]
+            state_str = data["print"].get("gcode_state", "UNKNOWN")
 
             if not hasattr(ThreeDPrinterStatus, state_str.upper()):
                 print(f"Unknown printer state: {state_str}")
@@ -139,7 +139,7 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
                 ThreeDPrinterStatus.UNKNOWN
             )
 
-            machine.set_status(status.value)
+            machine.set_status(status)
 
         except Exception as e:
             print(f"Error parsing MQTT payload: {e}")
