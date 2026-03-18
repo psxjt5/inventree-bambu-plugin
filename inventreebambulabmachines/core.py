@@ -1,13 +1,12 @@
 """Machine drivers and support for Bambu Lab 3D printers."""
 
-from plugin.mixins import MachineDriverMixin
 from plugin import InvenTreePlugin
 
 from . import PLUGIN_VERSION
 
 # Backwards compatibility imports
 try:
-    from plugin.mixins import MachineDriverMixin, SettingsMixin, UserInterfaceMixin
+    from plugin.mixins import MachineDriverMixin
 except ImportError:
 
     class MachineDriverMixin:
@@ -15,7 +14,7 @@ except ImportError:
 
         pass
 
-class InvenTreeBambuLabMachines(MachineDriverMixin, SettingsMixin, UserInterfaceMixin, InvenTreePlugin):
+class InvenTreeBambuLabMachines(InvenTreePlugin):
 
     """InvenTreeBambuLabMachines - custom InvenTree plugin."""
 
