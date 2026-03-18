@@ -33,11 +33,12 @@ class ThreeDPrinterStatus(MachineStatus):
         ERROR: The printer is in an unknown error condition
     """
 
-    UNKNOWN = 0, _("Unknown"), ColorEnum.secondary
-    IDLE = 1, _("Idle"), ColorEnum.success
-    PRINTING = 2, _("Printing"), ColorEnum.primary
-    WARNING = 3, _("Warning"), ColorEnum.warning
-    ERROR = 4, _("Error"), ColorEnum.danger
+    UNKNOWN = 0, _('Unknown'), ColorEnum.secondary
+    IDLE = 1, _('Idle'), ColorEnum.success
+    RUNNING = 2, _('Printing'), ColorEnum.primary
+    PAUSE = 3, _('Paused'), ColorEnum.warning
+    FINISH = 4, _('Finished'), ColorEnum.success
+    ERROR = 5, _('Error'), ColorEnum.danger
 
 
 class ThreeDPrinterMachine(BaseMachineType):

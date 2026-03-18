@@ -126,11 +126,21 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
         if not self.latest_mqtt_message:
             return
 
-        import json
         try:
             data = json.loads(self.latest_mqtt_message)
             state_str = data["print"]["upgrade_state"]["status"]
-            machine.set_status(getattr(ThreeDPrinterStatus, state_str.upper(), ThreeDPrinterStatus.UNKNOWN))
+
+            if not hasattr(ThreeDPrinterStatus, state_str.upper()):
+                print(f"Unknown printer state: {state_str}")
+
+            status = getattr(
+                ThreeDPrinterStatus,
+                state_str.upper(),
+                ThreeDPrinterStatus.UNKNOWN
+            )
+
+            machine.set_status(status.value)
+
         except Exception as e:
             print(f"Error parsing MQTT payload: {e}")
     
