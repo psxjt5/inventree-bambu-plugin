@@ -68,7 +68,7 @@ class BambuLabPrinterDriver(MachineDriverMixin):
 
         super().__init__(*args, **kwargs)
 
-    def init_machine(self, machine: BaseMachine):
+    def init_machine(self, machine):
         """Called when machine is initialized"""
 
         if self.test_connection(machine):
@@ -76,7 +76,7 @@ class BambuLabPrinterDriver(MachineDriverMixin):
         else:
             machine.set_status("offline")
 
-    def test_connection(self, machine: BaseMachine) -> bool:
+    def test_connection(self, machine) -> bool:
         import requests
 
         ip = machine.get_setting("IP_ADDRESS")
@@ -92,7 +92,7 @@ class BambuLabPrinterDriver(MachineDriverMixin):
         except Exception:
             return False
         
-    def get_status(self, machine: BaseMachine):
+    def get_status(self, machine):
         import requests
 
         ip = machine.get_setting("IP_ADDRESS")
