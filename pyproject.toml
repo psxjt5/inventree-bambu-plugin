@@ -4,7 +4,7 @@
 #- Ref: https://github.com/inventree/plugin_creator
 
 [build-system]
-requires = ["setuptools", "twine", "wheel", "paho-mqtt"]
+requires = ["setuptools", "twine", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -19,7 +19,7 @@ license = "MIT"
 keywords = ["inventree", "plugin"]
 requires-python = ">=3.9"
 dependencies = [
-    # Enter your plugin library dependencies here
+    "paho-mqtt>=1.6.1"
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
