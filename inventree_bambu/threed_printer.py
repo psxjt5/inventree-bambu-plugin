@@ -26,24 +26,18 @@ class ThreeDPrinterStatus(MachineStatus):
     """Label printer status codes.
 
     Attributes:
-        CONNECTED: The printer is connected and ready to print
         UNKNOWN: The printer status is unknown (e.g. there is no active connection to the printer)
-        PRINTING: The printer is currently printing a label
+        IDLE: The printer is connected and waiting for a job
+        PRINTING: The printer is currently printing a job
         WARNING: The printer is in an unknown warning condition
-        NO_MEDIA: The printer is out of media (e.g. the label spool is empty)
-        PAPER_JAM: The printer has a paper jam
-        DISCONNECTED: The driver cannot establish a connection to the printer
         ERROR: The printer is in an unknown error condition
     """
 
-    CONNECTED = 100, _('Connected'), ColorEnum.success
-    UNKNOWN = 101, _('Unknown')# , ColorEnum.secondary
-    PRINTING = 110, _('Printing'), ColorEnum.primary
-    WARNING = 200, _('Warning'), ColorEnum.warning
-    NO_MEDIA = 301, _('No media'), ColorEnum.warning
-    PAPER_JAM = 302, _('Paper jam'), ColorEnum.warning
-    DISCONNECTED = 400, _('Disconnected'), ColorEnum.danger
-    ERROR = 500, _('Error'), ColorEnum.danger
+    UNKNOWN = 0, _("Unknown"), ColorEnum.secondary
+    IDLE = 1, _("Idle"), ColorEnum.success
+    PRINTING = 2, _("Printing"), ColorEnum.primary
+    WARNING = 3, _("Warning"), ColorEnum.warning
+    ERROR = 4, _("Error"), ColorEnum.danger
 
 
 class ThreeDPrinterMachine(BaseMachineType):

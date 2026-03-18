@@ -1,5 +1,10 @@
 """Machine drivers and support for Bambu Lab 3D printers."""
 
+import threading
+import json
+import socket
+import paho.mqtt.client as mqtt
+
 from plugin import InvenTreePlugin
 from plugin.mixins import MachineDriverMixin
 from .threed_printer import ThreeDPrinterBaseDriver, ThreeDPrinterMachine, ThreeDPrinterStatus
@@ -62,6 +67,8 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
         },
     }
 
+    
+
     def init_machine(self, machine):
         """Called when machine is initialized"""
 
@@ -71,44 +78,55 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
             machine.set_status(ThreeDPrinterStatus.DISCONNECTED)
 
     def test_connection(self, machine) -> bool:
-        import requests
-
+        """Check if the printer is reachable over MQTT."""
         ip = machine.get_setting("IP_ADDRESS", "M")
-        token = machine.get_setting("ACCESS_TOKEN", "M")
+        port = 8883  # MQTT port for Bambu Lab printers in local mode
 
         try:
-            r = requests.get(
-                f"http://{ip}/status",
-                headers={"Authorization": f"Bearer {token}"},
-                timeout=3,
-            )
-            return r.status_code == 200
+            with socket.create_connection((ip, port), timeout=3):
+                return True
         except Exception:
             return False
         
     def get_status(self, machine):
-        import requests
+        """Return current machine status from MQTT cache."""
+        import json
 
-        ip = machine.get_setting("IP_ADDRESS", "M")
-        token = machine.get_setting("ACCESS_TOKEN", "M")
+        # self.latest_mqtt_message should be updated by your MQTT listener
+        payload = self.latest_mqtt_message
+
+        if not payload:
+            return {"state": "offline"}
 
         try:
-            r = requests.get(
-                f"http://{ip}/status",
-                headers={"Authorization": f"Bearer {token}"},
-                timeout=5,
-            )
-            data = r.json()
+            data = json.loads(payload)
+            device = data["print"]["device"]
+            job = data["print"]
+            
+            state_str = data["print"]["upgrade_state"]["status"]
+            layer = job.get("layer_num", 0)
+            total = job.get("total_layer_num", 0)
+            progress = int(layer / total * 100) if total else 0
 
             return {
-                "state": ThreeDPrinterStatus.CONNECTED,
-                "progress": data.get("progress"),
-                "hotend_temp": data.get("hotend_temp"),
-                "bed_temp": data.get("bed_temp"),
+                "state": state_str.lower(),  # "idle", "printing", etc.
+                "progress": progress,
+                "bed_temp": device["bed_temp"],
+                "nozzle_temp": device["nozzle"]["info"][0]["temp"],
             }
 
         except Exception as e:
-            return {
-                "state": ThreeDPrinterStatus.DISCONNECTED,
-                "error": str(e),
-            }
+            return {"state": "offline", "error": str(e)}
+    
+    ## Helper Functions
+    def mqtt_listener(self, machine):
+        client = mqtt.Client()
+        client.username_pw_set("bblp", machine.get_setting("ACCESS_TOKEN", "M"))
+        client.connect(machine.get_setting("IP_ADDRESS", "M"), 8883)
+        
+        def on_message(client, userdata, msg):
+            self.latest_mqtt_message = msg.payload.decode()
+
+        client.on_message = on_message
+        client.subscribe(f"device/{machine.serial}/report")
+        client.loop_start()
