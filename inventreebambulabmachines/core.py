@@ -5,17 +5,8 @@ from plugin.machine import BaseMachineType
 
 from . import PLUGIN_VERSION
 
-# Backwards compatibility imports
-try:
-    from plugin.mixins import MachineDriverMixin
-except ImportError:
 
-    class MachineDriverMixin:
-        """Dummy mixin for backwards compatibility."""
-
-        pass
-
-class InvenTreeBambuLabMachines(MachineDriverMixin, InvenTreePlugin):
+class InvenTreeBambuLabMachines(InvenTreePlugin):
 
     """InvenTreeBambuLabMachines - custom InvenTree plugin."""
 
