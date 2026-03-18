@@ -28,7 +28,7 @@ class InvenTreeBambuPlugin(MachineDriverMixin, InvenTreePlugin):
     # MAX_VERSION = '2.0.0'
 
     # Render custom UI elements to the plugin settings page
-    #ADMIN_SOURCE = "Settings.js:renderPluginSettings"
+    ADMIN_SOURCE = "Settings.js:renderPluginSettings"
 
     def get_machine_drivers(self) -> list:
         print("REGISTERING BAMBU DRIVER")
