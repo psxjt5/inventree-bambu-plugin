@@ -2,7 +2,7 @@
 
 from plugin import InvenTreePlugin
 from plugin.mixins import MachineDriverMixin
-from threed_printer import ThreeDPrinterBaseDriver, ThreeDPrinterMachine
+from .threed_printer import ThreeDPrinterBaseDriver, ThreeDPrinterMachine
 
 from . import PLUGIN_VERSION
 
