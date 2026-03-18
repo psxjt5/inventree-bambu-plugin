@@ -17,7 +17,7 @@ class ThreeDPrinterBaseDriver(BaseDriver):
     """Base driver for 3D printer machines.
     """
 
-    machine_type = '3D-printer'
+    machine_type = '3d-printer'
 
     USE_BACKGROUND_WORKER = True
 
