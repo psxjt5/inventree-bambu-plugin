@@ -2,7 +2,7 @@
 
 from plugin import InvenTreePlugin
 from plugin.mixins import MachineDriverMixin
-from .threed_printer import ThreeDPrinterBaseDriver, ThreeDPrinterMachine
+from .threed_printer import ThreeDPrinterBaseDriver, ThreeDPrinterMachine, ThreeDPrinterStatus
 
 from . import PLUGIN_VERSION
 
@@ -66,9 +66,9 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
         """Called when machine is initialized"""
 
         if self.test_connection(machine):
-            machine.set_status("idle")
+            machine.set_status(ThreeDPrinterStatus.CONNECTED)
         else:
-            machine.set_status("offline")
+            machine.set_status(ThreeDPrinterStatus.DISCONNECTED)
 
     def test_connection(self, machine) -> bool:
         import requests
@@ -101,7 +101,7 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
             data = r.json()
 
             return {
-                "state": "online",
+                "state": ThreeDPrinterStatus.CONNECTED,
                 "progress": data.get("progress"),
                 "hotend_temp": data.get("hotend_temp"),
                 "bed_temp": data.get("bed_temp"),
@@ -109,6 +109,6 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
 
         except Exception as e:
             return {
-                "state": "offline",
+                "state": ThreeDPrinterStatus.DISCONNECTED,
                 "error": str(e),
             }
