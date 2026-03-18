@@ -2,11 +2,12 @@
 
 from plugin import InvenTreePlugin
 from plugin.machine.machine_types import LabelPrinterBaseDriver, LabelPrinterMachine
+from plugin.mixins import MachineDriverMixin
 
 from . import PLUGIN_VERSION
 
 
-class InvenTreeBambuPlugin(InvenTreePlugin):
+class InvenTreeBambuPlugin(MachineDriverMixin, InvenTreePlugin):
 
     """InvenTreeBambuPlugin - custom InvenTree plugin."""
 
@@ -27,9 +28,9 @@ class InvenTreeBambuPlugin(InvenTreePlugin):
     # MAX_VERSION = '2.0.0'
 
     # Render custom UI elements to the plugin settings page
-    ADMIN_SOURCE = "Settings.js:renderPluginSettings"
+    #ADMIN_SOURCE = "Settings.js:renderPluginSettings"
 
-    def get_machine_drivers(self):
+    def get_machine_drivers(self) -> list:
         print("REGISTERING BAMBU DRIVER")
         return [BambuLabPrinterDriver]
     
