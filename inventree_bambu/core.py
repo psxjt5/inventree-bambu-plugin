@@ -6,6 +6,8 @@ import socket
 import paho.mqtt.client as mqtt
 import ssl
 
+from django.http import JsonResponse
+
 from plugin import InvenTreePlugin
 from plugin.mixins import MachineDriverMixin
 from .threed_printer import ThreeDPrinterBaseDriver, ThreeDPrinterMachine, ThreeDPrinterStatus
@@ -68,6 +70,17 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
         },
     }
 
+    DASHBOARD_WIDGETS = [
+        {
+            "component": "BambuDashboardWidget",
+            "title": "Bambu Printer",
+        }
+    ]
+
+    API_URLS = {
+        "machine": "get_machine_info",
+    }
+
     def init_machine(self, machine):
         """Called when machine is initialized"""
         print("Initialising Machine")
@@ -125,6 +138,36 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
 
         except Exception as e:
             return {"state": "offline", "error": str(e)}
+        
+    def get_printer_data(self, machine):
+        """Return extra data for UI widgets"""
+        if not self.latest_mqtt_message:
+            return {}
+
+        try:
+            data = json.loads(self.latest_mqtt_message)
+            p = data.get("print", {})
+
+            return {
+                "state": p.get("gcode_state", {}).get("status"),
+                "progress": p.get("mc_percent"),
+                "bed_temp": p.get("bed_temper"),
+                "nozzle_temp": p.get("nozzle_temper"),
+                "job_name": p.get("subtask_name"),
+                "remaining_time": p.get("mc_remaining_time"),
+            }
+
+        except Exception as e:
+            return {"error": str(e)}
+        
+    def get_machine_info(self, request, machine, *args, **kwargs):
+        """Custom API endpoint for machine info"""
+        driver = machine.get_driver()
+
+        if not driver:
+            return JsonResponse({"error": "No driver"}, status=404)
+
+        return JsonResponse(driver.get_extra_data(machine))
         
     def _update_status_from_mqtt(self, machine):
         if not self.latest_mqtt_message:
