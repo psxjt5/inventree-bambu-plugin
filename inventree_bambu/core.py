@@ -69,6 +69,7 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
 
     def init_machine(self, machine):
         """Called when machine is initialized"""
+        print("Initialising Machine")
         self.latest_mqtt_message = None
 
         if self.test_connection(machine):
@@ -78,8 +79,10 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
                 args=(machine,),
                 daemon=True
             ).start()
+            print("Connection test successful")
         else:
             machine.set_status(ThreeDPrinterStatus.UNKNOWN)
+            print("Connection test failed")
 
     def test_connection(self, machine) -> bool:
         """Check if the printer is reachable over MQTT."""
