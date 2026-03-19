@@ -147,31 +147,34 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
 
         except Exception as e:
             print(f"Error parsing MQTT payload: {e}")
-    
+
     def _mqtt_thread(self, machine):
         """Persistent MQTT listener with auto-reconnect."""
-        self.latest_mqtt_message = None
+        import ssl
+        import time
+
+        client = mqtt.Client()
+        client.username_pw_set("bblp", machine.get_setting("ACCESS_TOKEN", "D"))
+
+        # Configure TLS ONCE
+        client.tls_set(cert_reqs=ssl.CERT_NONE)
+        client.tls_insecure_set(True)
+
+        def on_connect(client, userdata, flags, rc):
+            print("MQTT connected:", rc)
+            client.subscribe("device/+/report")
+
+        def on_message(client, userdata, msg):
+            self.latest_mqtt_message = msg.payload.decode()
+            self._update_status_from_mqtt(machine)
+
+        client.on_connect = on_connect
+        client.on_message = on_message
 
         while True:
             try:
-                client = mqtt.Client()
-                client.username_pw_set("bblp", machine.get_setting("ACCESS_TOKEN", "D"))
-                client.tls_set()  # ensure TLS
-                client.tls_set(cert_reqs=ssl.CERT_NONE)
-                client.tls_insecure_set(True)
-
-                def on_message(client, userdata, msg):
-                    self.latest_mqtt_message = msg.payload.decode()
-                    self._update_status_from_mqtt(machine)
-
-                client.on_message = on_message
-
-                # Use '+' to listen for any serial number
                 client.connect(machine.get_setting("IP_ADDRESS", "D"), 8883)
-                client.subscribe(f"device/+/report")
-                client.loop_forever()  # blocks and reconnects automatically
-
+                client.loop_forever()
             except Exception as e:
                 print(f"MQTT connection error: {e}")
-                import time
                 time.sleep(5)
