@@ -4,6 +4,7 @@ import threading
 import json
 import socket
 import paho.mqtt.client as mqtt
+import ssl
 
 from plugin import InvenTreePlugin
 from plugin.mixins import MachineDriverMixin
@@ -156,6 +157,8 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
                 client = mqtt.Client()
                 client.username_pw_set("bblp", machine.get_setting("ACCESS_TOKEN", "D"))
                 client.tls_set()  # ensure TLS
+                client.tls_set(cert_reqs=ssl.CERT_NONE)
+                client.tls_insecure_set(True)
 
                 def on_message(client, userdata, msg):
                     self.latest_mqtt_message = msg.payload.decode()
