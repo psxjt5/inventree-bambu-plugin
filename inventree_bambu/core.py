@@ -52,7 +52,7 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
     MACHINE_NAME = "Bambu Lab 3D Printer"
     DESCRIPTION = "Driver for Bambu Lab 3D printers"
 
-    DRIVER_SETTINGS = {
+    MACHINE_SETTINGS = {
         "IP_ADDRESS": {
             "name": "IP Address",
             "description": "Printer IP address",
