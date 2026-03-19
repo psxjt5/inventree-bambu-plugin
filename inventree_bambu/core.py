@@ -83,7 +83,7 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
 
     def test_connection(self, machine) -> bool:
         """Check if the printer is reachable over MQTT."""
-        ip = machine.get_setting("IP_ADDRESS", "M")
+        ip = machine.get_setting("IP_ADDRESS", "D")
         port = 8883  # MQTT port for Bambu Lab printers in local mode
 
         try:
@@ -151,7 +151,7 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
         while True:
             try:
                 client = mqtt.Client()
-                client.username_pw_set("bblp", machine.get_setting("ACCESS_TOKEN", "M"))
+                client.username_pw_set("bblp", machine.get_setting("ACCESS_TOKEN", "D"))
                 client.tls_set()  # ensure TLS
 
                 def on_message(client, userdata, msg):
@@ -161,7 +161,7 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
                 client.on_message = on_message
 
                 # Use '+' to listen for any serial number
-                client.connect(machine.get_setting("IP_ADDRESS", "M"), 8883)
+                client.connect(machine.get_setting("IP_ADDRESS", "D"), 8883)
                 client.subscribe(f"device/+/report")
                 client.loop_forever()  # blocks and reconnects automatically
 
