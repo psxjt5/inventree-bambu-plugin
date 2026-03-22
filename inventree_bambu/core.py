@@ -1,6 +1,6 @@
 """Machine drivers and support for Bambu Lab 3D printers."""
 
-from .mqtt_manager import start_bambu_service
+from .bambumqttmanager import BambuMQTTManager
 
 import time
 import socket
@@ -93,9 +93,11 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
         if not self.validate_required_settings(machine):
             machine.set_status(ThreeDPrinterStatus.UNKNOWN)
             return
+        
+        self.mqtt_manager = BambuMQTTManager()
 
         if self.test_connection(machine):
-            start_bambu_service(
+            self.mqtt_manager.start_bambu_service(
                 ip=machine.get_setting("IP_ADDRESS", "D"),
                 port=8883,
                 token=machine.get_setting("ACCESS_TOKEN", "D"),
