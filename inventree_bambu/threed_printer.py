@@ -12,7 +12,7 @@ from generic.states import ColorEnum
 from machine.machine_type import BaseDriver, BaseMachineType, MachineStatus
 from stock.models import StockLocation
 
-
+# Base Driver (Inherited by user-written specific printer drivers.)
 class ThreeDPrinterBaseDriver(BaseDriver):
     """Base driver for 3D printer machines.
     """
@@ -21,7 +21,7 @@ class ThreeDPrinterBaseDriver(BaseDriver):
 
     USE_BACKGROUND_WORKER = True
 
-
+# Enum containing printer statuses.
 class ThreeDPrinterStatus(MachineStatus):
     """Label printer status codes.
 
@@ -40,7 +40,7 @@ class ThreeDPrinterStatus(MachineStatus):
     FINISH = 4, _('Finished'), ColorEnum.success
     ERROR = 5, _('Error'), ColorEnum.danger
 
-
+# Machine Type
 class ThreeDPrinterMachine(BaseMachineType):
     """3D printer machine type."""
 
