@@ -104,7 +104,7 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
             )
 
             # Initialize status from cache
-            serial = machine.get_setting("SERIAL")
+            serial = machine.get_setting("SERIAL", "D")
             data = cache.get(f"bambu:{serial}")
             if data and time.time() - data.get("last_seen", 0) < 30:
                 state = data["payload"].get("print", {}).get("gcode_state")
