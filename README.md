@@ -1,6 +1,6 @@
-# InvenTreeBambuLabMachines
+# InvenTree Bambu Lab 3D Printing
 
-Machine drivers and support for Bambu Lab 3D printers.
+InvenTree Machine drivers and support for Bambu Lab 3D printers.
 
 ## Installation
 
