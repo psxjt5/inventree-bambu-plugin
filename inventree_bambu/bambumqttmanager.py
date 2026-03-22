@@ -4,7 +4,7 @@ from .bambumqttservice import BambuMQTTService
 class BambuMQTTManager:
 
     def __init__(self):
-        self.service = {};
+        self.services = {};
     
     def start_bambu_mqtt_service(self, ip, port, token):
         """
