@@ -97,7 +97,7 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
         self.mqtt_manager = BambuMQTTManager()
 
         if self.test_connection(machine):
-            self.mqtt_manager.start_bambu_service(
+            self.mqtt_manager.start_bambu_mqtt_service(
                 ip=machine.get_setting("IP_ADDRESS", "D"),
                 port=8883,
                 token=machine.get_setting("ACCESS_TOKEN", "D"),
