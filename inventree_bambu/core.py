@@ -128,7 +128,7 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
 
         missing = []
         for field in required_fields:
-            value = machine.get_setting(field)
+            value = machine.get_setting(field, "D")
             if not value:
                 missing.append(field)
 
@@ -160,7 +160,7 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
         return mapping.get(state, ThreeDPrinterStatus.UNKNOWN)
 
     def get_status(self, machine):
-        serial = machine.get_setting("SERIAL")
+        serial = machine.get_setting("SERIAL", "D")
         if not serial:
             return ThreeDPrinterStatus.UNKNOWN
 
