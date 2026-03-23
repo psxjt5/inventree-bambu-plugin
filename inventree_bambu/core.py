@@ -95,7 +95,7 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
         self.initialise(machine)
 
     def initialise(self, machine):
-        print("[BambuLabPrinterDriver] Initialising Machine")
+        print(f"[BambuLabPrinterDriver] Initialising Machine {machine.name}")
         machine.set_status(ThreeDPrinterStatus.UNKNOWN)
 
         if not self.validate_required_settings(machine):
@@ -112,15 +112,14 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
             )
 
             # Initialize status from cache
-            serial = machine.get_setting("SERIAL", "D")
-            data = cache.get(f"bambu:{serial}")
-            print(f"[BambuLabPrinterDriver] Fetching initial status: {data}")
-            if data and time.time() - data.get("last_seen", 0) < 30:
-                state = data["payload"].get("print", {}).get("gcode_state")
-                machine.set_status(self.map_state(state))
-            else:
-                machine.set_status(ThreeDPrinterStatus.UNKNOWN)
-
+            # serial = machine.get_setting("SERIAL", "D")
+            # data = cache.get(f"bambu:{serial}")
+            # print(f"[BambuLabPrinterDriver] Fetching initial status: {data}")
+            # if data and time.time() - data.get("last_seen", 0) < 30:
+            #     state = data["payload"].get("print", {}).get("gcode_state")
+            #     machine.set_status(self.map_state(state))
+            # else:
+            machine.set_status(ThreeDPrinterStatus.UNKNOWN)
             print(f"[BambuLabPrinterDriver] Connection test successful for {machine.name}")
 
         else:
@@ -169,6 +168,7 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
         return mapping.get(state, ThreeDPrinterStatus.UNKNOWN)
 
     def get_status(self, machine):
+        print(f"Getting status for {machine.name}")
         serial = machine.get_setting("SERIAL", "D")
         if not serial:
             return ThreeDPrinterStatus.UNKNOWN

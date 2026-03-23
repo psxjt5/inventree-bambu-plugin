@@ -62,8 +62,6 @@ class BambuMQTTService:
 
         data = payload
 
-        print(f"[BambuMQTTService] Message received for {serial}")
-
         cache.set(
         f"bambu:{serial}",
         {
