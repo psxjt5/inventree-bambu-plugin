@@ -36,8 +36,8 @@ class ThreeDPrinterStatus(MachineStatus):
     UNKNOWN = 0, _('Unknown'), ColorEnum.secondary
     IDLE = 1, _('Idle'), ColorEnum.success
     RUNNING = 2, _('Printing'), ColorEnum.primary
-    PAUSE = 3, _('Paused'), ColorEnum.warning
-    FINISH = 4, _('Finished'), ColorEnum.success
+    PAUSED = 3, _('Paused'), ColorEnum.warning
+    FINISHED = 4, _('Finished'), ColorEnum.success
     ERROR = 5, _('Error'), ColorEnum.danger
 
 # Machine Type

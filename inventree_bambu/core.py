@@ -160,8 +160,8 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
             "IDLE": ThreeDPrinterStatus.IDLE,
             "READY": ThreeDPrinterStatus.IDLE,
             "RUNNING": ThreeDPrinterStatus.RUNNING,
-            "PAUSE": ThreeDPrinterStatus.PAUSED,
-            "FINISH": ThreeDPrinterStatus.IDLE,
+            "PAUSED": ThreeDPrinterStatus.PAUSED,
+            "FINISHED": ThreeDPrinterStatus.FINISHED,
             "FAILED": ThreeDPrinterStatus.ERROR,
         }
 
