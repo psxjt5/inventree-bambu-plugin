@@ -2,7 +2,7 @@
 
 InvenTree Machine drivers and support for Bambu Lab 3D printers.
 
-**This plugin in still under active development and is not currently functional**
+**This plugin in still under active development and is not currently functional.**
 
 ## Installation
 
