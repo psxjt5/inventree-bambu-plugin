@@ -190,10 +190,13 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
     def test_connection(self, machine) -> bool:
         """Check if the printer is reachable over MQTT."""
         ip = machine.get_setting("IP_ADDRESS", "D")
+        print(f"[BambuLabPrinterDriver] Connection test for {machine.name} at {ip}.")
         port = 8883
 
         try:
             with socket.create_connection((ip, port), timeout=3):
+                print(f"[BambuLabPrinterDriver] Connection test successful for {machine.name} at {ip}.")
                 return True
         except Exception:
+            print(f"[BambuLabPrinterDriver] Connection test failed for {machine.name} at {ip}.")
             return False
