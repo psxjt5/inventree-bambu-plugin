@@ -168,6 +168,8 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
         return mapping.get(state, ThreeDPrinterStatus.UNKNOWN)
 
     def get_status(self, machine):
+        return ThreeDPrinterStatus.UNKNOWN
+
         print(f"[BambuLabPrinterDriver] Getting status for {machine.name}")
         serial = machine.get_setting("SERIAL", "D")
         if not serial:
