@@ -60,7 +60,7 @@ class ThreeDPrinterMachine(BaseMachineType):
 
     MACHINE_STATUS: ThreeDPrinterStatus
 
-    default_machine_status = ThreeDPrinterStatus.UNKNOWN
+    default_machine_status = 0
 
     @property
     def location(self):
