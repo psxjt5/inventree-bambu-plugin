@@ -117,10 +117,6 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
         print("Status requested")
         import json
 
-        print("[BambuLabPrinterDriver] Machine status class:", machine.MACHINE_STATUS)
-        print("[BambuLabPrinterDriver] Unknown value:", machine.MACHINE_STATUS.UNKNOWN)
-        print("[BambuLabPrinterDriver] Choices:", getattr(machine.MACHINE_STATUS, 'choices', None))
-
         # self.latest_mqtt_message should be updated by your MQTT listener
         payload = self.latest_mqtt_message
 
@@ -180,6 +176,10 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
     def _update_status_from_mqtt(self, machine):
         if not self.latest_mqtt_message:
             return
+
+        print("[BambuLabPrinterDriver] Machine status class:", machine.MACHINE_STATUS)
+        print("[BambuLabPrinterDriver] Unknown value:", machine.MACHINE_STATUS.UNKNOWN)
+        print("[BambuLabPrinterDriver] Choices:", getattr(machine.MACHINE_STATUS, 'choices', None))
 
         try:
             data = json.loads(self.latest_mqtt_message)
