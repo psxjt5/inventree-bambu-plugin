@@ -58,17 +58,9 @@ class ThreeDPrinterMachine(BaseMachineType):
         }
     }
 
-    MACHINE_STATUS = ThreeDPrinterStatus
+    MACHINE_STATUS: type[ThreeDPrinterStatus] = ThreeDPrinterStatus
 
-    print(f"[DEBUG] Inside ThreeDPrinterMachine, MACHINE_STATUS is: {MACHINE_STATUS}")
-    
-    # Check if the MachineType is seeing the items
-    if hasattr(MACHINE_STATUS, 'items'):
-        print(f"[DEBUG] MACHINE_STATUS has items: {MACHINE_STATUS.items()}")
-    else:
-        print("[DEBUG] WARNING: MACHINE_STATUS does not have .items()!")
-
-    default_machine_status = 0
+    default_machine_status = ThreeDPrinterStatus.UNKNOWN
 
     @property
     def location(self):
