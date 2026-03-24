@@ -84,38 +84,42 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
     def init_machine(self, machine):
         """Called when machine is initialized"""
         print("Initialising Machine")
-        machine.set_status(ThreeDPrinterStatus.UNKNOWN)
-        # self.latest_mqtt_message = None
+        self.latest_mqtt_message = None
+        print("[BambuLabPrinterDriver] Machine status class:", machine.MACHINE_STATUS)
+        print("[BambuLabPrinterDriver] Unknown value:", machine.MACHINE_STATUS.UNKNOWN)
+        print("[BambuLabPrinterDriver] Choices:", getattr(machine.MACHINE_STATUS, 'choices', None))
 
-        # if self.test_connection(machine):
-        #     machine.set_status(ThreeDPrinterStatus.IDLE)
-        #     threading.Thread(
-        #         target=self._mqtt_thread,
-        #         args=(machine,),
-        #         daemon=True
-        #     ).start()
-        #     print("Connection test successful")
-        # else:
-        #     machine.set_status(ThreeDPrinterStatus.UNKNOWN)
-        #     print("Connection test failed")
+        if self.test_connection(machine):
+            machine.set_status(ThreeDPrinterStatus.IDLE)
+            threading.Thread(
+                target=self._mqtt_thread,
+                args=(machine,),
+                daemon=True
+            ).start()
+            print("Connection test successful")
+        else:
+            machine.set_status(ThreeDPrinterStatus.UNKNOWN)
+            print("Connection test failed")
 
-    # def test_connection(self, machine) -> bool:
-    #     """Check if the printer is reachable over MQTT."""
-    #     ip = machine.get_setting("IP_ADDRESS", "D")
-    #     port = 8883  # MQTT port for Bambu Lab printers in local mode
+    def test_connection(self, machine) -> bool:
+        """Check if the printer is reachable over MQTT."""
+        ip = machine.get_setting("IP_ADDRESS", "D")
+        port = 8883  # MQTT port for Bambu Lab printers in local mode
 
-    #     try:
-    #         with socket.create_connection((ip, port), timeout=3):
-    #             return True
-    #     except Exception:
-    #         return False
+        try:
+            with socket.create_connection((ip, port), timeout=3):
+                return True
+        except Exception:
+            return False
         
     def get_status(self, machine):
         """Return current machine status from MQTT cache."""
         print("Status requested")
-        machine.set_status(ThreeDPrinterStatus.UNKNOWN)
-        return ThreeDPrinterStatus.UNKNOWN
         import json
+
+        print("[BambuLabPrinterDriver] Machine status class:", machine.MACHINE_STATUS)
+        print("[BambuLabPrinterDriver] Unknown value:", machine.MACHINE_STATUS.UNKNOWN)
+        print("[BambuLabPrinterDriver] Choices:", getattr(machine.MACHINE_STATUS, 'choices', None))
 
         # self.latest_mqtt_message should be updated by your MQTT listener
         payload = self.latest_mqtt_message
@@ -143,85 +147,85 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
         except Exception as e:
             return {"state": "offline", "error": str(e)}
         
-    # def get_printer_data(self, machine):
-    #     """Return extra data for UI widgets"""
-    #     if not self.latest_mqtt_message:
-    #         return {}
+    def get_printer_data(self, machine):
+        """Return extra data for UI widgets"""
+        if not self.latest_mqtt_message:
+            return {}
 
-    #     try:
-    #         data = json.loads(self.latest_mqtt_message)
-    #         p = data.get("print", {})
+        try:
+            data = json.loads(self.latest_mqtt_message)
+            p = data.get("print", {})
 
-    #         return {
-    #             "state": p.get("gcode_state", {}).get("status"),
-    #             "progress": p.get("mc_percent"),
-    #             "bed_temp": p.get("bed_temper"),
-    #             "nozzle_temp": p.get("nozzle_temper"),
-    #             "job_name": p.get("subtask_name"),
-    #             "remaining_time": p.get("mc_remaining_time"),
-    #         }
+            return {
+                "state": p.get("gcode_state", {}).get("status"),
+                "progress": p.get("mc_percent"),
+                "bed_temp": p.get("bed_temper"),
+                "nozzle_temp": p.get("nozzle_temper"),
+                "job_name": p.get("subtask_name"),
+                "remaining_time": p.get("mc_remaining_time"),
+            }
 
-    #     except Exception as e:
-    #         return {"error": str(e)}
+        except Exception as e:
+            return {"error": str(e)}
         
-    # def get_machine_info(self, request, machine, *args, **kwargs):
-    #     """Custom API endpoint for machine info"""
-    #     driver = machine.get_driver()
+    def get_machine_info(self, request, machine, *args, **kwargs):
+        """Custom API endpoint for machine info"""
+        driver = machine.get_driver()
 
-    #     if not driver:
-    #         return JsonResponse({"error": "No driver"}, status=404)
+        if not driver:
+            return JsonResponse({"error": "No driver"}, status=404)
 
-    #     return JsonResponse(driver.get_extra_data(machine))
+        return JsonResponse(driver.get_extra_data(machine))
         
-    # def _update_status_from_mqtt(self, machine):
-    #     if not self.latest_mqtt_message:
-    #         return
+    def _update_status_from_mqtt(self, machine):
+        if not self.latest_mqtt_message:
+            return
 
-    #     try:
-    #         data = json.loads(self.latest_mqtt_message)
-    #         state_str = data["print"].get("gcode_state", "UNKNOWN")
+        try:
+            data = json.loads(self.latest_mqtt_message)
+            state_str = data["print"].get("gcode_state", "UNKNOWN")
 
-    #         if not hasattr(ThreeDPrinterStatus, state_str.upper()):
-    #             print(f"Unknown printer state: {state_str}")
+            if not hasattr(ThreeDPrinterStatus, state_str.upper()):
+                print(f"Unknown printer state: {state_str}")
 
-    #         status = getattr(
-    #             ThreeDPrinterStatus,
-    #             state_str.upper(),
-    #             ThreeDPrinterStatus.UNKNOWN
-    #         )
+            status = getattr(
+                ThreeDPrinterStatus,
+                state_str.upper(),
+                ThreeDPrinterStatus.UNKNOWN
+            )
 
-    #         machine.set_status(status)
+            machine.set_status(status)
 
-    #     except Exception as e:
-    #         print(f"Error parsing MQTT payload: {e}")
+        except Exception as e:
+            print(f"Error parsing MQTT payload: {e}")
 
-    # def _mqtt_thread(self, machine):
-    #     """Persistent MQTT listener with auto-reconnect."""
-    #     import ssl
-    #     import time
+    def _mqtt_thread(self, machine):
+        """Persistent MQTT listener with auto-reconnect."""
+        import ssl
+        import time
 
-    #     client = mqtt.Client()
-    #     client.username_pw_set("bblp", machine.get_setting("ACCESS_TOKEN", "D"))
+        client = mqtt.Client()
+        client.username_pw_set("bblp", machine.get_setting("ACCESS_TOKEN", "D"))
 
-    #     # Configure TLS ONCE
-    #     client.tls_set(cert_reqs=ssl.CERT_NONE)
-    #     client.tls_insecure_set(True)
+        # Configure TLS ONCE
+        client.tls_set(cert_reqs=ssl.CERT_NONE)
+        client.tls_insecure_set(True)
 
-    #     def on_connect(client, userdata, flags, rc):
-    #         print("MQTT connected:", rc)
-    #         client.subscribe("device/+/report")
+        def on_connect(client, userdata, flags, rc):
+            print("MQTT connected:", rc)
+            client.subscribe("device/+/report")
 
-    #     def on_message(client, userdata, msg):
-    #         self.latest_mqtt_message = msg.payload.decode()
-    #         self._update_status_from_mqtt(machine)
+        def on_message(client, userdata, msg):
+            self.latest_mqtt_message = msg.payload.decode()
+            self._update_status_from_mqtt(machine)
 
-    #     client.on_connect = on_connect
-    #     client.on_message = on_message
+        client.on_connect = on_connect
+        client.on_message = on_message
 
-    #     while True:
-    #         try:
-    #             client.connect(machine.get_setting("IP_ADDRESS", "D"), 8883)
-    #             client.loop_forever()
-    #         except Exception as e:
-    #             print(f"MQTT connection error: {e}")
-    #             time.sleep(5)
+        while True:
+            try:
+                client.connect(machine.get_setting("IP_ADDRESS", "D"), 8883)
+                client.loop_forever()
+            except Exception as e:
+                print(f"MQTT connection error: {e}")
+                time.sleep(5)
