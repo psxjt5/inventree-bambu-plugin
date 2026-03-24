@@ -96,7 +96,7 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
 
     def initialise(self, machine):
         print(f"[BambuLabPrinterDriver] Initialising Machine {machine.name}")
-        machine.set_status(ThreeDPrinterStatus.MACHINE_STATUS.UNKNOWN)
+        machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.CONNECTED)
 
         # if not self.validate_required_settings(machine):
         #     machine.set_status(ThreeDPrinterStatus.UNKNOWN)
