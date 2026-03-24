@@ -58,7 +58,7 @@ class ThreeDPrinterMachine(BaseMachineType):
         }
     }
 
-    MACHINE_STATUS: type[ThreeDPrinterStatus] = ThreeDPrinterStatus
+    MACHINE_STATUS: ThreeDPrinterStatus
 
     default_machine_status = ThreeDPrinterStatus.UNKNOWN
 
