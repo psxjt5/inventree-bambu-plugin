@@ -98,33 +98,33 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
         print(f"[BambuLabPrinterDriver] Initialising Machine {machine.name}")
         machine.set_status(ThreeDPrinterStatus.UNKNOWN)
 
-        if not self.validate_required_settings(machine):
-            machine.set_status(ThreeDPrinterStatus.UNKNOWN)
-            return
+        # if not self.validate_required_settings(machine):
+        #     machine.set_status(ThreeDPrinterStatus.UNKNOWN)
+        #     return
         
-        self.mqtt_manager = BambuMQTTManager()
+        # self.mqtt_manager = BambuMQTTManager()
 
-        if self.test_connection(machine):
-            self.mqtt_manager.start_bambu_mqtt_service(
-                ip=machine.get_setting("IP_ADDRESS", "D"),
-                port=8883,
-                token=machine.get_setting("ACCESS_TOKEN", "D"),
-            )
+        # if self.test_connection(machine):
+        #     self.mqtt_manager.start_bambu_mqtt_service(
+        #         ip=machine.get_setting("IP_ADDRESS", "D"),
+        #         port=8883,
+        #         token=machine.get_setting("ACCESS_TOKEN", "D"),
+        #     )
 
-            # Initialize status from cache
-            # serial = machine.get_setting("SERIAL", "D")
-            # data = cache.get(f"bambu:{serial}")
-            # print(f"[BambuLabPrinterDriver] Fetching initial status: {data}")
-            # if data and time.time() - data.get("last_seen", 0) < 30:
-            #     state = data["payload"].get("print", {}).get("gcode_state")
-            #     machine.set_status(self.map_state(state))
-            # else:
-            machine.set_status(ThreeDPrinterStatus.UNKNOWN)
-            print(f"[BambuLabPrinterDriver] Connection test successful for {machine.name}")
+        #     # Initialize status from cache
+        #     # serial = machine.get_setting("SERIAL", "D")
+        #     # data = cache.get(f"bambu:{serial}")
+        #     # print(f"[BambuLabPrinterDriver] Fetching initial status: {data}")
+        #     # if data and time.time() - data.get("last_seen", 0) < 30:
+        #     #     state = data["payload"].get("print", {}).get("gcode_state")
+        #     #     machine.set_status(self.map_state(state))
+        #     # else:
+        #     machine.set_status(ThreeDPrinterStatus.UNKNOWN)
+        #     print(f"[BambuLabPrinterDriver] Connection test successful for {machine.name}")
 
-        else:
-            machine.set_status(ThreeDPrinterStatus.UNKNOWN)
-            print("[BambuLabPrinterDriver] Connection test failed")
+        # else:
+        #     machine.set_status(ThreeDPrinterStatus.UNKNOWN)
+        #     print("[BambuLabPrinterDriver] Connection test failed")
 
     def validate_required_settings(self, machine) -> bool:
         """
