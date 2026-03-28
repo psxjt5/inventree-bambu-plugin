@@ -189,7 +189,6 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
 
         print("[BambuLabPrinterDriver] Machine status class:", machine.MACHINE_STATUS)
         print("[BambuLabPrinterDriver] Unknown value:", machine.MACHINE_STATUS.UNKNOWN)
-        print("[BambuLabPrinterDriver] Choices:", ThreeDPrinterStatus.)
 
         try:
             data = json.loads(self.latest_mqtt_message)
