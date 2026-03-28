@@ -89,17 +89,27 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
         print("[BambuLabPrinterDriver] Unknown value:", machine.MACHINE_STATUS.UNKNOWN)
         print("[BambuLabPrinterDriver] Choices:", getattr(machine.MACHINE_STATUS, 'choices', None))
 
-        if self.test_connection(machine):
-            machine.set_status(ThreeDPrinterStatus.IDLE)
-            threading.Thread(
-                target=self._mqtt_thread,
-                args=(machine,),
-                daemon=True
-            ).start()
-            print("Connection test successful")
-        else:
-            machine.set_status(ThreeDPrinterStatus.UNKNOWN)
-            print("Connection test failed")
+        machine.set_status(ThreeDPrinterStatus.UNKNOWN)
+
+        state_str = "Paused"
+
+        status = getattr(
+                ThreeDPrinterStatus,
+                state_str.upper(),
+                ThreeDPrinterStatus.UNKNOWN
+            )
+
+        # if self.test_connection(machine):
+        #     machine.set_status(ThreeDPrinterStatus.IDLE)
+        #     threading.Thread(
+        #         target=self._mqtt_thread,
+        #         args=(machine,),
+        #         daemon=True
+        #     ).start()
+        #     print("Connection test successful")
+        # else:
+        #     machine.set_status(ThreeDPrinterStatus.UNKNOWN)
+        #     print("Connection test failed")
 
     def test_connection(self, machine) -> bool:
         """Check if the printer is reachable over MQTT."""
@@ -179,7 +189,7 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
 
         print("[BambuLabPrinterDriver] Machine status class:", machine.MACHINE_STATUS)
         print("[BambuLabPrinterDriver] Unknown value:", machine.MACHINE_STATUS.UNKNOWN)
-        print("[BambuLabPrinterDriver] Choices:", getattr(machine.MACHINE_STATUS, 'choices', None))
+        print("[BambuLabPrinterDriver] Choices:", ThreeDPrinterStatus.)
 
         try:
             data = json.loads(self.latest_mqtt_message)
