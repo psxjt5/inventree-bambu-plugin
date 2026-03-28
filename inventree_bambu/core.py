@@ -5,6 +5,7 @@ import json
 import socket
 import paho.mqtt.client as mqtt
 import ssl
+import time
 
 from django.http import JsonResponse
 
@@ -89,17 +90,20 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
         print("[BambuLabPrinterDriver] Unknown value:", machine.MACHINE_STATUS.UNKNOWN)
         print("[BambuLabPrinterDriver] Choices:", getattr(machine.MACHINE_STATUS, 'choices', None))
 
-        machine.set_status(ThreeDPrinterStatus.UNKNOWN)
+        while (True):
+            machine.set_status(ThreeDPrinterStatus.UNKNOWN)
 
-        state_str = "Paused"
+            state_str = "Paused"
 
-        status = getattr(
-                ThreeDPrinterStatus,
-                state_str.upper(),
-                ThreeDPrinterStatus.UNKNOWN
-            )
-        
-        machine.set_status(status)
+            status = getattr(
+                    ThreeDPrinterStatus,
+                    state_str.upper(),
+                    ThreeDPrinterStatus.UNKNOWN
+                )
+            
+            machine.set_status(status)
+
+            time.sleep(2.5)
 
         # if self.test_connection(machine):
         #     machine.set_status(ThreeDPrinterStatus.IDLE)
