@@ -98,6 +98,8 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
                 state_str.upper(),
                 ThreeDPrinterStatus.UNKNOWN
             )
+        
+        machine.set_status(status)
 
         # if self.test_connection(machine):
         #     machine.set_status(ThreeDPrinterStatus.IDLE)
