@@ -29,7 +29,9 @@ setuptools.setup(
     url="https://github.com/psxjt5/inventree-bambu-plugin",
     license="MIT",
     packages=setuptools.find_packages(),
-    install_requires=[],
+    install_requires=[
+        "inventree-3d"
+    ],
     setup_requires=[
         "wheel",
         "twine",
