@@ -7,6 +7,8 @@ from django.utils.translation import gettext_lazy as _
 from inventree_3d.threed import ThreeDPrinterBaseDriver, ThreeDPrinterMachine
 from .bambumqttmanager import BambuMQTTManager
 
+import socket
+
 class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
     """BambuLab 3D Printing machine driver."""
 
@@ -48,6 +50,11 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
             machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.MISCONFIGURED)
             return
         
+        if self.test_connection(machine):
+            machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.CONNECTED)
+        else:
+            machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.UNKNOWN)
+        
     def validate_required_settings(self, machine) -> bool:
         """
         Ensure that all required machine settings are filled.
@@ -67,3 +74,17 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
             return False
 
         return True
+    
+    def test_connection(self, machine) -> bool:
+        """Check if the printer is reachable over the network."""
+        ip = machine.get_setting("IP_ADDRESS", "D")
+        print(f"[BambuLab3DPrinterDriver] Connection test for {machine.name} at {ip}.")
+        port = 8883
+
+        try:
+            with socket.create_connection((ip, port), timeout=3):
+                print(f"[BambuLabPrinterDriver] Connection test successful for {machine.name} at {ip}.")
+                return True
+        except Exception:
+            print(f"[BambuLabPrinterDriver] Connection test failed for {machine.name} at {ip}.")
+            return False
