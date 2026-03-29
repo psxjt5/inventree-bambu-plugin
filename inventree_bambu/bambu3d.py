@@ -50,9 +50,19 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
             machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.MISCONFIGURED)
             return
         
+        # Perform an initial connection test to the machine
         if not self.test_connection(machine):
             return
-            
+        
+        # Begin the MQTT service for this machine
+        self.mqtt_manager = BambuMQTTManager()
+        self.mqtt_manager.start_bambu_mqtt_service(
+            ip=machine.get_setting("IP_ADDRESS", "D"),
+            port=8883,
+            token=machine.get_setting("ACCESS_TOKEN", "D"),
+            machine=machine,
+            callback=self.message_received
+        )
         
     def validate_required_settings(self, machine) -> bool:
         """
@@ -91,3 +101,19 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
             machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.DISCONNECTED)
             machine.set_status_text("Connection Test Unsuccessful.")
             return False
+        
+    def message_received(self, machine, serial, data):
+        print(f"[BambuLab3DPrinterDriver] MQTT message for {machine.name}.")
+        machine.refresh_from_db()
+
+        state = data.get("print", {}).get("gcode_state")
+
+        print(f"[BambuLab3DPrinterDriver] MQTT state for {machine.name}: {state}.")
+
+        # if state == "RUNNING":
+        #     machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.PRINTING)
+
+        # elif state == "IDLE":
+        #     machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.IDLE)
+
+
