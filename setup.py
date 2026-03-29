@@ -30,7 +30,7 @@ setuptools.setup(
     license="MIT",
     packages=setuptools.find_packages(),
     install_requires=[
-        "inventree-3d"
+        "inventree-3d-printing"
     ],
     setup_requires=[
         "wheel",
