@@ -4,7 +4,7 @@ from django.db.models.query import QuerySet
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.utils.translation import gettext_lazy as _
 
-from inventree_3d.threed import ThreeDPrinterBaseDriver
+from inventree_3d.threed import ThreeDPrinterBaseDriver, ThreeDPrinterMachine
 
 class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
     """BambuLab 3D Printing machine driver."""
@@ -36,3 +36,7 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
         }
 
         super().__init__(*args, **kwargs)
+
+    def init_machine(self, machine):
+        """Machine initialise hook"""
+        machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.PRINTING)
