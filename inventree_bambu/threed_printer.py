@@ -26,6 +26,7 @@ class ThreeDPrinterBaseDriver(BaseDriver):
         raise NotImplementedError("Driver must implement ping() method")
     
     def ping_machines(self):
+        print(f"[ThreeDPrinterDriver] Pinging Registered Machines")
         for machine in self.get_machines():
             try:
                 self.ping(machine)
