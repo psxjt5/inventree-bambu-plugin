@@ -103,8 +103,7 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
             return False
         
     def message_received(self, machine, serial, data):
-        print(f"[BambuLab3DPrinterDriver] MQTT message for {machine.name}.")
-
+        # Set the status of the printer.
         self.mqtt_set_status(machine, data.get("print", {}).get("gcode_state"))
 
     def mqtt_set_status(self, machine, state):
