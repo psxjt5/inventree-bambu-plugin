@@ -94,11 +94,13 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
     def restart_machine(self, machine):
         """Called when machine is restarted"""
         self.initialise(machine)
+
+    def ping_machines(self, machine):
+        machine.set_status(ThreeDPrinterStatus.UNKNOWN)
         
     def initialise(self, machine):
         print(f"[BambuLabPrinterDriver] Initialising Machine {machine.name}")
-        machine.set_status(ThreeDPrinterStatus.UNKNOWN)
-        machine.save()
+        #machine.set_status(ThreeDPrinterStatus.UNKNOWN)
 
         # if not self.validate_required_settings(machine):
         #     machine.set_status(ThreeDPrinterStatus.UNKNOWN)
