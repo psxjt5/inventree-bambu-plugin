@@ -24,15 +24,6 @@ class ThreeDPrinterBaseDriver(BaseDriver):
     def ping(self, machine):
         """Ping a single machine — must be implemented by subclasses."""
         raise NotImplementedError("Driver must implement ping() method")
-    
-    def ping_machines(self):
-        print(f"[ThreeDPrinterDriver] Pinging Registered Machines")
-        for machine in self.get_machines():
-            try:
-                self.ping(machine)
-            except Exception as e:
-                print(f"[{self.SLUG}] Failed to ping {machine.name}: {e}")
-                machine.set_status(ThreeDPrinterStatus.UNKNOWN)
 
 # Driver Statuses
 class ThreeDPrinterStatus(MachineStatus):
@@ -74,6 +65,15 @@ class ThreeDPrinterMachine(BaseMachineType):
     MACHINE_STATUS: type[ThreeDPrinterStatus] = ThreeDPrinterStatus
 
     default_machine_status = ThreeDPrinterStatus.UNKNOWN
+    
+    def ping_machines(self):
+        print(f"[ThreeDPrinterDriver] Pinging Registered Machines")
+        for machine in self.get_machines():
+            try:
+                self.ping(machine)
+            except Exception as e:
+                print(f"[{self.SLUG}] Failed to ping {machine.name}: {e}")
+                machine.set_status(ThreeDPrinterStatus.UNKNOWN)
 
     @property
     def location(self):
