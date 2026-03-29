@@ -104,7 +104,6 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
         
     def message_received(self, machine, serial, data):
         print(f"[BambuLab3DPrinterDriver] MQTT message for {machine.name}.")
-        machine.refresh_from_db()
 
         state = data.get("print", {}).get("gcode_state")
 
