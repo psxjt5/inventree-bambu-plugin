@@ -50,13 +50,9 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
             machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.MISCONFIGURED)
             return
         
-        if self.test_connection(machine):
-            machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.CONNECTED)
-            machine.set_status_text("Connection Test Successful.")
-        else:
-            machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.DISCONNECTED)
-            machine.set_status_text("Connection Test Unsuccessful.")
-            machine.initialized = False
+        if not self.test_connection(machine):
+            return
+            
         
     def validate_required_settings(self, machine) -> bool:
         """
@@ -87,7 +83,11 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
         try:
             with socket.create_connection((ip, port), timeout=3):
                 print(f"[BambuLab3DPrinterDriver] Connection test successful for {machine.name} at {ip}.")
+                machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.CONNECTED)
+                machine.set_status_text("Connection Test Successful.")
                 return True
         except Exception:
             print(f"[BambuLab3DPrinterDriver] Connection test failed for {machine.name} at {ip}.")
+            machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.DISCONNECTED)
+            machine.set_status_text("Connection Test Unsuccessful.")
             return False
