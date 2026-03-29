@@ -7,8 +7,8 @@ from django.utils.translation import gettext_lazy as _
 from inventree_3d.threed import ThreeDPrinterBaseDriver
 
 class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
-    """Base driver for 3D printer machines."""
+    """BambuLab 3D Printing machine driver."""
 
-    machine_type = '3d-printer'
-
-    USE_BACKGROUND_WORKER = True
+    SLUG = "bambu-lab-3d-printer"
+    NAME = "Bambu Lab 3D Printer"
+    DESCRIPTION = "Bambu Lab 3D Printer driver for InvenTree"
