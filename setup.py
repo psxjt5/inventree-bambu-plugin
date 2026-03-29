@@ -30,7 +30,8 @@ setuptools.setup(
     license="MIT",
     packages=setuptools.find_packages(),
     install_requires=[
-        "inventree-3d-printing"
+        "inventree-3d-printing",
+        "paho-mqtt>=1.6.1"
     ],
     setup_requires=[
         "wheel",
