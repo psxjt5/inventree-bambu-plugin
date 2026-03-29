@@ -89,67 +89,44 @@ class BambuLabPrinterDriver(ThreeDPrinterBaseDriver):
 
     def init_machine(self, machine):
         """Called when machine is initialized"""
-        thread = threading.Thread(
-            target=self._delayed_initialise,
-            args=(machine,),
-            daemon=True
-        )
-        thread.start()
+        self.initialise(machine)
 
     def restart_machine(self, machine):
         """Called when machine is restarted"""
-        thread = threading.Thread(
-            target=self._delayed_initialise,
-            args=(machine,),
-            daemon=True
-        )
-        thread.start()
-
-    def _delayed_initialise(self, machine):
-        time.sleep(1)
         self.initialise(machine)
         
     def initialise(self, machine):
-        if getattr(self, "_init_started", False):
-            return
-
-        self._init_started = True
-
         print(f"[BambuLabPrinterDriver] Initialising Machine {machine.name}")
-        machine.set_status(machine.MACHINE_STATUS.UNKNOWN)
-        print("[BambuLabPrinterDriver] Machine status class:", machine.MACHINE_STATUS)
-        print("[BambuLabPrinterDriver] Unknown value:", machine.MACHINE_STATUS.UNKNOWN)
-        print("[BambuLabPrinterDriver] Choices:", getattr(machine.MACHINE_STATUS, 'choices', None))
 
-        if not self.validate_required_settings(machine):
-            machine.set_status(ThreeDPrinterStatus.UNKNOWN)
-            return
+        # if not self.validate_required_settings(machine):
+        #     machine.set_status(ThreeDPrinterStatus.UNKNOWN)
+        #     return
         
-        self.mqtt_manager = BambuMQTTManager()
+        # self.mqtt_manager = BambuMQTTManager()
 
-        if self.test_connection(machine):
-            self.mqtt_manager.start_bambu_mqtt_service(
-                ip=machine.get_setting("IP_ADDRESS", "D"),
-                port=8883,
-                token=machine.get_setting("ACCESS_TOKEN", "D"),
-            )
+        # if self.test_connection(machine):
+        #     self.mqtt_manager.start_bambu_mqtt_service(
+        #         ip=machine.get_setting("IP_ADDRESS", "D"),
+        #         port=8883,
+        #         token=machine.get_setting("ACCESS_TOKEN", "D"),
+        #     )
 
-            # Initialize status from cache
-            # serial = machine.get_setting("SERIAL", "D")
-            # data = cache.get(f"bambu:{serial}")
-            # print(f"[BambuLabPrinterDriver] Fetching initial status: {data}")
-            # if data and time.time() - data.get("last_seen", 0) < 30:
-            #     state = data["payload"].get("print", {}).get("gcode_state")
-            #     machine.set_status(self.map_state(state))
-            # else:
-            machine.set_status(ThreeDPrinterStatus.UNKNOWN)
-            print(f"[BambuLabPrinterDriver] Connection test successful for {machine.name}")
+        #     # Initialize status from cache
+        #     # serial = machine.get_setting("SERIAL", "D")
+        #     # data = cache.get(f"bambu:{serial}")
+        #     # print(f"[BambuLabPrinterDriver] Fetching initial status: {data}")
+        #     # if data and time.time() - data.get("last_seen", 0) < 30:
+        #     #     state = data["payload"].get("print", {}).get("gcode_state")
+        #     #     machine.set_status(self.map_state(state))
+        #     # else:
+        #     machine.set_status(ThreeDPrinterStatus.UNKNOWN)
+        #     print(f"[BambuLabPrinterDriver] Connection test successful for {machine.name}")
 
-        else:
-            machine.set_status(ThreeDPrinterStatus.UNKNOWN)
-            print("[BambuLabPrinterDriver] Connection test failed")
+        # else:
+        #     machine.set_status(ThreeDPrinterStatus.UNKNOWN)
+        #     print("[BambuLabPrinterDriver] Connection test failed")
 
-        self.initialised = True
+        # self.initialised = True
 
     def validate_required_settings(self, machine) -> bool:
         """
