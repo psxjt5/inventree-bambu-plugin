@@ -119,6 +119,7 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
             machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.PAUSED)
         elif state == "FINISH":
             machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.FINISHED)
+            machine.set_status_text("Print Completed.")
         elif state == "FAILED":
             machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.FAILED)
 
