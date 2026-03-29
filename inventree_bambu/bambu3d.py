@@ -12,3 +12,27 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
     SLUG = "bambu-lab-3d-printer"
     NAME = "Bambu Lab 3D Printer"
     DESCRIPTION = "Bambu Lab 3D Printer driver for InvenTree"
+
+    def __init__(self, *args, **kwargs):
+        self.MACHINE_SETTINGS = {
+            "IP_ADDRESS": {
+                "name": "IP Address",
+                "description": "Printer IP Address",
+                "default": "",
+                "required": True,
+            },
+            "ACCESS_TOKEN": {
+                "name": "Access Token",
+                "description": "Printer API Token",
+                "default": "",
+                "required": True,
+            },
+            "SERIAL": {
+                "name": "Serial Number",
+                "description": "Printer Serial Number",
+                "default": "",
+                "required": True,
+            }
+        }
+
+        super().__init__(*args, **kwargs)
