@@ -56,6 +56,7 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
         else:
             machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.DISCONNECTED)
             machine.set_status_text("Connection Test Unsuccessful.")
+            machine.initialized = False
         
     def validate_required_settings(self, machine) -> bool:
         """
