@@ -1,27 +1,2 @@
-# InvenTree Bambu Lab 3D Printing Support
-
-InvenTree Machine drivers and support for Bambu Lab 3D printers.
-
-**This plugin in still under active development and is not currently functional.**
-
-## Installation
-
-### InvenTree Plugin Manager
-
-... todo ...
-
-### Command Line 
-
-To install manually via the command line, run the following command:
-
-```bash
-pip install inventree-inventreebambulabmachines
-```
-
-## Configuration
-
-... todo ...
-
-## Usage
-
-... todo ...
+# Inventree Bambu Plugin
+BambuLab 3D Printing Support for InvenTree
