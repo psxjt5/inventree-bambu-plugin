@@ -105,14 +105,22 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
     def message_received(self, machine, serial, data):
         print(f"[BambuLab3DPrinterDriver] MQTT message for {machine.name}.")
 
-        state = data.get("print", {}).get("gcode_state")
+        self.mqtt_set_status(machine, data.get("print", {}).get("gcode_state"))
 
-        print(f"[BambuLab3DPrinterDriver] MQTT state for {machine.name}: {state}.")
-
-        # if state == "RUNNING":
-        #     machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.PRINTING)
-
-        # elif state == "IDLE":
-        #     machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.IDLE)
+    def mqtt_set_status(self, machine, state):
+        if state == "IDLE":
+            machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.IDLE)
+        elif state == "PREPARE":
+            machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.PREPARING)
+        elif state == "SLICING":
+            machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.PREPARING)
+        elif state == "RUNNING":
+            machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.PRINTING)
+        elif state == "PAUSE":
+            machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.PAUSED)
+        elif state == "FINISH":
+            machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.FINISHED)
+        elif state == "FAILED":
+            machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.FAILED)
 
 
