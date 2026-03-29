@@ -21,7 +21,19 @@ class ThreeDPrinterBaseDriver(BaseDriver):
 
     USE_BACKGROUND_WORKER = True
 
-# Enum containing printer statuses.
+    def ping(self, machine):
+        """Ping a single machine — must be implemented by subclasses."""
+        raise NotImplementedError("Driver must implement ping() method")
+    
+    def ping_machines(self):
+        for machine in self.get_machines():
+            try:
+                self.ping(machine)
+            except Exception as e:
+                print(f"[{self.SLUG}] Failed to ping {machine.name}: {e}")
+                machine.set_status(ThreeDPrinterStatus.UNKNOWN)
+
+# Driver Statuses
 class ThreeDPrinterStatus(MachineStatus):
     """Label printer status codes.
 
