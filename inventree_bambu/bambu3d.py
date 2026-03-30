@@ -133,9 +133,6 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
         return sn_map.get(prefix, "Unknown")
 
     def message_received(self, machine, serial, data):
-        # Get the latest machine instance
-        machine = ThreeDPrinterMachine.objects.get(pk=machine.pk)
-
         # Set the status of the printer.
         self.mqtt_set_status(machine, data.get("print", {}).get("gcode_state"))
 
