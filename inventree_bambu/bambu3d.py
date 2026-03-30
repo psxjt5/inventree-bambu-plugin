@@ -168,4 +168,7 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
             {'key': 'Remaining Time', 'value': f'{remainingtime}'},
         ])
 
+        print(machine)
+        print(type(machine))
+
 
