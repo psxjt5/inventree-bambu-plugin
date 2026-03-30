@@ -140,18 +140,24 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
         print(f"[BambuLab3DPrinterDriver] Setting status for {machine.name}: {state}.")
         if state == "IDLE":
             machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.IDLE)
+            machine.set_status_text("Printer Idle")
         elif state == "PREPARE":
             machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.PREPARING)
+            machine.set_status_text("Print Preparing")
         elif state == "SLICING":
             machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.PREPARING)
+            machine.set_status_text("Print Preparing")
         elif state == "RUNNING":
             machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.PRINTING)
+            machine.set_status_text("Printing")
         elif state == "PAUSE":
             machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.PAUSED)
+            machine.set_status_text("Print Paused")
         elif state == "FINISH":
             machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.FINISHED)
             machine.set_status_text("Print Completed")
         elif state == "FAILED":
             machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.FAILED)
+            machine.set_status_text("Print Failed")
 
 
