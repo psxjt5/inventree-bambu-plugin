@@ -137,6 +137,7 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
         self.mqtt_set_status(machine, data.get("print", {}).get("gcode_state"))
 
     def mqtt_set_status(self, machine, state):
+        print(f"[BambuLab3DPrinterDriver] Setting status for {machine.name}: {state}.")
         if state == "IDLE":
             machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.IDLE)
         elif state == "PREPARE":
