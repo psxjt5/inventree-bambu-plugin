@@ -7,6 +7,8 @@ from django.utils.translation import gettext_lazy as _
 from inventree_3d.threed import ThreeDPrinterBaseDriver, ThreeDPrinterMachine
 from .bambumqttmanager import BambuMQTTManager
 
+from plugin.base.event import trigger_event
+
 import socket
 
 class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
@@ -135,6 +137,8 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
     def message_received(self, machine, serial, data):
         # Set the status of the printer.
         self.mqtt_set_status(machine, data.get("print", {}).get("gcode_state"))
+
+        trigger_event(f'machine_config.saved', id=machine.pk, model='MachineConfig')
 
     def mqtt_set_status(self, machine, state):
         print(f"[BambuLab3DPrinterDriver] Setting status for {machine.name}: {state}.")
