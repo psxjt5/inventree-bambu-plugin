@@ -38,6 +38,14 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
             }
         }
 
+        self.MACHINE_PROPERTIES = {
+            "MODEL": {
+                "name": "Model",
+                "description": "Printer Model",
+                "type": "string",
+            },
+        }
+
         super().__init__(*args, **kwargs)
 
     def init_machine(self, machine):
@@ -49,6 +57,12 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
             print(f"[BambuLab3DPrinterDriver] Machine misconfigured {machine.name}")
             machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.MISCONFIGURED)
             return
+        
+        # Determine the Model
+        model = self.get_model(machine.get_setting("SERIAL", "D"))
+        machine.set_properties([
+            {'key': 'Model', 'value': f'{model}'},
+        ])
         
         # Perform an initial connection test to the machine
         if not self.test_connection(machine):
@@ -102,6 +116,22 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
             machine.set_status_text("Connection Test Unsuccessful.")
             return False
         
+    def get_model(sn: str) -> str:
+        sn_map = {
+            "31B": "H2C",
+            "094": "H2D",
+            "239": "H2D Pro",
+            "093": "H2S",
+            "00M": "X1C",
+            "03W": "X1E",
+            "01P": "P1S",
+            "01S": "P1P",
+            "039": "A1",
+            "030": "A1 Mini"
+        }
+        prefix = sn[:3]
+        return sn_map.get(prefix, "Unknown")
+
     def message_received(self, machine, serial, data):
         # Set the status of the printer.
         self.mqtt_set_status(machine, data.get("print", {}).get("gcode_state"))
@@ -119,7 +149,7 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
             machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.PAUSED)
         elif state == "FINISH":
             machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.FINISHED)
-            machine.set_status_text("Print Completed.")
+            machine.set_status_text("Print Completed")
         elif state == "FAILED":
             machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.FAILED)
 
