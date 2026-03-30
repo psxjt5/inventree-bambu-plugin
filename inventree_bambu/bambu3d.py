@@ -137,6 +137,7 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
     def message_received(self, machine, serial, data):
         # Set the status of the printer.
         self.mqtt_set_status(machine, data.get("print", {}).get("gcode_state"))
+        self.mqtt_set_ams_count(machine, len(data.get("print", {}).get("ams", {}).get("ams", [])))
 
         trigger_event(f'machine_config.saved', id=machine.pk, model='MachineConfig')
 
@@ -163,5 +164,12 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
         elif state == "FAILED":
             machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.FAILED)
             machine.set_status_text("Print Failed")
+
+    def mqtt_set_ams_count(self, machine, count):
+        print(f"[BambuLab3DPrinterDriver] Setting ams count for {machine.name}: {count}.")
+
+        machine.set_properties([
+            {'key': 'AMS Units', 'value': f'{count}'},
+        ])
 
 
