@@ -131,7 +131,7 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
     def message_received(self, machine, serial, data):
         # Set the status of the printer.
         self.mqtt_set_status(machine, data.get("print", {}).get("gcode_state"))
-        self.mqtt_set_properties(machine, self.get_model(serial), len(data.get("print", {}).get("ams", {}).get("ams", [])))
+        self.mqtt_set_properties(machine, self.get_model(serial), len(data.get("print", {}).get("ams", {}).get("ams", [])), data.get("print", {}).get("mc_remaining_time"))
 
         trigger_event(f'machine_config.saved', id=machine.pk, model='MachineConfig')
 
@@ -159,12 +159,13 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
             machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.FAILED)
             machine.set_status_text("Print Failed")
 
-    def mqtt_set_properties(self, machine, model, amscount):
-        print(f"[BambuLab3DPrinterDriver] Setting properties for {machine.name}: {model},{amscount}.")
+    def mqtt_set_properties(self, machine, model, amscount, remainingtime):
+        print(f"[BambuLab3DPrinterDriver] Setting properties for {machine.name}: {model},{amscount},{remainingtime}.")
 
         machine.set_properties([
             {'key': 'Model', 'value': f'{model}'},
             {'key': 'AMS Units', 'value': f'{amscount}'},
+            {'key': 'Remaining Time', 'value': f'{remainingtime}'},
         ])
 
 
