@@ -170,5 +170,6 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
 
         print(machine)
         print(type(machine))
+        print(dir(machine))
 
 
