@@ -7,7 +7,7 @@ from django.utils.translation import gettext_lazy as _
 from inventree_3d.threed import ThreeDPrinterBaseDriver, ThreeDPrinterMachine
 from .bambumqttmanager import BambuMQTTManager
 
-from plugin.base.event import trigger_event
+from plugin.base.event.events import trigger_event
 
 import socket
 
