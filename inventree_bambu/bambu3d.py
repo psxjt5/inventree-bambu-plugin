@@ -116,7 +116,7 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
             machine.set_status_text("Connection Test Unsuccessful.")
             return False
         
-    def get_model(sn: str) -> str:
+    def get_model(self, sn: str) -> str:
         sn_map = {
             "31B": "H2C",
             "094": "H2D",
