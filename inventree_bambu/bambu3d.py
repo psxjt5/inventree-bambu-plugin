@@ -65,7 +65,7 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
             return
         
         # Initialise the properties
-        self.initialise_properties(machine)
+        self.init_properties(machine)
         
         # Begin the MQTT service for this machine
         self.mqtt_manager = BambuMQTTManager()
@@ -115,7 +115,7 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
             machine.set_status_text("Connection Test Unsuccessful.")
             return False
         
-    def initialise_properties(self, machine):
+    def init_properties(self, machine):
         machine.set_properties([
             {'key': 'Model', 'value': ''},
             {'key': 'AMS Units', 'value': ''},
