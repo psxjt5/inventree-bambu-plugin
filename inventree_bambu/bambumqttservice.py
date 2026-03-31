@@ -11,10 +11,11 @@ from django.core.cache import cache
 
 class BambuMQTTService:
 
-    def __init__(self, ip, port, token):
+    def __init__(self, ip, port, token, machine, message_callback):
         self.ip = ip
         self.port = port
         self.token = token
+        self.message_callback=lambda s, data: message_callback(machine, s, data)
 
         self.client = mqtt.Client(clean_session=True)
         self.client.username_pw_set("bblp", token)
@@ -70,6 +71,13 @@ class BambuMQTTService:
         },
         timeout=60
         )
+
+        # Call the maching callback function
+        if self.message_callback:
+            try:
+                self.message_callback(serial, payload)
+            except Exception as e:
+                print(f"[BambuMQTTService] Callback error: {e}")
 
     def extract_serial(self, topic):
         parts = topic.split("/")

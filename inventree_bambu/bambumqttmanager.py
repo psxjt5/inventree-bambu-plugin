@@ -6,7 +6,7 @@ class BambuMQTTManager:
     def __init__(self):
         self.services = {};
     
-    def start_bambu_mqtt_service(self, ip, port, token):
+    def start_bambu_mqtt_service(self, ip, port, token, machine, callback=None):
         """
         Starts a MQTT service for the specified printer.
         Multiple instances are guarded against.
@@ -17,7 +17,7 @@ class BambuMQTTManager:
         if key in self.services:
             return
 
-        service = BambuMQTTService(ip, port, token)
+        service = BambuMQTTService(ip, port, token, machine, callback)
 
         thread = threading.Thread(
             target=service.start,
