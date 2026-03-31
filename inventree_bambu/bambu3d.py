@@ -183,10 +183,16 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
         self.update_property(machine, "AMS Units", amsunits)
 
     def update_property(self, machine, key, value):
-        properties = machine.properties_dict.copy()
+        # Extract raw values
+        properties = {
+            k: v.get('value') if isinstance(v, dict) else v
+            for k, v in machine.properties_dict.items()
+        }
 
+        # Update the target key
         properties[key] = value
 
+        # Rebuild properly
         machine.set_properties([
             {'key': k, 'value': v} for k, v in properties.items()
         ])
