@@ -66,7 +66,7 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
         
         # Initialise the properties
         print(f"[BambuLab3DPrinterDriver] Initialising machine properties for {machine.name}")
-        self.init_properties(machine)
+        #self.init_properties(machine)
         
         # Begin the MQTT service for this machine
         self.mqtt_manager = BambuMQTTManager()
@@ -143,8 +143,8 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
         self.mqtt_set_status(machine, data.get("print", {}).get("gcode_state"))
 
         # Set the properties of the printer.
-        self.update_property(machine, 'Model', self.get_model(serial))
-        self.update_property(machine, 'AMS Units', len(data.get("print", {}).get("ams", {}).get("ams", [])))
+        #self.update_property(machine, 'Model', self.get_model(serial))
+        #self.update_property(machine, 'AMS Units', len(data.get("print", {}).get("ams", {}).get("ams", [])))
 
         #trigger_event(f'machine_config.saved', id=machine.pk, model='MachineConfig')
 
@@ -172,23 +172,23 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
             machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.FAILED)
             machine.set_status_text("Print Failed")
 
-    def mqtt_set_model(self, machine, model):
-        print(f"[BambuLab3DPrinterDriver] Setting model for {machine.name}: {model}.")
+    # def mqtt_set_model(self, machine, model):
+    #     print(f"[BambuLab3DPrinterDriver] Setting model for {machine.name}: {model}.")
 
-        self.update_property(machine, "Model", model)
+    #     self.update_property(machine, "Model", model)
 
-    def mqtt_set_amsunits(self, machine, amsunits):
-        print(f"[BambuLab3DPrinterDriver] Setting AMS units for {machine.name}: {amsunits}.")
+    # def mqtt_set_amsunits(self, machine, amsunits):
+    #     print(f"[BambuLab3DPrinterDriver] Setting AMS units for {machine.name}: {amsunits}.")
 
-        self.update_property(machine, "AMS Units", amsunits)
+    #     self.update_property(machine, "AMS Units", amsunits)
 
-    def update_property(self, machine, key, value):
-        properties = machine.properties_dict.copy()
+    # def update_property(self, machine, key, value):
+    #     properties = machine.properties_dict.copy()
 
-        properties[key] = value
+    #     properties[key] = value
 
-        machine.set_properties([
-            {'key': k, 'value': v} for k, v in properties.items()
-        ])
+    #     machine.set_properties([
+    #         {'key': k, 'value': v} for k, v in properties.items()
+    #     ])
 
 
