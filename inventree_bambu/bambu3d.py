@@ -65,7 +65,7 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
             return
         
         # Initialise the properties
-        self.initialise_properties()
+        self.initialise_properties(machine)
         
         # Begin the MQTT service for this machine
         self.mqtt_manager = BambuMQTTManager()
