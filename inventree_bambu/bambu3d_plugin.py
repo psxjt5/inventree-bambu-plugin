@@ -19,7 +19,7 @@ from django.urls import path
 
 # Backwards compatibility imports
 try:
-    from plugin.mixins import MachineDriverMixin, UrlsMixin
+    from plugin.mixins import MachineDriverMixin, UrlsMixin, UserInterfaceMixin
 except ImportError:
 
     class MachineDriverMixin:
@@ -27,7 +27,7 @@ except ImportError:
 
         pass
 
-class Bambu3DPlugin(MachineDriverMixin, UrlsMixin, InvenTreePlugin):
+class Bambu3DPlugin(MachineDriverMixin, UrlsMixin, UserInterfaceMixin, InvenTreePlugin):
     """BambuLab 3D Printing support for InvenTree."""
 
     AUTHOR = "James Todd"
@@ -50,3 +50,23 @@ class Bambu3DPlugin(MachineDriverMixin, UrlsMixin, InvenTreePlugin):
         return [
             path("get_printer_data/<str:machine_serial>", BambuAPI.get_printer_data),
         ]
+    
+    def get_ui_dashboard_items(self, request, context: dict, **kwargs):
+        #if not request.user or not request.user.is_staff:
+        #    return []
+        
+        items = []
+
+        items.append({
+            'key': 'Inventree-Bambu-Dashboard',
+            'title': 'Bambu 3D Printer Dashboard',
+            'description': 'Dashboard item for Bambu Lab 3D Printers.',
+            'icon': 'ti:dashboard:outline',
+            'source': self.plugin_static_file('Dashboard.js:renderBambuDashboardItem'),
+            'context': {
+                # Provide additional context data to the dashboard item
+                'settings': self.get_settings_dict()
+            }
+        })
+
+        return items
