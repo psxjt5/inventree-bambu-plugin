@@ -13,7 +13,7 @@ from .bambu3d import BambuLab3DPrinterDriver
 
 # Backwards compatibility imports
 try:
-    from plugin.mixins import MachineDriverMixin, UserInterfaceMixin
+    from plugin.mixins import MachineDriverMixin, UserInterfaceMixin, SettingsMixin
 except ImportError:
 
     class MachineDriverMixin:
@@ -21,7 +21,7 @@ except ImportError:
 
         pass
 
-class Bambu3DPlugin(MachineDriverMixin, UserInterfaceMixin, InvenTreePlugin):
+class Bambu3DPlugin(MachineDriverMixin, UserInterfaceMixin, SettingsMixin, InvenTreePlugin):
     """BambuLab 3D Printing support for InvenTree."""
 
     AUTHOR = "James Todd"
