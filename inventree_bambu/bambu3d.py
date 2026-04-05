@@ -77,26 +77,6 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
             machine=machine,
             callback=self.message_received
         )
-    
-    def get_ui_dashboard_items(self, request, context: dict, **kwargs):
-        #if not request.user or not request.user.is_staff:
-        #    return []
-        
-        items = []
-
-        items.append({
-            'key': 'Inventree-Bambu-Dashboard',
-            'title': 'Bambu 3D Printer Dashboard',
-            'description': 'Dashboard item for Bambu Lab 3D Printers.',
-            'icon': 'ti:dashboard:outline',
-            'source': self.plugin_static_file('Dashboard.js:renderBambuDashboardItem'),
-            'context': {
-                # Provide additional context data to the dashboard item
-                'settings': self.get_settings_dict()
-            }
-        })
-
-        return items
 
     def validate_required_settings(self, machine) -> bool:
         """

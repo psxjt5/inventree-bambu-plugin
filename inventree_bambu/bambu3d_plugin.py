@@ -13,7 +13,7 @@ from .bambu3d import BambuLab3DPrinterDriver
 
 # Backwards compatibility imports
 try:
-    from plugin.mixins import MachineDriverMixin
+    from plugin.mixins import MachineDriverMixin, UserInterfaceMixin
 except ImportError:
 
     class MachineDriverMixin:
@@ -21,7 +21,7 @@ except ImportError:
 
         pass
 
-class Bambu3DPlugin(MachineDriverMixin, InvenTreePlugin):
+class Bambu3DPlugin(MachineDriverMixin, UserInterfaceMixin, InvenTreePlugin):
     """BambuLab 3D Printing support for InvenTree."""
 
     AUTHOR = "James Todd"
@@ -37,3 +37,23 @@ class Bambu3DPlugin(MachineDriverMixin, InvenTreePlugin):
     def get_machine_drivers(self) -> list:
         print("Registering BambuLab 3D Printer Machine")
         return [BambuLab3DPrinterDriver]
+    
+    def get_ui_dashboard_items(self, request, context: dict, **kwargs):
+        #if not request.user or not request.user.is_staff:
+        #    return []
+        
+        items = []
+
+        items.append({
+            'key': 'Inventree-Bambu-Dashboard',
+            'title': 'Bambu 3D Printer Dashboard',
+            'description': 'Dashboard item for Bambu Lab 3D Printers.',
+            'icon': 'ti:dashboard:outline',
+            'source': self.plugin_static_file('Dashboard.js:renderBambuDashboardItem'),
+            'context': {
+                # Provide additional context data to the dashboard item
+                'settings': self.get_settings_dict()
+            }
+        })
+
+        return items
