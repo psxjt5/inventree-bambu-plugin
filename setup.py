@@ -18,7 +18,7 @@ with open("README.md", encoding="utf-8") as f:
 
 
 setuptools.setup(
-    name="inventree-bambu-plugin",
+    name="inventree_bambu",
     version=inventree_bambu.PLUGIN_VERSION,
     author="James Todd",
     author_email="james.todd@nottingham.ac.uk",

@@ -30,8 +30,8 @@ class Bambu3DPlugin(MachineDriverMixin, UserInterfaceMixin, SettingsMixin, Inven
 
     MIN_VERSION = "0.16.0"
 
-    NAME = "Bambu 3D Printing"
-    SLUG = "bambu-3d-printing"
+    NAME = "Inventree Bambu"
+    SLUG = "inventree_bambu"
     TITLE = "BambuLab 3D Printing Support"
 
     def get_machine_drivers(self) -> list:
@@ -45,7 +45,7 @@ class Bambu3DPlugin(MachineDriverMixin, UserInterfaceMixin, SettingsMixin, Inven
         items = []
 
         items.append({
-            'key': 'Inventree-Bambu-Dashboard',
+            'key': 'Inventree_Bambu-Dashboard',
             'title': 'Bambu 3D Printer Dashboard',
             'description': 'Dashboard item for Bambu Lab 3D Printers.',
             'icon': 'ti:dashboard:outline',

@@ -51,7 +51,7 @@ export default defineConfig({
         
       ],
       output: {
-        dir: '../inventree-bambu-plugin/static',
+        dir: '../inventree_bambu/static',
         entryFileNames: '[name].js',
         assetFileNames: 'assets/[name].[ext]',
         globals: externalLibs,
