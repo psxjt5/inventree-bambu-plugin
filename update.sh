@@ -26,7 +26,7 @@ git pull
 echo "Copying frontend assets..."
 
 rm -rf $STATIC_DIR/*
-cp -r $PLUGIN1_DIR/inventree_bambu/static/* $STATIC_DIR/
+cp -r $PLUGIN2_DIR/inventree_bambu/static/* $STATIC_DIR/
 
 echo "Plugin update complete"
 
