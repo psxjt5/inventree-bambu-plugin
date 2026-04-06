@@ -1,44 +1,54 @@
+import { Table, Text, Title } from '@mantine/core';
+import { useEffect, useState } from 'react';
 
-import { Button, SimpleGrid, Text } from '@mantine/core';
-import { useState } from 'react';
+type Machine = {
+    id: number;
+    name: string;
+    state: string;
+    progress: number | null;
+};
 
-// Import for type checking
-import { checkPluginVersion, type InvenTreePluginContext } from '@inventreedb/ui';
+function BambuDashboardItem({ context }) {
 
-/**
- * Render a custom dashboard item with the provided context
- * Refer to the InvenTree documentation for the context interface
- * https://docs.inventree.org/en/stable/extend/plugins/ui/#plugin-context
- */
-function BambuDashboardItem({
-    context
-}: {
-    context: InvenTreePluginContext;
-}) {
+    const [machines, setMachines] = useState<Machine[]>([]);
 
-    const [ counter, setCounter ] = useState<number>(0);
+    useEffect(() => {
+        fetch('/api/plugin/bambu/status/')
+            .then(res => res.json())
+            .then(setMachines)
+            .catch(() => setMachines([]));
+    }, []);
 
-    const pluginName : string = "demo";
+    const rows = machines.map((m) => (
+        <tr key={m.id}>
+            <td>{m.name}</td>
+            <td>{m.state}</td>
+            <td>
+                {m.progress !== null ? `${m.progress}%` : '-'}
+            </td>
+        </tr>
+    ));
 
-    // Render a simple grid of data
     return (
-        <SimpleGrid cols={2} spacing="md">
-            <Text>Plugin: {pluginName}</Text>
-            <Text>
-                Username: {context.user?.username?.()}
-            </Text>
-            <Text>
-                Counter: {counter}
-            </Text>
-            <Button onClick={() => setCounter(counter + 1)}>+</Button>
-        </SimpleGrid>
+        <>
+            <Title order={1} mb="md">
+                3D Printer Status
+            </Title>
+
+            {machines.length === 0 ? (
+                <Text>No printers found</Text>
+            ) : (
+                <Table striped highlightOnHover>
+                    <thead>
+                        <tr>
+                            <th>Printer</th>
+                            <th>Status</th>
+                            <th>Progress</th>
+                        </tr>
+                    </thead>
+                    <tbody>{rows}</tbody>
+                </Table>
+            )}
+        </>
     );
-}
-
-
-// This is the function which is called by InvenTree to render the actual dashboard
-//  component
-export function renderBambuDashboardItem(context: InvenTreePluginContext) {
-    checkPluginVersion(context);
-    return <BambuDashboardItem context={context} />;
 }
