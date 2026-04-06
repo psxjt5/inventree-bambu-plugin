@@ -1,5 +1,5 @@
 {
-  "name": "inventree-bambu-plugin",
+  "name": "inventree_bambu",
   "private": true,
   "version": "0.1.0",
   "type": "module",

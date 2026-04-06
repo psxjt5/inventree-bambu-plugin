@@ -1,4 +1,4 @@
-# Inventree-Bambu-Plugin - Frontend Code
+# Inventree_Bambu - Frontend Code
 
 This directory contains the frontend code for the Rolling Stocktake plugin.
 
@@ -27,7 +27,7 @@ To compile the frontend code, run:
 npm run build
 ```
 
-This will compile the frontend into the `../Inventree-Bambu-Plugin/static` directory (ready for distribution).
+This will compile the frontend into the `../Inventree_Bambu/static` directory (ready for distribution).
 
 Note: The target directory is intentionally outside of the frontend directory, so that the compiled files are correctly bundled into the python package install.
 
