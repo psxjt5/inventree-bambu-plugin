@@ -53,6 +53,10 @@ class Bambu3DPlugin(MachineDriverMixin, UserInterfaceMixin, SettingsMixin, Inven
             'context': {
                 # Provide additional context data to the dashboard item
                 'settings': self.get_settings_dict()
+            },
+            'options': {
+                'width': 5,
+                'height': 3
             }
         })
 
