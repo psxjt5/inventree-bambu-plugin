@@ -67,7 +67,7 @@ function BambuDashboardItem({
 
 
 // Required export for InvenTree
-export function renderbambuDashboardItem(context: InvenTreePluginContext) {
+export function renderBambuDashboardItem(context: InvenTreePluginContext) {
     checkPluginVersion(context);
     return <BambuDashboardItem context={context} />;
 }
