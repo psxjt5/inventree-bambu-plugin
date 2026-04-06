@@ -1,5 +1,8 @@
-import { Table, Text, Title } from '@mantine/core';
+import { Table, Title, Text } from '@mantine/core';
 import { useEffect, useState } from 'react';
+
+// Import for type checking
+import { checkPluginVersion, type InvenTreePluginContext } from '@inventreedb/ui';
 
 type Machine = {
     id: number;
@@ -8,24 +11,33 @@ type Machine = {
     progress: number | null;
 };
 
-function BambuDashboardItem({ context }) {
+function BambuDashboardItem({
+    context: _context
+}: {
+    context: InvenTreePluginContext;
+}) {
 
     const [machines, setMachines] = useState<Machine[]>([]);
 
     useEffect(() => {
-        fetch('/api/plugin/bambu/status/')
-            .then(res => res.json())
-            .then(setMachines)
-            .catch(() => setMachines([]));
+        const fetchData = () => {
+            fetch('/api/plugin/bambu/status/')
+                .then(res => res.json())
+                .then(setMachines)
+                .catch(() => setMachines([]));
+        };
+
+        fetchData();
+        const interval = setInterval(fetchData, 5000);
+
+        return () => clearInterval(interval);
     }, []);
 
     const rows = machines.map((m) => (
         <tr key={m.id}>
             <td>{m.name}</td>
             <td>{m.state}</td>
-            <td>
-                {m.progress !== null ? `${m.progress}%` : '-'}
-            </td>
+            <td>{m.progress !== null ? `${m.progress}%` : '-'}</td>
         </tr>
     ));
 
@@ -51,4 +63,11 @@ function BambuDashboardItem({ context }) {
             )}
         </>
     );
+}
+
+
+// Required export for InvenTree
+export function renderbambuDashboardItem(context: InvenTreePluginContext) {
+    checkPluginVersion(context);
+    return <BambuDashboardItem context={context} />;
 }
