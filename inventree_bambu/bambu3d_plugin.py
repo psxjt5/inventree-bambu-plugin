@@ -38,10 +38,11 @@ class Bambu3DPlugin(MachineDriverMixin, InvenTreePlugin):
     TITLE = "BambuLab 3D Printing Support"
 
     def get_machine_drivers(self) -> list:
-        print("Registering BambuLab 3D Printer Machine")
+        print("[BambuLab3DPrinterPlugin] Registering BambuLab 3D Printer Machine")
         return [BambuLab3DPrinterDriver]
     
     def get_api_urls(self):
+        print("[BambuLab3DPrinterPlugin] Registering BambuLab 3D API URLs")
         from django.urls import include, path
 
         return [
