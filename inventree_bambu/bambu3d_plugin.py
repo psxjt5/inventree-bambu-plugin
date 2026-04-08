@@ -1,4 +1,7 @@
-"""3D Printing Support for InvenTree.
+"""
+Bambu3D_Plugin: Primary plugin registry (entry point).
+
+3D Printing Support for InvenTree.
 
 Adds support for 3D printing drivers to integrate into various parts of the system.
 """

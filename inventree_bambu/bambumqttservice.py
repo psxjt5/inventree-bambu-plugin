@@ -1,4 +1,6 @@
-"""Manages the MQTT connection between the worker and individual printers."""
+"""
+BambuMQTTService: Manages the MQTT connection between the worker and individual printers.
+"""
 
 # MQTT connections.
 import ssl
