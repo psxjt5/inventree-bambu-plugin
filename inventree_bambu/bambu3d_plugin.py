@@ -15,7 +15,7 @@ from plugin.machine import BaseMachineType
 from .bambu3d import BambuLab3DPrinterDriver
 from .bambuapi import BambuAPI
 
-from django.conf.urls import url
+from django.urls import path
 
 # Backwards compatibility imports
 try:
@@ -48,5 +48,5 @@ class Bambu3DPlugin(MachineDriverMixin, UrlsMixin, InvenTreePlugin):
         print("[BambuLab3DPrinterPlugin] Registering BambuLab 3D API URLs")
 
         return [
-            url(r"example/", BambuAPI.example_endpoint, name="example"),
+            path("example/", BambuAPI.example_endpoint),
         ]
