@@ -2,8 +2,6 @@
 Provides data from the Bambu MQTT Service
 """
 
-from .bambuapi import BambuAPI
-
 from django.core.cache import cache
 
 class BambuData:
