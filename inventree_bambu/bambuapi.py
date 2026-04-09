@@ -6,18 +6,23 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from .bambudata import BambuData
+
 class BambuAPI:
 
     @api_view(["GET"])
     @permission_classes([IsAuthenticated])
-    def example_endpoint(request, machine_id):
+    def get_printer_data(request, machine_serial):
         """Return data for a specific printer"""
 
         data = {
-            "id": machine_id,
-            "name": f"Printer {machine_id}",
-            "state": "idle",
-            "progress": None,
+            "serial": machine_serial,
+            "status": BambuData.getStatus(machine_serial),
+            "model": BambuData.getStatus(machine_serial),
+            "ams_count": BambuData.getAMSUnitCount(machine_serial)
         }
 
         return Response(data)
+
+
+

@@ -18,6 +18,7 @@ class BambuMQTTService:
         self.port = port
         self.token = token
         self.message_callback=lambda s, data: message_callback(machine, s, data)
+        
 
         self.client = mqtt.Client(clean_session=True)
         self.client.username_pw_set("bblp", token)
