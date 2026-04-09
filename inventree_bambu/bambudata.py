@@ -7,11 +7,11 @@ from django.core.cache import cache
 class BambuData:
 
     @staticmethod
-    def getStatus(self, serial):
-        return self.getPayload(serial).get("print", {}).get("gcode_state")
+    def getStatus(serial):
+        return BambuData.getPayload(serial).get("print", {}).get("gcode_state")
         
     @staticmethod
-    def getModel(self, serial):
+    def getModel(serial):
         sn_map = {
             "31B": "H2C",
             "094": "H2D",
@@ -28,22 +28,22 @@ class BambuData:
         return sn_map.get(prefix, "Unknown")
     
     @staticmethod
-    def getAMSUnitCount(self, serial):
-        return len(self.getPayload(serial).get("print", {}).get("ams", {}).get("ams", []))
+    def getAMSUnitCount(serial):
+        return len(BambuData.getPayload(serial).get("print", {}).get("ams", {}).get("ams", []))
     
     @staticmethod
-    def getProgress(self, serial):
+    def getProgress(serial):
         return
     
     @staticmethod
-    def getJobName(self, serial):
+    def getJobName(serial):
         return
     
     @staticmethod
-    def getRaw(self, serial):
+    def getRaw(serial):
         return cache.get(f"bambu:{serial}")
 
     @staticmethod
-    def getPayload(self, serial):
-        data = self.get_raw(serial)
+    def getPayload(serial):
+        data = BambuData.getRaw(serial)
         return data.get("payload") if data else None
