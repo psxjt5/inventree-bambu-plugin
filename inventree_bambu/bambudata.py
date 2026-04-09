@@ -28,16 +28,66 @@ class BambuData:
         return sn_map.get(prefix, "Unknown")
     
     @staticmethod
+    def getProgress(serial):
+        return BambuData.getPayload(serial).get("print", {}).get("mc_percent")
+    
+    @staticmethod
+    def getLayerProgress(serial):
+        layer = BambuData.getPayload(serial).get("print", {}).get("layer_num", 0)
+        total = BambuData.getPayload(serial).get("print", {}).get("total_layer_num", 0)
+        return int((layer / total) * 100) if total else 0
+
+    @staticmethod
+    def getCurrentLayer(serial):
+        return BambuData.getPayload(serial).get("print", {}).get("layer_num")
+
+    @staticmethod
+    def getTotalLayers(serial):
+        return BambuData.getPayload(serial).get("print", {}).get("total_layer_num")
+
+    @staticmethod
+    def getRemainingTime(serial):
+        return BambuData.getPayload(serial).get("print", {}).get("mc_remaining_time")
+
+    @staticmethod
+    def getFileName(serial):
+        return BambuData.getPayload(serial).get("print", {}).get("subtask_name")
+
+    @staticmethod
+    def getNozzleTemperature(serial):
+        return BambuData.getPayload(serial).get("print", {}).get("nozzle_temper")
+
+    @staticmethod
+    def getNozzleTargetTemperature(serial):
+        return BambuData.getPayload(serial).get("print", {}).get("nozzle_target_temper")
+
+    @staticmethod
+    def getBedTemperature(serial):
+        return BambuData.getPayload(serial).get("print", {}).get("bed_temper")
+
+    @staticmethod
+    def getBedTargetTemperature(serial):
+        return BambuData.getPayload(serial).get("print", {}).get("bed_target_temper")
+
+    @staticmethod
+    def getCoolingFanSpeed(serial):
+        return BambuData.getPayload(serial).get("print", {}).get("cooling_fan_speed")
+    
+    @staticmethod
+    def getHeatBreakFanSpeed(serial):
+        return BambuData.getPayload(serial).get("print", {}).get("heatbreak_fan_speed")
+    
+    @staticmethod
+    def getBigFan1Speed(serial):
+        return BambuData.getPayload(serial).get("print", {}).get("big_fan1_speed")
+    
+    @staticmethod
+    def getBigFan2Speed(serial):
+        return BambuData.getPayload(serial).get("print", {}).get("big_fan2_speed")
+
+    @staticmethod
     def getAMSUnitCount(serial):
         return len(BambuData.getPayload(serial).get("print", {}).get("ams", {}).get("ams", []))
-    
-    @staticmethod
-    def getProgress(serial):
-        return
-    
-    @staticmethod
-    def getJobName(serial):
-        return
     
     @staticmethod
     def getRaw(serial):
