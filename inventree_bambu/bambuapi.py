@@ -2,12 +2,14 @@
 BambuAPI: API methods for Bambu Lab printers.
 """
 
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 class BambuAPI:
     
     @api_view(["GET"])
+    @permission_classes([IsAuthenticated])
     def example_endpoint(request):
         """Very basic test endpoint"""
 
