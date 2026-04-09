@@ -13,10 +13,13 @@ from report.models import LabelTemplate
 from plugin import InvenTreePlugin
 from plugin.machine import BaseMachineType
 from .bambu3d import BambuLab3DPrinterDriver
+from .bambuapi import BambuAPI
+
+from django.conf.urls import url
 
 # Backwards compatibility imports
 try:
-    from plugin.mixins import MachineDriverMixin
+    from plugin.mixins import MachineDriverMixin, UrlsMixin
 except ImportError:
 
     class MachineDriverMixin:
@@ -24,7 +27,7 @@ except ImportError:
 
         pass
 
-class Bambu3DPlugin(MachineDriverMixin, InvenTreePlugin):
+class Bambu3DPlugin(MachineDriverMixin, UrlsMixin, InvenTreePlugin):
     """BambuLab 3D Printing support for InvenTree."""
 
     AUTHOR = "James Todd"
@@ -41,10 +44,9 @@ class Bambu3DPlugin(MachineDriverMixin, InvenTreePlugin):
         print("[BambuLab3DPrinterPlugin] Registering BambuLab 3D Printer Machine")
         return [BambuLab3DPrinterDriver]
     
-    def get_api_urls(self):
+    def setup_urls(self):
         print("[BambuLab3DPrinterPlugin] Registering BambuLab 3D API URLs")
-        from django.urls import include, path
 
         return [
-            path("Bambu3D/", include("inventree_bambu.urls")),
+            url(r"example/", BambuAPI.example_endpoint, name="example"),
         ]
