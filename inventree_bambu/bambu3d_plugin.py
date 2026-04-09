@@ -48,5 +48,5 @@ class Bambu3DPlugin(MachineDriverMixin, UrlsMixin, InvenTreePlugin):
         print("[BambuLab3DPrinterPlugin] Registering BambuLab 3D API URLs")
 
         return [
-            path("example/", BambuAPI.example_endpoint),
+            path("example/<int:machine_id>/", BambuAPI.example_endpoint),
         ]

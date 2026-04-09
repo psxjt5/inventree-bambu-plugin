@@ -7,25 +7,17 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 class BambuAPI:
-    
+
     @api_view(["GET"])
     @permission_classes([IsAuthenticated])
-    def example_endpoint(request):
-        """Very basic test endpoint"""
+    def example_endpoint(request, machine_id):
+        """Return data for a specific printer"""
 
-        data = [
-            {
-                "id": 1,
-                "name": "Printer 1",
-                "state": "idle",
-                "progress": None,
-            },
-            {
-                "id": 2,
-                "name": "Printer 2",
-                "state": "running",
-                "progress": 42,
-            },
-        ]
+        data = {
+            "id": machine_id,
+            "name": f"Printer {machine_id}",
+            "state": "idle",
+            "progress": None,
+        }
 
         return Response(data)
