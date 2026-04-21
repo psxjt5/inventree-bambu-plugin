@@ -19,9 +19,7 @@ from django.urls import path
 
 # Backwards compatibility imports
 try:
-<<<<<<< HEAD
     from plugin.mixins import MachineDriverMixin, UrlsMixin, UserInterfaceMixin, SettingsMixin
->>>>>>> c68e66f (Added settings mixin.)
 except ImportError:
 
     class MachineDriverMixin:
@@ -29,9 +27,7 @@ except ImportError:
 
         pass
 
-<<<<<<< HEAD
 class Bambu3DPlugin(MachineDriverMixin, UrlsMixin, UserInterfaceMixin, SettingsMixin, InvenTreePlugin):
->>>>>>> c68e66f (Added settings mixin.)
     """BambuLab 3D Printing support for InvenTree."""
 
     AUTHOR = "James Todd"
