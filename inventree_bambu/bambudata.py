@@ -86,9 +86,68 @@ class BambuData:
         return BambuData.getPayload(serial).get("print", {}).get("big_fan2_speed")
 
     @staticmethod
+    def getErrorCode(serial):
+        return BambuData.getPayload(serial).get("print", {}).get("print_error")
+
+    @staticmethod
+    def getFailReason(serial):
+        return BambuData.getPayload(serial).get("print", {}).get("fail_reason")
+
+    @staticmethod
+    def getWifiSignal(serial):
+        return BambuData.getPayload(serial).get("print", {}).get("wifi_signal")
+
+    @staticmethod
+    def getLightsData(serial):
+        return BambuData.getPayload(serial).get("print", {}).get("lights_report", [])
+
+    @staticmethod
+    def getCameraURL(serial):
+        return BambuData.getPayload(serial).get("print", {}).get("ipcam", {}).get("rtsp_url")
+
+
+    @staticmethod
     def getAMSUnitCount(serial):
         return len(BambuData.getPayload(serial).get("print", {}).get("ams", {}).get("ams", []))
     
+    @staticmethod
+    def getAMSActiveTray(serial):
+        return BambuData.getPayload(serial).get("print", {}).get("ams", {}).get("tray_now")
+    
+    @staticmethod
+    def getAMSData(serial):
+        ams_data = BambuData.getPayload(serial).get("print", {}).get("ams", {})
+        ams_list = ams_data.get("ams", {})
+
+        result = []
+
+        for ams in ams_list:
+            trays = []
+
+            for tray in ams.get("tray", []):
+                tray_id = tray.get("id")
+
+                trays.append({
+                    "id": tray_id,
+                    "type": tray.get("tray_type"),
+                    "name": tray.get("tray_sub_brands"),
+                    "color": BambuDataService._parse_color(tray.get("tray_color")),
+                    "remaining": tray.get("remain"),
+                    "state": tray.get("state"),
+                    "is_active": tray_id == active_tray
+                })
+
+            result.append({
+                "id": ams.get("id"),
+                "temp": BambuDataService._safe_float(ams.get("temp")),
+                "humidity": BambuDataService._safe_int(ams.get("humidity")),
+                "trays": trays
+            })
+
+        return result
+
+
+
     @staticmethod
     def getRaw(serial):
         return cache.get(f"bambu:{serial}")
