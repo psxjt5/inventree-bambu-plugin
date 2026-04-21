@@ -216,19 +216,23 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
         self.update_property(machine, "AMS Units", amsunits)
 
     def update_property(self, machine, key, value):
-        # Get full property objects
-        properties = {
-            prop['key']: prop.copy()
-            for prop in machine.get_properties()
-        }
+        # Copy full property objects (NOT just values)
+        properties = {}
 
+        for k, v in machine.properties_dict.items():
+            if isinstance(v, dict):
+                properties[k] = v.copy()
+            else:
+                # fallback (shouldn't really happen, but safe)
+                properties[k] = {'key': k, 'value': v}
+
+        # Update the target property
         if key in properties:
             properties[key]['value'] = value
         else:
-            # fallback if property doesn't exist yet
             properties[key] = {'key': key, 'value': value}
 
-        # Rebuild with full metadata preserved
+        # Reapply properties with metadata preserved
         machine.set_properties(list(properties.values()))
 
 
