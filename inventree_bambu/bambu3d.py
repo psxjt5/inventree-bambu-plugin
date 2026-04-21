@@ -159,25 +159,25 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
 
     def message_received(self, machine, serial, data):
         # Set the status of the printer.
-        self.mqtt_set_status(machine, BambuData.getStatus)
+        self.mqtt_set_status(machine, BambuData.getStatus())
 
         # Set the properties of the printer.
-        self.update_property(machine, 'Model', BambuData.getModel)
-        self.update_property(machine, 'AMS Units', BambuData.getAMSUnitCount)
-        self.update_property(machine, 'Job Progress', BambuData.getProgress)
-        self.update_property(machine, 'Layer Progress', BambuData.getLayerProgress)
-        self.update_property(machine, 'Current Layer', BambuData.getCurrentLayer)
-        self.update_property(machine, 'Total Layers', BambuData.getTotalLayers)
-        self.update_property(machine, 'Remaining Time', BambuData.getRemainingTime)
-        self.update_property(machine, 'File Name', BambuData.getFileName)
-        self.update_property(machine, 'Nozzle Temperature', BambuData.getNozzleTemperature)
-        self.update_property(machine, 'Nozzle Target Temperature', BambuData.getNozzleTargetTemperature)
-        self.update_property(machine, 'Bed Temperature', BambuData.getBedTemperature)
-        self.update_property(machine, 'Bed Target Temperature', BambuData.getBedTargetTemperature)
-        self.update_property(machine, 'Cooling Fan Speed', BambuData.getCoolingFanSpeed)
-        self.update_property(machine, 'Heatbreak Fan Speed', BambuData.getHeatBreakFanSpeed)
-        self.update_property(machine, 'Big Fan 1 Fan Speed', BambuData.getBigFan1Speed)
-        self.update_property(machine, 'Big Fan 2 Fan Speed', BambuData.getBigFan2Speed)
+        self.update_property(machine, 'Model', BambuData.getModel())
+        self.update_property(machine, 'AMS Units', BambuData.getAMSUnitCount())
+        self.update_property(machine, 'Job Progress', BambuData.getProgress())
+        self.update_property(machine, 'Layer Progress', BambuData.getLayerProgress())
+        self.update_property(machine, 'Current Layer', BambuData.getCurrentLayer())
+        self.update_property(machine, 'Total Layers', BambuData.getTotalLayers())
+        self.update_property(machine, 'Remaining Time', BambuData.getRemainingTime())
+        self.update_property(machine, 'File Name', BambuData.getFileName())
+        self.update_property(machine, 'Nozzle Temperature', BambuData.getNozzleTemperature())
+        self.update_property(machine, 'Nozzle Target Temperature', BambuData.getNozzleTargetTemperature())
+        self.update_property(machine, 'Bed Temperature', BambuData.getBedTemperature())
+        self.update_property(machine, 'Bed Target Temperature', BambuData.getBedTargetTemperature())
+        self.update_property(machine, 'Cooling Fan Speed', BambuData.getCoolingFanSpeed())
+        self.update_property(machine, 'Heatbreak Fan Speed', BambuData.getHeatBreakFanSpeed())
+        self.update_property(machine, 'Big Fan 1 Fan Speed', BambuData.getBigFan1Speed())
+        self.update_property(machine, 'Big Fan 2 Fan Speed', BambuData.getBigFan2Speed())
 
         #trigger_event(f'machine_config.saved', id=machine.pk, model='MachineConfig')
 
