@@ -162,7 +162,7 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
         self.mqtt_set_status(machine, BambuData.getStatus)
 
         # Set the properties of the printer.
-        self.update_property(machine, 'Model', BambuData.GetModel)
+        self.update_property(machine, 'Model', BambuData.getModel)
         self.update_property(machine, 'AMS Units', BambuData.getAMSUnitCount)
         self.update_property(machine, 'Job Progress', BambuData.getProgress)
         self.update_property(machine, 'Layer Progress', BambuData.getLayerProgress)
