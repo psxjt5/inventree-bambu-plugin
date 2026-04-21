@@ -10,6 +10,7 @@ from django.utils.translation import gettext_lazy as _
 
 from inventree_3d.threed import ThreeDPrinterBaseDriver, ThreeDPrinterMachine
 from .bambumqttmanager import BambuMQTTManager
+from .bambudata import BambuData
 
 #from plugin.base.event.events import trigger_event
 
@@ -124,6 +125,20 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
         machine.set_properties([
             {'key': 'Model', 'value': ''},
             {'key': 'AMS Units', 'value': ''},
+            {'key': 'Job Progress', 'value': '', 'type': 'progress', 'max_progress': '100'},
+            {'key': 'Layer Progress', 'value': '', 'type': 'progress', 'max_progress': '100'},
+            {'key': 'Current Layer', 'value': ''},
+            {'key': 'Total Layers', 'value': ''},
+            {'key': 'Remaining Time', 'value': ''},
+            {'key': 'File Name', 'value': ''},
+            {'key': 'Nozzle Temperature', 'value': ''},
+            {'key': 'Nozzle Target Temperature', 'value': ''},
+            {'key': 'Bed Temperature', 'value': ''},
+            {'key': 'Bed Target Temperature', 'value': ''},
+            {'key': 'Cooling Fan Speed', 'value': ''},
+            {'key': 'Heatbreak Fan Speed', 'value': ''},
+            {'key': 'Big Fan 1 Speed', 'value': ''},
+            {'key': 'Big Fan 2 Speed', 'value': ''},
         ])
 
     def get_model(self, sn: str) -> str:
@@ -144,11 +159,25 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
 
     def message_received(self, machine, serial, data):
         # Set the status of the printer.
-        self.mqtt_set_status(machine, data.get("print", {}).get("gcode_state"))
+        self.mqtt_set_status(machine, BambuData.getStatus)
 
         # Set the properties of the printer.
-        self.update_property(machine, 'Model', self.get_model(serial))
-        self.update_property(machine, 'AMS Units', len(data.get("print", {}).get("ams", {}).get("ams", [])))
+        self.update_property(machine, 'Model', BambuData.GetModel)
+        self.update_property(machine, 'AMS Units', BambuData.getAMSUnitCount)
+        self.update_property(machine, 'Job Progress', BambuData.getProgress)
+        self.update_property(machine, 'Layer Progress', BambuData.getLayerProgress)
+        self.update_property(machine, 'Current Layer', BambuData.getCurrentLayer)
+        self.update_property(machine, 'Total Layers', BambuData.getTotalLayers)
+        self.update_property(machine, 'Remaining Time', BambuData.getRemainingTime)
+        self.update_property(machine, 'File Name', BambuData.getFileName)
+        self.update_property(machine, 'Nozzle Temperature', BambuData.getNozzleTemperature)
+        self.update_property(machine, 'Nozzle Target Temperature', BambuData.getNozzleTargetTemperature)
+        self.update_property(machine, 'Bed Temperature', BambuData.getBedTemperature)
+        self.update_property(machine, 'Bed Target Temperature', BambuData.getBedTargetTemperature)
+        self.update_property(machine, 'Cooling Fan Speed', BambuData.getCoolingFanSpeed)
+        self.update_property(machine, 'Heatbreak Fan Speed', BambuData.getHeatBreakFanSpeed)
+        self.update_property(machine, 'Big Fan 1 Fan Speed', BambuData.getBigFan1Speed)
+        self.update_property(machine, 'Big Fan 2 Fan Speed', BambuData.getBigFan2Speed)
 
         #trigger_event(f'machine_config.saved', id=machine.pk, model='MachineConfig')
 
