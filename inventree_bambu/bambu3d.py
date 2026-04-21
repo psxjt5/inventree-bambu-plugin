@@ -176,8 +176,8 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
         self.update_property(machine, 'Bed Target Temperature', BambuData.getBedTargetTemperature(serial))
         self.update_property(machine, 'Cooling Fan Speed', BambuData.getCoolingFanSpeed(serial))
         self.update_property(machine, 'Heatbreak Fan Speed', BambuData.getHeatBreakFanSpeed(serial))
-        self.update_property(machine, 'Big 1 Fan Speed', BambuData.getBigFan1Speed(serial))
-        self.update_property(machine, 'Big 2 Fan Speed', BambuData.getBigFan2Speed(serial))
+        self.update_property(machine, 'Big Fan 1 Speed', BambuData.getBigFan1Speed(serial))
+        self.update_property(machine, 'Big Fan 2 Speed', BambuData.getBigFan2Speed(serial))
 
         #trigger_event(f'machine_config.saved', id=machine.pk, model='MachineConfig')
 
