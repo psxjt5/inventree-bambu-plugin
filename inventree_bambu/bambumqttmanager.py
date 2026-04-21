@@ -1,3 +1,7 @@
+"""
+BambuMQTTManager: Manager for BambuMQTTService instances. Ensures each printer has one MQTT connection.
+"""
+
 import threading
 from .bambumqttservice import BambuMQTTService
 

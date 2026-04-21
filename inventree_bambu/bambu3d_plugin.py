@@ -1,4 +1,7 @@
-"""3D Printing Support for InvenTree.
+"""
+Bambu3D_Plugin: Primary plugin registry (entry point).
+
+3D Printing Support for InvenTree.
 
 Adds support for 3D printing drivers to integrate into various parts of the system.
 """
@@ -10,10 +13,13 @@ from report.models import LabelTemplate
 from plugin import InvenTreePlugin
 from plugin.machine import BaseMachineType
 from .bambu3d import BambuLab3DPrinterDriver
+from .bambuapi import BambuAPI
+
+from django.urls import path
 
 # Backwards compatibility imports
 try:
-    from plugin.mixins import MachineDriverMixin
+    from plugin.mixins import MachineDriverMixin, UrlsMixin
 except ImportError:
 
     class MachineDriverMixin:
@@ -21,7 +27,7 @@ except ImportError:
 
         pass
 
-class Bambu3DPlugin(MachineDriverMixin, InvenTreePlugin):
+class Bambu3DPlugin(MachineDriverMixin, UrlsMixin, InvenTreePlugin):
     """BambuLab 3D Printing support for InvenTree."""
 
     AUTHOR = "James Todd"
@@ -35,5 +41,12 @@ class Bambu3DPlugin(MachineDriverMixin, InvenTreePlugin):
     TITLE = "BambuLab 3D Printing Support"
 
     def get_machine_drivers(self) -> list:
-        print("Registering BambuLab 3D Printer Machine")
+        print("[BambuLab3DPrinterPlugin] Registering BambuLab 3D Printer Machine")
         return [BambuLab3DPrinterDriver]
+    
+    def setup_urls(self):
+        print("[BambuLab3DPrinterPlugin] Registering BambuLab 3D API URLs")
+
+        return [
+            path("get_printer_data/<str:machine_serial>", BambuAPI.get_printer_data),
+        ]

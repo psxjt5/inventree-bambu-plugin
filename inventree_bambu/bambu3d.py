@@ -1,3 +1,7 @@
+"""
+Bambu3D: Bambu 3D Printing Driver.
+"""
+
 from django.contrib.auth.models import AnonymousUser
 from django.db import models
 from django.db.models.query import QuerySet
@@ -6,6 +10,7 @@ from django.utils.translation import gettext_lazy as _
 
 from inventree_3d.threed import ThreeDPrinterBaseDriver, ThreeDPrinterMachine
 from .bambumqttmanager import BambuMQTTManager
+from .bambudata import BambuData
 
 #from plugin.base.event.events import trigger_event
 
@@ -120,6 +125,20 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
         machine.set_properties([
             {'key': 'Model', 'value': ''},
             {'key': 'AMS Units', 'value': ''},
+            {'key': 'Job Progress', 'value': '', 'type': 'progress', 'max_progress': '100'},
+            {'key': 'Layer Progress', 'value': '', 'type': 'progress', 'max_progress': '100'},
+            {'key': 'Current Layer', 'value': ''},
+            {'key': 'Total Layers', 'value': ''},
+            {'key': 'Remaining Time', 'value': ''},
+            {'key': 'File Name', 'value': ''},
+            {'key': 'Nozzle Temperature', 'value': ''},
+            {'key': 'Nozzle Target Temperature', 'value': ''},
+            {'key': 'Bed Temperature', 'value': ''},
+            {'key': 'Bed Target Temperature', 'value': ''},
+            {'key': 'Cooling Fan Speed', 'value': ''},
+            {'key': 'Heatbreak Fan Speed', 'value': ''},
+            {'key': 'Big Fan 1 Speed', 'value': ''},
+            {'key': 'Big Fan 2 Speed', 'value': ''},
         ])
 
     def get_model(self, sn: str) -> str:
@@ -140,11 +159,25 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
 
     def message_received(self, machine, serial, data):
         # Set the status of the printer.
-        self.mqtt_set_status(machine, data.get("print", {}).get("gcode_state"))
+        self.mqtt_set_status(machine, BambuData.getStatus(serial))
 
         # Set the properties of the printer.
-        self.update_property(machine, 'Model', self.get_model(serial))
-        self.update_property(machine, 'AMS Units', len(data.get("print", {}).get("ams", {}).get("ams", [])))
+        self.update_property(machine, 'Model', BambuData.getModel(serial))
+        self.update_property(machine, 'AMS Units', BambuData.getAMSUnitCount(serial))
+        self.update_property(machine, 'Job Progress', BambuData.getProgress(serial))
+        self.update_property(machine, 'Layer Progress', BambuData.getLayerProgress(serial))
+        self.update_property(machine, 'Current Layer', BambuData.getCurrentLayer(serial))
+        self.update_property(machine, 'Total Layers', BambuData.getTotalLayers(serial))
+        self.update_property(machine, 'Remaining Time', BambuData.getRemainingTime(serial))
+        self.update_property(machine, 'File Name', BambuData.getFileName(serial))
+        self.update_property(machine, 'Nozzle Temperature', BambuData.getNozzleTemperature(serial))
+        self.update_property(machine, 'Nozzle Target Temperature', BambuData.getNozzleTargetTemperature(serial))
+        self.update_property(machine, 'Bed Temperature', BambuData.getBedTemperature(serial))
+        self.update_property(machine, 'Bed Target Temperature', BambuData.getBedTargetTemperature(serial))
+        self.update_property(machine, 'Cooling Fan Speed', BambuData.getCoolingFanSpeed(serial))
+        self.update_property(machine, 'Heatbreak Fan Speed', BambuData.getHeatBreakFanSpeed(serial))
+        self.update_property(machine, 'Big Fan 1 Speed', BambuData.getBigFan1Speed(serial))
+        self.update_property(machine, 'Big Fan 2 Speed', BambuData.getBigFan2Speed(serial))
 
         #trigger_event(f'machine_config.saved', id=machine.pk, model='MachineConfig')
 
@@ -183,18 +216,23 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
         self.update_property(machine, "AMS Units", amsunits)
 
     def update_property(self, machine, key, value):
-        # Extract raw values
-        properties = {
-            k: v.get('value') if isinstance(v, dict) else v
-            for k, v in machine.properties_dict.items()
-        }
+        # Copy full property objects (NOT just values)
+        properties = {}
 
-        # Update the target key
-        properties[key] = value
+        for k, v in machine.properties_dict.items():
+            if isinstance(v, dict):
+                properties[k] = v.copy()
+            else:
+                # fallback (shouldn't really happen, but safe)
+                properties[k] = {'key': k, 'value': v}
 
-        # Rebuild properly
-        machine.set_properties([
-            {'key': k, 'value': v} for k, v in properties.items()
-        ])
+        # Update the target property
+        if key in properties:
+            properties[key]['value'] = value
+        else:
+            properties[key] = {'key': key, 'value': value}
+
+        # Reapply properties with metadata preserved
+        machine.set_properties(list(properties.values()))
 
 
