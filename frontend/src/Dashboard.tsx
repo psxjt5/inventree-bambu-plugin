@@ -7,7 +7,7 @@ import { checkPluginVersion, type InvenTreePluginContext } from '@inventreedb/ui
 type ThreeDPrinter = {
     pk: string;
     name: string;
-    status_text: string;
+    status: number;
     machine_type: string;
     properties: {
         key: string;
@@ -22,6 +22,21 @@ function BambuDashboardItem({
 }: {
     context: InvenTreePluginContext;
 }) {
+
+    const STATUS_MAP: Record<number, { label: string; color: string }> = {
+        100: { label: 'Connected', color: 'blue' },
+        101: { label: 'Disconnected', color: 'red' },
+
+        200: { label: 'Idle', color: 'blue' },
+        201: { label: 'Preparing', color: 'blue' },
+        202: { label: 'Printing', color: 'green' },
+        203: { label: 'Paused', color: 'yellow' },
+        204: { label: 'Finished', color: 'teal' },
+        205: { label: 'Failed', color: 'red' },
+
+        998: { label: 'Misconfigured', color: 'red' },
+        999: { label: 'Unknown', color: 'gray' }
+    };
 
     const [printers, setPrinters] = useState<ThreeDPrinter[]>([]);
 
@@ -47,6 +62,11 @@ function BambuDashboardItem({
     const rows = printers.map((m) => {
         const progress = getProgress(m);
 
+        const printerStatus = STATUS_MAP[m.status] ?? {
+                        label: 'Unknown',
+                        color: 'gray'
+                    };
+
         return (
             <Table.Tr key={m.pk}>
                 <Table.Td>
@@ -57,17 +77,21 @@ function BambuDashboardItem({
                     {/* <Text size="sm" c="dimmed">
                         {m.status_text}
                     </Text> */}
-                    <Badge color={getStatusColor(m.status_text)} variant="light">
-                        {m.status_text}
+                    
+
+                    <Badge color={printerStatus.color} variant="light">
+                        {printerStatus.label}
                     </Badge>
                 </Table.Td>
 
                 <Table.Td style={{ minWidth: 120 }}>
-                    {progress !== null ? (
-                        <Progress value={progress} size="sm" />
-                    ) : (
-                        <Text size="sm" c="dimmed">-</Text>
-                    )}
+                    <div style={{ minWidth: 140 }}>
+                        {progress !== null ? (
+                            <Progress value={progress} size="sm" />
+                        ) : (
+                            <Text size="sm" c="dimmed">-</Text>
+                        )}
+                    </div>
                 </Table.Td>
             </Table.Tr>
         );
@@ -87,13 +111,20 @@ function BambuDashboardItem({
             <ScrollArea h={300}>
                 <Container px={0}>
                     <Table>
+                        <Table.Thead>
+                            <Table.Tr>
+                                <Table.Th>Printer</Table.Th>
+                                <Table.Th>Status</Table.Th>
+                                <Table.Th>Progress</Table.Th>
+                            </Table.Tr>
+                        </Table.Thead>
                         <Table.Tbody>
                             {printers.length > 0 ? (
                                 rows
                             ) : (
                                 <Table.Tr>
-                                    <Table.Td>
-                                        <Text c="dimmed">
+                                    <Table.Td colSpan={3}>
+                                        <Text ta="center" c="dimmed">
                                             No printers found
                                         </Text>
                                     </Table.Td>
@@ -117,15 +148,15 @@ function getProgress(machine: ThreeDPrinter): number | null {
     return Number(prop.value)
 }
 
-function getStatusColor(status: string): string {
-    const s = status.toLowerCase();
+// function getStatusColor(status: string): string {
+//     const s = status.toLowerCase();
 
-    if (s.includes('printing')) return 'green';
-    if (s.includes('paused')) return 'yellow';
-    if (s.includes('error')) return 'red';
+//     if (s.includes('printing')) return 'green';
+//     if (s.includes('paused')) return 'yellow';
+//     if (s.includes('error')) return 'red';
 
-    return 'gray';
-}
+//     return 'gray';
+// }
 
 // Required export for InvenTree
 export function renderBambuDashboardItem(context: InvenTreePluginContext) {
