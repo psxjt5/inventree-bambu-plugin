@@ -1,4 +1,4 @@
-import { Table, Title, Text, Badge, Progress } from '@mantine/core';
+import { Table, Text, Badge, Progress, Container, ScrollArea } from '@mantine/core';
 import { useEffect, useState } from 'react';
 
 // Import for type checking
@@ -72,24 +72,33 @@ function BambuDashboardItem({
 
     return (
         <>
-            <Title order={4} mb="sm">
-                3D Printer Status
-            </Title>
-
-            {printers.length === 0 ? (
-                <Text c="dimmed">No printers found</Text>
-            ) : (
-                <Table striped highlightOnHover>
-                    <thead>
-                        <tr>
-                            <th>Printer</th>
-                            <th>Status</th>
-                            <th>Progress</th>
-                        </tr>
-                    </thead>
-                    <tbody>{rows}</tbody>
-                </Table>
-            )}
+            <Text
+            variant="gradient"
+            gradient={{ from: 'indigo', to: 'dark', deg: 45 }}
+            size="xl"
+            fw={700}
+            mb="sm"
+            >
+            3D Printer Status
+            </Text>
+            <ScrollArea>
+                <Container>
+                    {printers.length === 0 ? (
+                        <Text c="dimmed">No printers found</Text>
+                    ) : (
+                        <Table striped highlightOnHover>
+                            <thead>
+                                <tr>
+                                    <th>Printer</th>
+                                    <th>Status</th>
+                                    <th>Progress</th>
+                                </tr>
+                            </thead>
+                            <tbody>{rows}</tbody>
+                        </Table>
+                    )}
+                </Container>
+            </ScrollArea>
         </>
     );
 }
