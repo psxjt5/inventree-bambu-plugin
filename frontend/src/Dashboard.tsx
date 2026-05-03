@@ -1,4 +1,4 @@
-import { Table, Title, Text } from '@mantine/core';
+import { Table, Title, Text, Badge, Progress, Card } from '@mantine/core';
 import { useEffect, useState } from 'react';
 
 // Import for type checking
@@ -48,11 +48,26 @@ function BambuDashboardItem({
         const progress = getProgress(m);
 
         return (
-            <tr key={m.pk}>
-                <td>{m.name}</td>
-                <td>{m.status_text}</td>
-                <td>{progress !== null ? `${progress}%` : '-'}</td>
-            </tr>
+            <Card shadow="sm" radius="md" p="md">
+                <Title order={4} mb="sm">
+                    3D Printer Status
+                </Title>
+
+                {printers.length === 0 ? (
+                    <Text c="dimmed">No printers found</Text>
+                ) : (
+                    <Table striped highlightOnHover>
+                        <thead>
+                            <tr>
+                                <th>Printer</th>
+                                <th>Status</th>
+                                <th>Progress</th>
+                            </tr>
+                        </thead>
+                        <tbody>{rows}</tbody>
+                    </Table>
+                )}
+            </Card>
         );
     });
 
@@ -90,6 +105,15 @@ function getProgress(machine: ThreeDPrinter): number | null {
     return Number(prop.value)
 }
 
+function getStatusColor(status: string): string {
+    const s = status.toLowerCase();
+
+    if (s.includes('printing')) return 'green';
+    if (s.includes('paused')) return 'yellow';
+    if (s.includes('error')) return 'red';
+
+    return 'gray';
+}
 
 // Required export for InvenTree
 export function renderBambuDashboardItem(context: InvenTreePluginContext) {
