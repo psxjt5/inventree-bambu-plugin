@@ -48,37 +48,36 @@ function BambuDashboardItem({
         const progress = getProgress(m);
 
         return (
-            <Card shadow="sm" radius="md" p="md">
-                <Title order={4} mb="sm">
-                    3D Printer Status
-                </Title>
+            <tr key={m.pk}>
+                <td>
+                    <Text fw={500}>{m.name}</Text>
+                </td>
 
-                {printers.length === 0 ? (
-                    <Text c="dimmed">No printers found</Text>
-                ) : (
-                    <Table striped highlightOnHover>
-                        <thead>
-                            <tr>
-                                <th>Printer</th>
-                                <th>Status</th>
-                                <th>Progress</th>
-                            </tr>
-                        </thead>
-                        <tbody>{rows}</tbody>
-                    </Table>
-                )}
-            </Card>
+                <td>
+                    <Badge color={getStatusColor(m.status_text)} variant="light">
+                        {m.status_text}
+                    </Badge>
+                </td>
+
+                <td style={{ minWidth: 120 }}>
+                    {progress !== null ? (
+                        <Progress value={progress} size="sm" />
+                    ) : (
+                        <Text size="sm" c="dimmed">-</Text>
+                    )}
+                </td>
+            </tr>
         );
     });
 
     return (
-        <>
-            <Title order={1} mb="md">
+        <Card shadow="sm" radius="md" p="md">
+            <Title order={4} mb="sm">
                 3D Printer Status
             </Title>
 
             {printers.length === 0 ? (
-                <Text>No printers found</Text>
+                <Text c="dimmed">No printers found</Text>
             ) : (
                 <Table striped highlightOnHover>
                     <thead>
@@ -91,7 +90,7 @@ function BambuDashboardItem({
                     <tbody>{rows}</tbody>
                 </Table>
             )}
-        </>
+        </Card>
     );
 }
 
