@@ -4,11 +4,17 @@ import { useEffect, useState } from 'react';
 // Import for type checking
 import { checkPluginVersion, type InvenTreePluginContext } from '@inventreedb/ui';
 
-type Machine = {
-    id: number;
+type ThreeDPrinter = {
+    pk: string;
     name: string;
-    state: string;
-    progress: number | null;
+    status_text: string;
+    machine_type: string;
+    properties: {
+        key: string;
+        value: string;
+        type: string;
+        max_progress: number | null;
+    }[];
 };
 
 function BambuDashboardItem({
@@ -17,14 +23,19 @@ function BambuDashboardItem({
     context: InvenTreePluginContext;
 }) {
 
-    const [machines, setMachines] = useState<Machine[]>([]);
+    const [printers, setPrinters] = useState<ThreeDPrinter[]>([]);
 
     useEffect(() => {
         const fetchData = () => {
-            fetch('/api/plugin/bambu/status/')
+            fetch('/api/machine/')
                 .then(res => res.json())
-                .then(setMachines)
-                .catch(() => setMachines([]));
+                .then((data: ThreeDPrinter[]) => {
+                    const printers = data
+                        .filter(m => m.machine_type === '3d-printer');
+
+                    setPrinters(printers);
+                })
+                .catch(() => setPrinters([]));
         };
 
         fetchData();
@@ -33,13 +44,17 @@ function BambuDashboardItem({
         return () => clearInterval(interval);
     }, []);
 
-    const rows = machines.map((m) => (
-        <tr key={m.id}>
-            <td>{m.name}</td>
-            <td>{m.state}</td>
-            <td>{m.progress !== null ? `${m.progress}%` : '-'}</td>
-        </tr>
-    ));
+    const rows = printers.map((m) => {
+        const progress = getProgress(m);
+
+        return (
+            <tr key={m.pk}>
+                <td>{m.name}</td>
+                <td>{m.status_text}</td>
+                <td>{progress !== null ? `${progress}%` : '-'}</td>
+            </tr>
+        );
+    });
 
     return (
         <>
@@ -47,7 +62,7 @@ function BambuDashboardItem({
                 3D Printer Status
             </Title>
 
-            {machines.length === 0 ? (
+            {printers.length === 0 ? (
                 <Text>No printers found</Text>
             ) : (
                 <Table striped highlightOnHover>
@@ -63,6 +78,16 @@ function BambuDashboardItem({
             )}
         </>
     );
+}
+
+function getProgress(machine: ThreeDPrinter): number | null {
+    const prop = machine.properties.find(
+        (p) => p.key === 'Job Progress'
+    );
+
+    if (!prop || prop.value === '') return null;
+
+    return Number(prop.value)
 }
 
 
