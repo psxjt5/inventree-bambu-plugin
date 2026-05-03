@@ -1,4 +1,4 @@
-import { Table, Text, Badge, Progress, Container, ScrollArea } from '@mantine/core';
+import { Table, Text, Badge, Progress, Container, ScrollArea, Stack } from '@mantine/core';
 import { useEffect, useState } from 'react';
 
 // Import for type checking
@@ -48,58 +48,62 @@ function BambuDashboardItem({
         const progress = getProgress(m);
 
         return (
-            <tr key={m.pk}>
-                <td>
+            <Table.Tr key={m.pk}>
+                <Table.Td>
                     <Text fw={500}>{m.name}</Text>
-                </td>
+                </Table.Td>
 
-                <td>
+                <Table.Td>
+                    {/* <Text size="sm" c="dimmed">
+                        {m.status_text}
+                    </Text> */}
                     <Badge color={getStatusColor(m.status_text)} variant="light">
                         {m.status_text}
                     </Badge>
-                </td>
+                </Table.Td>
 
-                <td style={{ minWidth: 120 }}>
+                <Table.Td>
                     {progress !== null ? (
                         <Progress value={progress} size="sm" />
                     ) : (
                         <Text size="sm" c="dimmed">-</Text>
                     )}
-                </td>
-            </tr>
+                </Table.Td>
+            </Table.Tr>
         );
     });
 
     return (
-        <>
+        <Stack>
             <Text
-            variant="gradient"
-            gradient={{ from: 'indigo', to: 'dark', deg: 45 }}
-            size="xl"
-            fw={700}
-            mb="sm"
+                variant="gradient"
+                gradient={{ from: 'indigo', to: 'blue', deg: 45 }}
+                size="xl"
+                fw={700}
             >
-            3D Printer Status
+                3D Printer Status
             </Text>
-            <ScrollArea>
-                <Container>
-                    {printers.length === 0 ? (
-                        <Text c="dimmed">No printers found</Text>
-                    ) : (
-                        <Table striped highlightOnHover>
-                            <thead>
-                                <tr>
-                                    <th>Printer</th>
-                                    <th>Status</th>
-                                    <th>Progress</th>
-                                </tr>
-                            </thead>
-                            <tbody>{rows}</tbody>
-                        </Table>
-                    )}
+
+            <ScrollArea h={300}>
+                <Container px={0}>
+                    <Table>
+                        <Table.Tbody>
+                            {printers.length > 0 ? (
+                                rows
+                            ) : (
+                                <Table.Tr>
+                                    <Table.Td>
+                                        <Text c="dimmed">
+                                            No printers found
+                                        </Text>
+                                    </Table.Td>
+                                </Table.Tr>
+                            )}
+                        </Table.Tbody>
+                    </Table>
                 </Container>
             </ScrollArea>
-        </>
+        </Stack>
     );
 }
 
