@@ -1,4 +1,4 @@
-import { Table, Title, Text, Badge, Progress, Card } from '@mantine/core';
+import { Table, Title, Text, Badge, Progress } from '@mantine/core';
 import { useEffect, useState } from 'react';
 
 // Import for type checking
@@ -71,7 +71,7 @@ function BambuDashboardItem({
     });
 
     return (
-        <Card shadow="sm" radius="md" p="md">
+        <>
             <Title order={4} mb="sm">
                 3D Printer Status
             </Title>
@@ -90,7 +90,7 @@ function BambuDashboardItem({
                     <tbody>{rows}</tbody>
                 </Table>
             )}
-        </Card>
+        </>
     );
 }
 
