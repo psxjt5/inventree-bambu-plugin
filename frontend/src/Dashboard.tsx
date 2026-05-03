@@ -62,7 +62,7 @@ function BambuDashboardItem({
                     </Badge>
                 </Table.Td>
 
-                <Table.Td>
+                <Table.Td style={{ minWidth: 120 }}>
                     {progress !== null ? (
                         <Progress value={progress} size="sm" />
                     ) : (
