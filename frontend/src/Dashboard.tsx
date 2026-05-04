@@ -60,7 +60,8 @@ function BambuDashboardItem({
     }, []);
 
     const rows = printers.map((m) => {
-        const progress = getProgress(m);
+        const progress = Number(getProperty(m, 'Job Progress'));
+        const fileName = getProperty(m, 'File Name');
 
         const printerStatus = STATUS_MAP[m.status] ?? {
                         label: 'Unknown',
@@ -74,14 +75,15 @@ function BambuDashboardItem({
                 </Table.Td>
 
                 <Table.Td>
-                    {/* <Text size="sm" c="dimmed">
-                        {m.status_text}
-                    </Text> */}
-                    
-
                     <Badge color={printerStatus.color} variant="light">
                         {printerStatus.label}
                     </Badge>
+                </Table.Td>
+
+                <Table.Td>
+                    <Text size="sm" truncate>
+                        {fileName ?? '-'}
+                    </Text>
                 </Table.Td>
 
                 <Table.Td style={{ minWidth: 120 }}>
@@ -119,6 +121,7 @@ function BambuDashboardItem({
                             <Table.Tr>
                                 <Table.Th>Printer</Table.Th>
                                 <Table.Th>Status</Table.Th>
+                                <Table.Th>File Name</Table.Th>
                                 <Table.Th>Progress</Table.Th>
                             </Table.Tr>
                         </Table.Thead>
@@ -142,14 +145,12 @@ function BambuDashboardItem({
     );
 }
 
-function getProgress(machine: ThreeDPrinter): number | null {
-    const prop = machine.properties.find(
-        (p) => p.key === 'Job Progress'
-    );
+function getProperty(machine: ThreeDPrinter, key: string): string | null {
+    const prop = machine.properties.find(p => p.key === key);
 
     if (!prop || prop.value === '') return null;
 
-    return Number(prop.value)
+    return prop.value;
 }
 
 // Required export for InvenTree
