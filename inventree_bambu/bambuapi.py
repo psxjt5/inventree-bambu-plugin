@@ -6,9 +6,49 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from machine.models import MachineConfig
+from machine.serializers import MachineConfigSerializer
+
 from .bambudata import BambuData
 
 class BambuAPI:
+
+    @api_view(["GET"])
+    @permission_classes([IsAuthenticated])
+    def get_dashboard_widget_data(request):
+        """Return a list of registered printers, along with their serial numbers"""
+
+        print("[BambuAPI] Get Printers")
+
+        machines = MachineConfig.objects.filter(
+            machine_type='3d-printer',
+            active=True
+        )
+
+        serializer = MachineConfigSerializer(machines, many=True)
+
+        data = serializer.data
+
+        # optional: filter down to only what your widget needs
+        simplified = [
+            {
+                "pk": m["pk"],
+                "name": m["name"],
+                "status": m["status"],
+                "status_text": m["status_text"],
+                "progress": next(
+                    (p["value"] for p in m.get("properties", []) if p["key"] == "Job Progress"),
+                    None
+                ),
+                "file_name": next(
+                    (p["value"] for p in m.get("properties", []) if p["key"] == "File Name"),
+                    None
+                ),
+            }
+            for m in data
+        ]
+
+        return Response(simplified)
 
     @api_view(["GET"])
     @permission_classes([IsAuthenticated])
@@ -39,6 +79,3 @@ class BambuAPI:
         }
 
         return Response(data)
-
-
-

@@ -4,25 +4,13 @@ import { useEffect, useState } from 'react';
 // Import for type checking
 import { checkPluginVersion, type InvenTreePluginContext } from '@inventreedb/ui';
 
-{/* <style>
-    @keyframes pulse {
-        0% { opacity: 0.3; }
-        50% { opacity: 1; }
-        100% { opacity: 0.3; }
-        }
-</style> */}
-
 type ThreeDPrinter = {
-    pk: string;
+    pk: string,
     name: string;
     status: number;
-    machine_type: string;
-    properties: {
-        key: string;
-        value: string;
-        type: string;
-        max_progress: number | null;
-    }[];
+    status_text: string,
+    progress: number,
+    file_name: string
 };
 
 function BambuDashboardItem({
@@ -52,10 +40,10 @@ function BambuDashboardItem({
 
     useEffect(() => {
         const fetchData = () => {
-            fetch('/api/machine/')
+            fetch('/plugin/inventree_bambu/get_dashboard_widget_data')
                 .then(res => res.json())
                 .then((data: ThreeDPrinter[]) => {
-                    const printers = data.filter(m => m.machine_type === '3d-printer');
+                    const printers = data;
                     setPrinters(printers);
                     setLastUpdated(new Date());
                     setIsLive(true);
@@ -67,14 +55,14 @@ function BambuDashboardItem({
         };
 
         fetchData();
-        const interval = setInterval(fetchData, 5000);
+        const interval = setInterval(fetchData, 1000);
 
         return () => clearInterval(interval);
     }, []);
 
     const rows = printers.map((m) => {
-        const progress = Number(getProperty(m, 'Job Progress'));
-        const fileName = getProperty(m, 'File Name');
+        const progress = Number(m.progress);
+        const fileName = m.file_name;
 
         const printerStatus = STATUS_MAP[m.status] ?? {
                         label: 'Unknown',
@@ -88,9 +76,14 @@ function BambuDashboardItem({
                 </Table.Td>
 
                 <Table.Td>
-                    <Badge color={printerStatus.color} variant="light">
-                        {printerStatus.label}
-                    </Badge>
+                    <Tooltip label={`${m.status_text}`} withArrow>
+                        <div>
+                            <Badge color={printerStatus.color} variant="light">
+                                {printerStatus.label}
+                            </Badge>
+                        </div>
+                    </Tooltip>
+                    
                 </Table.Td>
 
                 <Table.Td>
@@ -181,14 +174,6 @@ function BambuDashboardItem({
             </ScrollArea>
         </Stack>
     );
-}
-
-function getProperty(machine: ThreeDPrinter, key: string): string | null {
-    const prop = machine.properties.find(p => p.key === key);
-
-    if (!prop || prop.value === '') return null;
-
-    return prop.value;
 }
 
 function getSecondsAgo(date: Date | null): string {

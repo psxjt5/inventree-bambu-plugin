@@ -49,6 +49,7 @@ class Bambu3DPlugin(MachineDriverMixin, UrlsMixin, UserInterfaceMixin, SettingsM
 
         return [
             path("get_printer_data/<str:machine_serial>", BambuAPI.get_printer_data),
+            path("get_dashboard_widget_data", BambuAPI.get_dashboard_widget_data),
         ]
     
     def get_ui_dashboard_items(self, request, context: dict, **kwargs):
