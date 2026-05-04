@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from machine.models import MachineConfig
+from machine.serializers import MachineConfigSerializer
 
 from .bambudata import BambuData
 
@@ -19,26 +20,35 @@ class BambuAPI:
 
         print("[BambuAPI] Get Printers")
 
-        machines = MachineConfig.objects.filter(machine_type='3d-printer', active=True)
+        machines = MachineConfig.objects.filter(
+            machine_type='3d-printer',
+            active=True
+        )
 
-        data = []
+        serializer = MachineConfigSerializer(machines, many=True)
 
-        for m in machines:
-            machine = m.machine
+        data = serializer.data
 
-            if not machine:
-                continue
+        # optional: filter down to only what your widget needs
+        simplified = [
+            {
+                "pk": m["id"],
+                "name": m["name"],
+                "status": m["status"],
+                "status_text": m["status_text"],
+                "progress": next(
+                    (p["value"] for p in m.get("properties", []) if p["key"] == "Job Progress"),
+                    None
+                ),
+                "file_name": next(
+                    (p["value"] for p in m.get("properties", []) if p["key"] == "File Name"),
+                    None
+                ),
+            }
+            for m in data
+        ]
 
-            data.append({
-                "pk": str(m.pk),
-                "name": m.name,
-                "status": machine.status,
-                "status_text": getattr(machine, "status_text", ""),
-                "progress": getattr(machine, "progress", None),
-                "file_name": getattr(machine, "file_name", ""),
-            })
-
-        return Response(data)
+        return Response(simplified)
 
     @api_view(["GET"])
     @permission_classes([IsAuthenticated])
