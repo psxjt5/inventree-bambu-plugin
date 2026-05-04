@@ -29,7 +29,7 @@ class BambuAPI:
             if not machine:
                 continue
 
-            printers.append({
+            data.append({
                 "pk": str(m.pk),
                 "name": m.name,
                 "status": machine.status,
