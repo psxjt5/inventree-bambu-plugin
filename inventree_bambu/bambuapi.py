@@ -24,16 +24,18 @@ class BambuAPI:
         data = []
 
         for m in machines:
-            # Extract properties into a dict for easier use
-            props = {p.key: p.value for p in m.properties.all()}
+            machine = m.machine
 
-            data.append({
+            if not machine:
+                continue
+
+            printers.append({
                 "pk": str(m.pk),
                 "name": m.name,
-                "status": m.status,
-                "status_text": m.status_text,
-                "progress": props.get("Job Progress"),
-                "file_name": props.get("File Name"),
+                "status": machine.status,
+                "status_text": getattr(machine, "status_text", ""),
+                "progress": getattr(machine, "progress", None),
+                "file_name": getattr(machine, "file_name", ""),
             })
 
         return Response(data)
