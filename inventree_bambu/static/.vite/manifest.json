@@ -1,0 +1,8 @@
+{
+  "src/Dashboard.tsx": {
+    "file": "Dashboard.js",
+    "name": "Dashboard",
+    "src": "src/Dashboard.tsx",
+    "isEntry": true
+  }
+}
