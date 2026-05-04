@@ -117,7 +117,7 @@ function BambuDashboardItem({
     });
 
     return (
-        <Stack style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <Stack style={{ height: '400px', display: 'flex', flexDirection: 'column' }}>
             <style>
             {`
             @keyframes pulse {
