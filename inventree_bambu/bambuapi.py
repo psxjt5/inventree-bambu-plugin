@@ -35,6 +35,7 @@ class BambuAPI:
                 "pk": m["pk"],
                 "name": m["name"],
                 "status": m["status"],
+                "status_text": m["status_text"],
                 "progress": next(
                     (p["value"] for p in m.get("properties", []) if p["key"] == "Job Progress"),
                     None
