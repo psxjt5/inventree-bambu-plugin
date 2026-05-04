@@ -1,4 +1,4 @@
-import { Table, Text, Badge, Progress, Container, ScrollArea, Stack } from '@mantine/core';
+import { Table, Text, Badge, Progress, Container, ScrollArea, Stack, Tooltip } from '@mantine/core';
 import { useEffect, useState } from 'react';
 
 // Import for type checking
@@ -87,7 +87,11 @@ function BambuDashboardItem({
                 <Table.Td style={{ minWidth: 120 }}>
                     <div style={{ minWidth: 140 }}>
                         {progress !== null ? (
-                            <Progress value={progress} size="sm" />
+                            <Tooltip label={`${progress}%`} withArrow>
+                                <div>
+                                    <Progress value={progress} size="sm" />
+                                </div>
+                            </Tooltip>
                         ) : (
                             <Text size="sm" c="dimmed">-</Text>
                         )}
@@ -147,16 +151,6 @@ function getProgress(machine: ThreeDPrinter): number | null {
 
     return Number(prop.value)
 }
-
-// function getStatusColor(status: string): string {
-//     const s = status.toLowerCase();
-
-//     if (s.includes('printing')) return 'green';
-//     if (s.includes('paused')) return 'yellow';
-//     if (s.includes('error')) return 'red';
-
-//     return 'gray';
-// }
 
 // Required export for InvenTree
 export function renderBambuDashboardItem(context: InvenTreePluginContext) {
