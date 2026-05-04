@@ -4,14 +4,6 @@ import { useEffect, useState } from 'react';
 // Import for type checking
 import { checkPluginVersion, type InvenTreePluginContext } from '@inventreedb/ui';
 
-{/* <style>
-    @keyframes pulse {
-        0% { opacity: 0.3; }
-        50% { opacity: 1; }
-        100% { opacity: 0.3; }
-        }
-</style> */}
-
 type ThreeDPrinter = {
     pk: string;
     name: string;
@@ -52,7 +44,7 @@ function BambuDashboardItem({
 
     useEffect(() => {
         const fetchData = () => {
-            fetch('/api/machine/')
+            fetch('/plugin/inventree_bambu/get_dashboard_widget_data')
                 .then(res => res.json())
                 .then((data: ThreeDPrinter[]) => {
                     const printers = data.filter(m => m.machine_type === '3d-printer');

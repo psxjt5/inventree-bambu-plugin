@@ -6,9 +6,37 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from machine.models import Machine
+
 from .bambudata import BambuData
 
 class BambuAPI:
+
+    @api_view(["GET"])
+    @permission_classes([IsAuthenticated])
+    def get_dashboard_widget_data(request):
+        """Return a list of registered printers, along with their serial numbers"""
+
+        print("[BambuAPI] Get Printers")
+
+        machines = Machine.objects.filter(machine_type='3d-printer', active=True)
+
+        data = []
+
+        for m in machines:
+            # Extract properties into a dict for easier use
+            props = {p.key: p.value for p in m.properties.all()}
+
+            data.append({
+                "pk": str(m.pk),
+                "name": m.name,
+                "status": m.status,
+                "status_text": m.status_text,
+                "progress": props.get("Job Progress"),
+                "file_name": props.get("File Name"),
+            })
+
+        return Response(data)
 
     @api_view(["GET"])
     @permission_classes([IsAuthenticated])
