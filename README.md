@@ -3,6 +3,8 @@ Bambu Lab 3D Printing Support for InvenTree
 
 This plugin requires the [Inventree-3D-Printing](https://github.com/psxjt5/inventree-3d-printing) plugin to be installed (which provides the ```3D Printer``` machine type).
 
+To aid with developing 3D printer plugins for other printer types, a significant amount of the functionality of this plugin will soon be moving into the [Inventree-3D-Printing](https://github.com/psxjt5/inventree-3d-printing), enabling elements such as the dashboard widget to work across all connected printers (and not just Bambu Lab ones).
+
 ## Current Capabilities
 Development of this plugin is still ongoing. Current capabilities include the ability to:
 - Add a printer into InvenTree's Machine Registry (within the Admin Center).
@@ -17,7 +19,7 @@ Dashboard Widget showing print status:
 
 <img height="150" alt="image" src="https://github.com/user-attachments/assets/d8225385-75f1-4882-8000-eb61bbf372e5" />
 
-Roadmap:
+## Roadmap
 - Printer status notifications.
 - Ability to manage and control printers through a panel in the Manufacturing module of InvenTree.
 - Ability to queue print jobs.
