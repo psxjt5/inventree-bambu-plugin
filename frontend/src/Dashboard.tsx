@@ -48,6 +48,7 @@ function BambuDashboardItem({
 
     const [printers, setPrinters] = useState<ThreeDPrinter[]>([]);
     const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+    const [isLive, setIsLive] = useState(false);
 
     useEffect(() => {
         const fetchData = () => {
@@ -57,8 +58,12 @@ function BambuDashboardItem({
                     const printers = data.filter(m => m.machine_type === '3d-printer');
                     setPrinters(printers);
                     setLastUpdated(new Date());
+                    setIsLive(true);
                 })
-                .catch(() => setPrinters([]));
+                .catch(() => {
+                    setPrinters([]);
+                    setIsLive(false);
+                })
         };
 
         fetchData();
@@ -122,7 +127,7 @@ function BambuDashboardItem({
             }
             `}
             </style>
-            
+
             <Group justify="space-between" mb="xs">
                 <Text
                     variant="gradient"
@@ -134,13 +139,15 @@ function BambuDashboardItem({
                 </Text>
 
                 <Group gap="xs">
-                    <Badge color="green" variant="light">
-                        Live
+                    <Badge
+                        color={isLive ? 'green' : 'red'}
+                        variant="dot"
+                    >
+                        {isLive ? 'Live' : 'Offline'}
                     </Badge>
+
                     <Text size="xs" c="dimmed">
-                        {lastUpdated
-                            ? lastUpdated.toLocaleTimeString()
-                            : ''}
+                        {getSecondsAgo(lastUpdated)}
                     </Text>
                 </Group>
             </Group>
@@ -182,6 +189,16 @@ function getProperty(machine: ThreeDPrinter, key: string): string | null {
     if (!prop || prop.value === '') return null;
 
     return prop.value;
+}
+
+function getSecondsAgo(date: Date | null): string {
+    if (!date) return '';
+
+    const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+
+    if (seconds < 1) return 'just now';
+
+    return `${seconds}s ago`;
 }
 
 // Required export for InvenTree
