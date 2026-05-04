@@ -1,8 +1,16 @@
-import { Table, Text, Badge, Progress, Container, ScrollArea, Stack, Tooltip } from '@mantine/core';
+import { Table, Text, Badge, Progress, Container, ScrollArea, Stack, Tooltip, Group } from '@mantine/core';
 import { useEffect, useState } from 'react';
 
 // Import for type checking
 import { checkPluginVersion, type InvenTreePluginContext } from '@inventreedb/ui';
+
+{/* <style>
+    @keyframes pulse {
+        0% { opacity: 0.3; }
+        50% { opacity: 1; }
+        100% { opacity: 0.3; }
+        }
+</style> */}
 
 type ThreeDPrinter = {
     pk: string;
@@ -39,16 +47,16 @@ function BambuDashboardItem({
     };
 
     const [printers, setPrinters] = useState<ThreeDPrinter[]>([]);
+    const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
     useEffect(() => {
         const fetchData = () => {
             fetch('/api/machine/')
                 .then(res => res.json())
                 .then((data: ThreeDPrinter[]) => {
-                    const printers = data
-                        .filter(m => m.machine_type === '3d-printer');
-
+                    const printers = data.filter(m => m.machine_type === '3d-printer');
                     setPrinters(printers);
+                    setLastUpdated(new Date());
                 })
                 .catch(() => setPrinters([]));
         };
@@ -71,7 +79,7 @@ function BambuDashboardItem({
         return (
             <Table.Tr key={m.pk}>
                 <Table.Td>
-                    <Text fw={500}>{m.name}</Text>
+                    <Text>{m.name}</Text>
                 </Table.Td>
 
                 <Table.Td>
@@ -105,14 +113,37 @@ function BambuDashboardItem({
 
     return (
         <Stack>
-            <Text
-                variant="gradient"
-                gradient={{ from: 'indigo', to: 'blue', deg: 45 }}
-                size="xl"
-                fw={700}
-            >
-                3D Printer Status
-            </Text>
+            <style>
+            {`
+            @keyframes pulse {
+            0% { opacity: 0.3; }
+            50% { opacity: 1; }
+            100% { opacity: 0.3; }
+            }
+            `}
+            </style>
+            
+            <Group justify="space-between" mb="xs">
+                <Text
+                    variant="gradient"
+                    gradient={{ from: 'indigo', to: 'blue', deg: 45 }}
+                    size="xl"
+                    fw={700}
+                >
+                    3D Printer Status
+                </Text>
+
+                <Group gap="xs">
+                    <Badge color="green" variant="light">
+                        Live
+                    </Badge>
+                    <Text size="xs" c="dimmed">
+                        {lastUpdated
+                            ? lastUpdated.toLocaleTimeString()
+                            : ''}
+                    </Text>
+                </Group>
+            </Group>
 
             <ScrollArea h={300}>
                 <Container px={0}>
