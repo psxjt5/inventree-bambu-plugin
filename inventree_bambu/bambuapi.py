@@ -32,7 +32,7 @@ class BambuAPI:
         # optional: filter down to only what your widget needs
         simplified = [
             {
-                "pk": str(m.pk),
+                "pk": m["pk"],
                 "name": m["name"],
                 "status": m["status"],
                 "progress": next(
