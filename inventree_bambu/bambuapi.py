@@ -32,9 +32,9 @@ class BambuAPI:
         # optional: filter down to only what your widget needs
         simplified = [
             {
+                "pk": str(m.pk),
                 "name": m["name"],
                 "status": m["status"],
-                "status_text": m["status_text"],
                 "progress": next(
                     (p["value"] for p in m.get("properties", []) if p["key"] == "Job Progress"),
                     None
@@ -78,6 +78,3 @@ class BambuAPI:
         }
 
         return Response(data)
-
-
-
