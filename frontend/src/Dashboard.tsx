@@ -117,7 +117,7 @@ function BambuDashboardItem({
     });
 
     return (
-        <Stack h="100%">
+        <Stack style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
             <style>
             {`
             @keyframes pulse {
@@ -152,7 +152,7 @@ function BambuDashboardItem({
                 </Group>
             </Group>
 
-            <ScrollArea style={{ flex: 1 }}>
+            <ScrollArea style={{ flex: 1, minHeight: 0 }}>
                 <Container px={0}>
                     <Table>
                         <Table.Thead>
