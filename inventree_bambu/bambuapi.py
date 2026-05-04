@@ -6,7 +6,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from machine.models import Machine
+from machine.models import MachineConfig
 
 from .bambudata import BambuData
 
@@ -19,7 +19,7 @@ class BambuAPI:
 
         print("[BambuAPI] Get Printers")
 
-        machines = Machine.objects.filter(machine_type='3d-printer', active=True)
+        machines = MachineConfig.objects.filter(machine_type='3d-printer', active=True)
 
         data = []
 
