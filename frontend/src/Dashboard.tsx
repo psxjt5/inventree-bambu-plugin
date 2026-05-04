@@ -76,7 +76,7 @@ function BambuDashboardItem({
                 </Table.Td>
 
                 <Table.Td>
-                    <Tooltip label={`${m.status_text}%`} withArrow>
+                    <Tooltip label={`${m.status_text}`} withArrow>
                         <div>
                             <Badge color={printerStatus.color} variant="light">
                                 {printerStatus.label}
