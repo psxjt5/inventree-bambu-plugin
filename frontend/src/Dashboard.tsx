@@ -20,18 +20,19 @@ function BambuDashboardItem({
 }) {
 
     const STATUS_MAP: Record<number, { label: string; color: string }> = {
-        100: { label: 'Connected', color: 'blue' },
-        101: { label: 'Disconnected', color: 'red' },
+        101: { label: 'Idle', color: 'blue' },
+        102: { label: 'Preparing', color: 'blue' },
+        103: { label: 'Printing', color: 'green' },
+        104: { label: 'Paused', color: 'yellow' },
+        105: { label: 'Finished', color: 'teal' },
 
-        200: { label: 'Idle', color: 'blue' },
-        201: { label: 'Preparing', color: 'blue' },
-        202: { label: 'Printing', color: 'green' },
-        203: { label: 'Paused', color: 'yellow' },
-        204: { label: 'Finished', color: 'teal' },
-        205: { label: 'Failed', color: 'red' },
+        300: { label: 'Connected', color: 'blue' },
+        301: { label: 'Disconnected', color: 'red' },
+        302: { label: 'Failed', color: 'red' },
 
-        998: { label: 'Misconfigured', color: 'red' },
-        999: { label: 'Unknown', color: 'gray' }
+        400: { label: 'Misconfigured', color: 'red' },
+
+        500: { label: 'Unknown', color: 'gray' }
     };
 
     const [printers, setPrinters] = useState<ThreeDPrinter[]>([]);
