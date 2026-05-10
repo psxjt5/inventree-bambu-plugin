@@ -13,10 +13,11 @@ from django.core.cache import cache
 
 class BambuMQTTService:
 
-    def __init__(self, ip, port, token, machine, message_callback):
+    def __init__(self, ip, port, token, serial, machine, message_callback):
         self.ip = ip
         self.port = port
         self.token = token
+        self.serial = serial
         self.message_callback=lambda s, data: message_callback(machine, s, data)
         
 
@@ -40,7 +41,7 @@ class BambuMQTTService:
     def on_connect(self, client, userdata, flags, rc):
         if rc == 0:
             print("[BambuMQTTService] Connected successfully")
-            client.subscribe("device/+/report")
+            client.subscribe(f"device/{self.serial}/report")
         else:
             print(f"[BambuMQTTService] Connection failed: {rc}")
 
