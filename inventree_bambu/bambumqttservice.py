@@ -95,15 +95,16 @@ class BambuMQTTService:
 
         # Existing data (from previous snapshots)
         existing = cache.get(cache_key, {})
+        existing_payload = existing.get("payload", {})
 
         # Merge in the new data
-        merged = self.deep_merge(existing, payload)
+        merged_payload = self.deep_merge(existing_payload, payload)
 
         # Update the cache with the new (merged) data
         cache.set(
             cache_key,
             {
-                "payload": merged,
+                "payload": merged_payload,
                 "last_seen": self.last_message,
             },
             timeout=None
@@ -112,7 +113,7 @@ class BambuMQTTService:
         # Call the matching callback function
         if self.message_callback:
             try:
-                self.message_callback(serial, merged)
+                self.message_callback(serial, merged_payload)
             except Exception as e:
                 print(f"[BambuMQTTService] Callback error: {e}")
 
