@@ -79,6 +79,7 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
             ip=machine.get_setting("IP_ADDRESS", "D"),
             port=8883,
             token=machine.get_setting("ACCESS_TOKEN", "D"),
+            serial=machine.get_setting("SERIAL", "D"),
             machine=machine,
             callback=self.message_received
         )
