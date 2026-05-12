@@ -4,6 +4,7 @@ Notifications: Delivers system notifications
 
 from common.notifications import trigger_notification
 from django.contrib.auth import get_user_model
+from machine.models import MachineConfig
 
 User = get_user_model()
 
@@ -13,6 +14,7 @@ class Notifications:
         print("[BambuLab3DPrintingNotifications] Sending Test Notification.")
 
         users = User.objects.filter(is_active=True)
+        machine_obj = Machine.objects.get(pk=machine.pk)
 
         # trigger_notification(
         #     obj=machine,
@@ -24,10 +26,12 @@ class Notifications:
         #     },
         # )
 
+        machine = MachineConfig.objects.get(pk=machine.pk)
+
         trigger_notification(
             obj=machine,
             category="system",
-            targets=list(User.objects.filter(is_superuser=True)),
+            targets=User.objects.filter(is_superuser=True),
             context={
                 "name": "HELLO",
                 "message": "If you see this, pipeline works",
