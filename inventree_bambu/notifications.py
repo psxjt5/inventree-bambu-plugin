@@ -14,7 +14,6 @@ class Notifications:
         print("[BambuLab3DPrintingNotifications] Sending Test Notification.")
 
         users = User.objects.filter(is_active=True)
-        machine_obj = Machine.objects.get(pk=machine.pk)
 
         # trigger_notification(
         #     obj=machine,
