@@ -85,7 +85,7 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
             callback=self.message_received
         )
 
-        Notifications.test_notification()
+        Notifications.test_notification(machine)
 
     def validate_required_settings(self, machine) -> bool:
         """
