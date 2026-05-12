@@ -15,6 +15,14 @@ from plugin.machine import BaseMachineType
 from .bambu3d import BambuLab3DPrinterDriver
 from .bambuapi import BambuAPI
 
+import warnings
+
+warnings.filterwarnings(
+    "error",
+    r"DateTimeField .* received a naive datetime",
+    RuntimeWarning,
+)
+
 from django.urls import path
 
 # Backwards compatibility imports
