@@ -11,6 +11,7 @@ from django.utils.translation import gettext_lazy as _
 from inventree_3d.threed import ThreeDPrinterBaseDriver, ThreeDPrinterMachine
 from .bambumqttmanager import BambuMQTTManager
 from .bambudata import BambuData
+from .notifications import Notifications
 
 #from plugin.base.event.events import trigger_event
 
@@ -83,6 +84,8 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
             machine=machine,
             callback=self.message_received
         )
+
+        Notifications.test_notification()
 
     def validate_required_settings(self, machine) -> bool:
         """
