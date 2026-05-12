@@ -186,6 +186,9 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
         #trigger_event(f'machine_config.saved', id=machine.pk, model='MachineConfig')
 
     def mqtt_set_status(self, machine, state):
+
+        # If the state hasn't changed, we don't need to update it here.
+
         print(f"[BambuLab3DPrinterDriver] Setting status for {machine.name}: {state}.")
         if state == "IDLE":
             machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.IDLE)
@@ -220,6 +223,8 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
         self.update_property(machine, "AMS Units", amsunits)
 
     def update_property(self, machine, key, value):
+        # If the property value hasn't changed, we don't need to update it.
+
         # Copy full property objects (NOT just values)
         properties = {}
 
@@ -238,5 +243,3 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
 
         # Reapply properties with metadata preserved
         machine.set_properties(list(properties.values()))
-
-

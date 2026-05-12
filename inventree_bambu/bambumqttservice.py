@@ -32,6 +32,7 @@ class BambuMQTTService:
         
         self.last_message = 0
         self.last_pushall = 0
+        self.connected = False
 
         self.client = mqtt.Client(clean_session=True)
 
@@ -51,10 +52,10 @@ class BambuMQTTService:
 
         self.client.connect(self.ip, self.port, keepalive=60)
 
+        self.client.loop_start()
+
         # Background monitoring loop
         threading.Thread(target=self.monitor_loop, daemon=True).start()
-
-        self.client.loop_forever()
 
     def on_connect(self, client, userdata, flags, rc):
         if rc == 0:
@@ -63,11 +64,15 @@ class BambuMQTTService:
             client.subscribe(f"device/{self.serial}/report")
 
             # Send a "pushall" upon connecting to get all parameters.
+            self.connected = True;
+            self.last_message = time.time()
             self.request_pushall()
         else:
             print(f"[BambuMQTTService] Connection failed: {rc}")
 
     def on_disconnect(self, client, userdata, rc):
+        self.connected = False;
+
         if rc != 0:
             print(f"[BambuMQTTService] Unexpected disconnect (rc={rc})")
         else:
@@ -101,17 +106,14 @@ class BambuMQTTService:
         merged_payload = self.deep_merge(existing_payload, payload)
 
         # Update the cache with the new (merged) data
-        try:
-            cache.set(
-                cache_key,
-                {
-                    "payload": merged_payload,
-                    "last_seen": self.last_message,
-                },
-                timeout=None
-            )
-        except Exception as e:
-            print(f"[BambuMQTTService] Cache write failed: {e}")
+        cache.set(
+            cache_key,
+            {
+                "payload": merged_payload,
+                "last_seen": self.last_message,
+            },
+            timeout=60
+        )
 
         # Call the matching callback function
         if self.message_callback:
@@ -122,6 +124,13 @@ class BambuMQTTService:
 
     # Send a "pushall" command to the printer to get all field values.
     def request_pushall(self):
+
+        now = time.time()
+
+        # Only send a pushall if required.
+        if now - self.last_pushall < 10:
+            return
+
         topic = f"device/{self.serial}/request"
 
         payload = {
@@ -143,7 +152,7 @@ class BambuMQTTService:
             now = time.time()
 
             # No messages for too long
-            if now - self.last_message > self.STALE_TIMEOUT:
+            if self.connected and now - self.last_message > self.STALE_TIMEOUT:
                 print(f"[BambuMQTTService] Printer stale: {self.machine.name}")
 
                 try:
