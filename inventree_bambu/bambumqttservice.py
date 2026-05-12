@@ -58,7 +58,7 @@ class BambuMQTTService:
         # Background monitoring loop
         threading.Thread(target=self.monitor_loop, daemon=True).start()
 
-    def on_connect(self, client, userdata, flags, rc):+
+    def on_connect(self, client, userdata, flags, rc):
         if rc == 0:
             print("[BambuMQTTService] Connected successfully")
 
