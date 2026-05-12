@@ -23,3 +23,13 @@ class Notifications:
                 "message": f"Test Notification Text",
             },
         )
+
+        trigger_notification(
+            obj=machine,
+            category="system",
+            targets=[User.objects.filter(is_superuser=True)],
+            context={
+                "name": "HELLO",
+                "message": "If you see this, pipeline works",
+            },
+        )
