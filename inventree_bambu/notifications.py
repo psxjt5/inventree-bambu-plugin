@@ -13,7 +13,7 @@ class Notifications:
 
         User = get_user_model()
 
-        user = User.objects.filter(is_superuser=True).first()
+        user = User.objects.filter(is_superuser=True)
 
         trigger_notification(
             obj=None,
