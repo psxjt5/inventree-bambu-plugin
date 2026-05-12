@@ -15,6 +15,7 @@ class Notifications:
         trigger_notification(
             obj=machine,
             category="machine.bambu",
+            targets=users,
             context={
                 "name": "Test Notification",
                 "message": f"Test Notification Text",
