@@ -25,7 +25,6 @@ class Notifications:
         )
 
         trigger_notification(
-            obj=machine,
             category="system",
             targets=[User.objects.filter(is_superuser=True)],
             context={
