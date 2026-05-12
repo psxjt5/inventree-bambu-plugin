@@ -10,6 +10,8 @@ User = get_user_model()
 class Notifications:
 
     def test_notification(machine):
+        print("[BambuLab3DPrintingNotifications] Sending Test Notification.")
+
         users = User.objects.filter(is_active=True)
 
         trigger_notification(
