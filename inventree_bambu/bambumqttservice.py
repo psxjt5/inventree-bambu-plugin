@@ -31,7 +31,7 @@ class BambuMQTTService:
         self.message_callback=lambda s, data: message_callback(machine, s, data)
         
         self.last_message = None
-        self.last_pushall = None
+        self.last_pushall = 0
         self.connected = False
 
         self.client = mqtt.Client(clean_session=True)
@@ -64,9 +64,7 @@ class BambuMQTTService:
 
             client.subscribe(f"device/{self.serial}/report")
 
-            # Send a "pushall" upon connecting to get all parameters.
-            self.connected = True;
-            self.last_message = None
+            self.connected = True
         else:
             print(f"[BambuMQTTService] Connection failed: {rc}")
 
@@ -157,7 +155,7 @@ class BambuMQTTService:
             now = time.time()
 
             # No messages for too long
-            if self.connected and self.last_message and now - self.last_message > self.STALE_TIMEOUT:
+            if self.connected and self.last_message is not None and now - self.last_message > self.STALE_TIMEOUT:
                 print(f"[BambuMQTTService] Printer stale: {self.machine.name}")
 
                 try:
