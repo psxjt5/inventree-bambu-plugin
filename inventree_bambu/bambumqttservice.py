@@ -7,6 +7,7 @@ import ssl
 import json
 import time
 import threading
+import copy
 
 import paho.mqtt.client as mqtt
 
@@ -74,7 +75,8 @@ class BambuMQTTService:
         self.request_pushall()
 
     def on_disconnect(self, client, userdata, rc):
-        self.connected = False;
+        self.connected = False
+        self.last_message = None
 
         if rc != 0:
             print(f"[BambuMQTTService] Unexpected disconnect (rc={rc})")
@@ -128,6 +130,9 @@ class BambuMQTTService:
     # Send a "pushall" command to the printer to get all field values.
     def request_pushall(self):
 
+        if not self.connected:
+            return
+
         now = time.time()
 
         # Only send a pushall if required.
@@ -143,7 +148,10 @@ class BambuMQTTService:
             }
         }
 
-        self.client.publish(topic, json.dumps(payload))
+        result = self.client.publish(topic, json.dumps(payload))
+
+        if result.rc != mqtt.MQTT_ERR_SUCCESS:
+            print(f"[BambuMQTTService] pushall publish failed: {result.rc}")
 
         self.last_pushall = time.time()
 
@@ -178,7 +186,7 @@ class BambuMQTTService:
         if not isinstance(old, dict) or not isinstance(new, dict):
             return new
 
-        merged = dict(old)
+        merged = copy.deepcopy(old)
 
         for key, value in new.items():
             if (
