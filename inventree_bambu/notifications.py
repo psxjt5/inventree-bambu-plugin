@@ -18,7 +18,7 @@ class Notifications:
         trigger_notification(
             obj=None,
             category="system",
-            targets=[user],
+            targets=user,
             context={
                 "name": "Test",
                 "message": "Hello world",
