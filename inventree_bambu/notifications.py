@@ -15,8 +15,10 @@ class Notifications:
 
         user = User.objects.filter(is_superuser=True)
 
+        machine = MachineConfig.objects.get(pk=machine.pk)
+
         trigger_notification(
-            obj=None,
+            obj=machine,
             category="system",
             targets=user,
             context={
