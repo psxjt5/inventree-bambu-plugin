@@ -16,17 +16,19 @@ class Notifications:
         user = User.objects.filter(is_superuser=True)
 
         machine = MachineConfig.objects.get(pk=machine.pk)
+        print(machine.id)
+        print(type(machine.id))
 
-        print(f"Machine UID: {getattr(machine, 'uid', None)}")
+        # print(f"Machine UID: {getattr(machine, 'uid', None)}")
 
-        trigger_notification(
-            obj=machine,
-            obj_ref='name',
-            category="system",
-            targets=user,
-            context={
-                "name": "Test",
-                "message": "Hello world",
-            },
-            check_recent=False,
-        )
+        # trigger_notification(
+        #     obj=machine,
+        #     obj_ref='name',
+        #     category="system",
+        #     targets=user,
+        #     context={
+        #         "name": "Test",
+        #         "message": "Hello world",
+        #     },
+        #     check_recent=False,
+        # )
