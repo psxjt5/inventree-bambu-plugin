@@ -11,9 +11,9 @@ class Notifications:
     def test_notification(machine):
         print("[BambuLab3DPrintingNotifications] Sending Test Notification.")
 
-        print(machine.pk, type(machine.pk))
-        print(machine.uid, type(machine.uid))
-        print(machine.id, type(machine.id))
+        print(repr(machine.pk))
+        print(type(machine.pk))
+        print(machine.pk.int)
 
         # User = get_user_model()
 
