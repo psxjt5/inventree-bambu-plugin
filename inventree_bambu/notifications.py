@@ -6,6 +6,8 @@ from common.notifications import trigger_notification
 from django.contrib.auth import get_user_model
 from machine.models import MachineConfig
 
+import traceback
+
 class Notifications:
 
     def test_notification(machine):
@@ -17,13 +19,18 @@ class Notifications:
 
         machine = MachineConfig.objects.get(pk=machine.pk)
 
-        trigger_notification(
-            obj=machine,
-            category="system",
-            targets=user,
-            context={
-                "name": "Test",
-                "message": "Hello world",
-            },
-            check_recent=False,
-        )
+        try:
+            trigger_notification(
+                obj=machine,
+                category="system",
+                targets=user,
+                context={
+                    "name": "Test",
+                    "message": "Hello world",
+                },
+                check_recent=False,
+            )
+        except Exception:
+            print("[BambuLab3DPrintingNotifications] NOTIFICATION FAILED")
+            traceback.print_exc()
+            raise
