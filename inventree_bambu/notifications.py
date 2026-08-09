@@ -19,7 +19,6 @@ class Notifications:
 
         trigger_notification(
             obj=machine,
-            obj_ref="name",
             category="system",
             targets=user,
             context={
