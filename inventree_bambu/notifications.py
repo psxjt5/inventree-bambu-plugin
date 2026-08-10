@@ -25,11 +25,12 @@ class Notifications:
         try:
             trigger_notification(
                 obj=machine,
-                category="system",
+                category="machine.3dprinting.bambu_lab",
                 targets=user,
                 context={
                     "name": "Test",
                     "message": "Hello world",
+                    "link": "/web/"
                 },
                 check_recent=False,
             )
