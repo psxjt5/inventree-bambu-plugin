@@ -49,12 +49,9 @@ class Bambu3DPlugin(MachineDriverMixin, UrlsMixin, UserInterfaceMixin, SettingsM
     TITLE = "BambuLab 3D Printing Support"
 
     SETTINGS = {
-        'notification_group': {
+        'THREED_GROUP': {
             'name': '3D Printing Group',
-            'description': (
-                'Bambu 3D Printer users group.'
-            ),
-            'default': '',
+            'description': 'Bambu 3D Printer users group.',
             #'choices': get_notification_groups,
         },
     }
