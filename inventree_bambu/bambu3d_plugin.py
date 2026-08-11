@@ -14,6 +14,7 @@ from plugin import InvenTreePlugin
 from plugin.machine import BaseMachineType
 from .bambu3d import BambuLab3DPrinterDriver
 from .bambuapi import BambuAPI
+from django.contrib.auth.models import Group
 
 from django.urls import path
 
@@ -30,6 +31,13 @@ except ImportError:
 class Bambu3DPlugin(MachineDriverMixin, UrlsMixin, UserInterfaceMixin, SettingsMixin, InvenTreePlugin):
     """BambuLab 3D Printing support for InvenTree."""
 
+    @staticmethod
+    def get_notification_groups():
+        return [
+            (str(group.pk), group.name)
+            for group in Group.objects.order_by('name')
+        ]
+
     AUTHOR = "James Todd"
     DESCRIPTION = "BambuLab 3D Printing support for InvenTree"
     VERSION = PLUGIN_VERSION
@@ -40,16 +48,54 @@ class Bambu3DPlugin(MachineDriverMixin, UrlsMixin, UserInterfaceMixin, SettingsM
     SLUG = "inventree_bambu"
     TITLE = "BambuLab 3D Printing Support"
 
+    SETTINGS = {
+        'notification_group': {
+            'name': '3D Printing Group',
+            'description': (
+                'Bambu 3D Printer users group.'
+            ),
+            'default': '',
+            'choices': get_notification_groups,
+        },
+    }
+
     USER_SETTINGS = {
         "NOTIFY_PRINT_START": {
             "name": "Print Started Notifications",
-            "description": "Receive a notification when a print is started",
+            "description": "Receive a notification when a print is started.",
+            "default": True,
+            "type": "boolean",
+            "validator": bool
+        },
+        "NOTIFY_PRINT_FAILED": {
+            "name": "Print Failure Notifications",
+            "description": "Receive a notification when a print fails.",
+            "default": True,
+            "type": "boolean",
+            "validator": bool
+        },
+        "NOTIFY_PRINT_FINISHED": {
+            "name": "Print Finished Notifications",
+            "description": "Receive a notification when a print finishes.",
+            "default": True,
+            "type": "boolean",
+            "validator": bool
+        },
+        "NOTIFY_PRINT_ONLINE": {
+            "name": "Printer Online Notifications",
+            "description": "Receive a notification when a printer comes online.",
+            "default": True,
+            "type": "boolean",
+            "validator": bool
+        },
+        "NOTIFY_PRINT_OFFLINE": {
+            "name": "Print Started Notifications",
+            "description": "Receive a notification when a printer goes offline.",
             "default": True,
             "type": "boolean",
             "validator": bool
         }
     }
-
 
     def get_machine_drivers(self) -> list:
         print("[BambuLab3DPrinterPlugin] Registering BambuLab 3D Printer Machine")
