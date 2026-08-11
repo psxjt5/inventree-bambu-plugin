@@ -40,6 +40,17 @@ class Bambu3DPlugin(MachineDriverMixin, UrlsMixin, UserInterfaceMixin, SettingsM
     SLUG = "inventree_bambu"
     TITLE = "BambuLab 3D Printing Support"
 
+    USER_SETTINGS = {
+        "NOTIFY_PRINT_START": {
+            "name": "Print Started Notifications",
+            "description": "Receive a notification when a print is started",
+            "default": True,
+            "type": "boolean",
+            "validator": bool
+        }
+    }
+
+
     def get_machine_drivers(self) -> list:
         print("[BambuLab3DPrinterPlugin] Registering BambuLab 3D Printer Machine")
         return [BambuLab3DPrinterDriver]

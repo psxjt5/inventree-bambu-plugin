@@ -53,17 +53,7 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
                 "type": "string",
             },
         }
-
-        self.USER_SETTINGS = {
-            "NOTIFY_PRINT_START": {
-                "name": "Print Started Notifications",
-                "description": "Receive a notification when a print is started",
-                "default": True,
-                "type": "boolean",
-                "validator": bool
-            }
-        }
-
+        
         super().__init__(*args, **kwargs)
 
     def init_machine(self, machine):
