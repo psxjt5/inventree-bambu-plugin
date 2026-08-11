@@ -59,7 +59,8 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
                 "name": "Print Started Notifications",
                 "description": "Receive a notification when a print is started",
                 "default": True,
-                "type": "boolean"
+                "type": "boolean",
+                "validator": bool
             }
         }
 
