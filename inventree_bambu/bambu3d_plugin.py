@@ -55,7 +55,7 @@ class Bambu3DPlugin(MachineDriverMixin, UrlsMixin, UserInterfaceMixin, SettingsM
                 'Bambu 3D Printer users group.'
             ),
             'default': '',
-            'choices': get_notification_groups,
+            #'choices': get_notification_groups,
         },
     }
 
