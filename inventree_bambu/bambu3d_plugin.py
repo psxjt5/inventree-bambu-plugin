@@ -15,6 +15,7 @@ from plugin.machine import BaseMachineType
 from .bambu3d import BambuLab3DPrinterDriver
 from .bambuapi import BambuAPI
 from django.contrib.auth.models import Group
+from .notifications import Notifications
 
 from django.urls import path
 
@@ -51,7 +52,7 @@ class Bambu3DPlugin(MachineDriverMixin, UrlsMixin, UserInterfaceMixin, SettingsM
     SETTINGS = {
         'THREED_GROUP': {
             'name': '3D Printing Group',
-            'description': 'Bambu 3D Printer users group.',
+            'description': 'Bambu 3D Printing users group.',
             'choices': get_notification_groups,
         },
     }
@@ -86,13 +87,21 @@ class Bambu3DPlugin(MachineDriverMixin, UrlsMixin, UserInterfaceMixin, SettingsM
             "validator": bool
         },
         "NOTIFY_PRINT_OFFLINE": {
-            "name": "Print Started Notifications",
+            "name": "Printer Offline Notifications",
             "description": "Receive a notification when a printer goes offline.",
             "default": True,
             "type": "boolean",
             "validator": bool
         }
     }
+    
+    def __init__(self):
+        super().__init__()
+
+        print("[BambuLab3DPrinterPlugin] Plugin initialised")
+
+        if not self.get_setting('THREED_GROUP'):
+            Notifications.setup_group_notification(self.plugin_config())
 
     def get_machine_drivers(self) -> list:
         print("[BambuLab3DPrinterPlugin] Registering BambuLab 3D Printer Machine")
