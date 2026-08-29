@@ -65,9 +65,9 @@ class Bambu3DPlugin(MachineDriverMixin, UrlsMixin, UserInterfaceMixin, SettingsM
             "type": "boolean",
             "validator": bool
         },
-        "NOTIFY_PRINT_FAILED": {
-            "name": "Print Failure Notifications",
-            "description": "Receive a notification when a print fails.",
+        "NOTIFY_PRINT_ERROR": {
+            "name": "Print Error Notifications",
+            "description": "Receive a notification when a printer error occurs.",
             "default": True,
             "type": "boolean",
             "validator": bool
@@ -79,14 +79,14 @@ class Bambu3DPlugin(MachineDriverMixin, UrlsMixin, UserInterfaceMixin, SettingsM
             "type": "boolean",
             "validator": bool
         },
-        "NOTIFY_PRINT_ONLINE": {
+        "NOTIFY_PRINTER_ONLINE": {
             "name": "Printer Online Notifications",
             "description": "Receive a notification when a printer comes online.",
             "default": True,
             "type": "boolean",
             "validator": bool
         },
-        "NOTIFY_PRINT_OFFLINE": {
+        "NOTIFY_PRINTER_OFFLINE": {
             "name": "Printer Offline Notifications",
             "description": "Receive a notification when a printer goes offline.",
             "default": True,

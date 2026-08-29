@@ -60,6 +60,8 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
         """Machine initialise hook"""
         print(f"[BambuLab3DPrinterDriver] Initialising Machine {machine.name}")
 
+        Notifications.print_started_notification(machine)
+
         # Check machine settings have been filled
         if not self.validate_required_settings(machine):
             print(f"[BambuLab3DPrinterDriver] Machine misconfigured {machine.name}")
@@ -84,8 +86,6 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
             machine=machine,
             callback=self.message_received
         )
-
-        Notifications.test_notification(machine)
 
     def validate_required_settings(self, machine) -> bool:
         """
