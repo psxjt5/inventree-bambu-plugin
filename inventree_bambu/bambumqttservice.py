@@ -29,7 +29,7 @@ class BambuMQTTService:
         self.serial = serial
         self.machine = machine
 
-        self.message_callback=lambda serialNumber, data: message_callback(machine, serialNumber, data)
+        self.message_callback=lambda serialNumber: message_callback(machine, serialNumber)
         self.connection_callback=lambda connected, lastConnected: connection_callback(machine, connected, lastConnected)
         
         self.last_message = None
@@ -133,7 +133,7 @@ class BambuMQTTService:
         # Call the matching callback function
         if self.message_callback:
             try:
-                self.message_callback(serialNumber, merged_payload)
+                self.message_callback(serialNumber)
             except Exception as e:
                 print(f"[BambuMQTTService] Callback error: {e}")
 
