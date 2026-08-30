@@ -161,7 +161,7 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
         prefix = sn[:3]
         return sn_map.get(prefix, "Unknown")
 
-    def message_received(self, machine, serial):
+    def message_received(self, machine, serial, data):
         # Set the status of the printer.
         # Data is pulled from the cache (where it will have been stored against the printer's serial).
         self.mqtt_set_status(machine, BambuData.getStatus(serial))
@@ -254,8 +254,8 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
         # If the state hasn't changed, we don't need to update it here.
         currentStatus = self.convert_status(state)
 
-        if currentStatus == self.get_status():
-            return
+        # if currentStatus == self.get_status():
+        #     return
 
         print(f"[BambuLab3DPrinterDriver] Setting status for {machine.name}: {state}.")
 
