@@ -105,7 +105,6 @@ class BambuData:
     def getCameraURL(serial):
         return BambuData.getPayload(serial).get("print", {}).get("ipcam", {}).get("rtsp_url")
 
-
     @staticmethod
     def getAMSUnitCount(serial):
         return len(BambuData.getPayload(serial).get("print", {}).get("ams", {}).get("ams", []))

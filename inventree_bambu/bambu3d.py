@@ -60,8 +60,6 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
         """Machine initialise hook"""
         print(f"[BambuLab3DPrinterDriver] Initialising Machine {machine.name}")
 
-        Notifications.print_started_notification(machine)
-
         # Check machine settings have been filled
         if not self.validate_required_settings(machine):
             print(f"[BambuLab3DPrinterDriver] Machine misconfigured {machine.name}")
@@ -84,7 +82,8 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
             token=machine.get_setting("ACCESS_TOKEN", "D"),
             serial=machine.get_setting("SERIAL", "D"),
             machine=machine,
-            callback=self.message_received
+            message_callback=self.message_received,
+            connection_callback=self.connection_changed
         )
 
     def validate_required_settings(self, machine) -> bool:
@@ -145,6 +144,7 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
             {'key': 'Big Fan 2 Speed', 'value': ''},
         ])
 
+    # Convert to static
     def get_model(self, sn: str) -> str:
         sn_map = {
             "31B": "H2C",
@@ -161,8 +161,9 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
         prefix = sn[:3]
         return sn_map.get(prefix, "Unknown")
 
-    def message_received(self, machine, serial, data):
+    def message_received(self, machine, serial):
         # Set the status of the printer.
+        # Data is pulled from the cache (where it will have been stored against the printer's serial).
         self.mqtt_set_status(machine, BambuData.getStatus(serial))
 
         # Set the properties of the printer.
@@ -183,34 +184,83 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
         self.update_property(machine, 'Big Fan 1 Speed', BambuData.getBigFan1Speed(serial))
         self.update_property(machine, 'Big Fan 2 Speed', BambuData.getBigFan2Speed(serial))
 
-        #trigger_event(f'machine_config.saved', id=machine.pk, model='MachineConfig')
+    def connection_changed(self, machine, connected, lastConnected):
+        if (connected == lastConnected):
+            return
+
+        if (connected):
+            Notifications.printer_online_notification(machine)
+        else:
+            Notifications.printer_offline_notification(machine)
+
+    # Convert to static
+    def convert_status(self, status):
+        match status:
+            case "IDLE":
+                return ThreeDPrinterMachine.MACHINE_STATUS.IDLE
+            case "PREPARE":
+                return ThreeDPrinterMachine.MACHINE_STATUS.PREPARING
+            case "SLICING":
+                return ThreeDPrinterMachine.MACHINE_STATUS.PREPARING
+            case "RUNNING":
+                return ThreeDPrinterMachine.MACHINE_STATUS.PRINTING
+            case "PAUSE":
+                return ThreeDPrinterMachine.MACHINE_STATUS.PAUSED
+            case "FINISH":
+                return ThreeDPrinterMachine.MACHINE_STATUS.FINISHED
+            case "FAILED":
+                return ThreeDPrinterMachine.MACHINE_STATUS.FAILED
+
+    # Convert to static
+    def convert_status_text(self, status):
+        match status:
+            case "IDLE":
+                return "Printer Idle"
+            case "PREPARE":
+                return "Print Preparing"
+            case "SLICING":
+                return "Print Preparing"
+            case "RUNNING":
+                return "Printing"
+            case "PAUSE":
+                return "Print Paused"
+            case "FINISH":
+                return "Print Completed"
+            case "FAILED":
+                return "Print Failed"
+
+    def send_status_notification(self, machine, status):
+        match status:
+            case "IDLE":
+                return
+            case "PREPARE":
+                return
+            case "SLICING":
+                return
+            case "RUNNING":
+                Notifications.print_started_notification(machine)
+                return
+            case "PAUSE":
+                return
+            case "FINISH":
+                Notifications.print_finished_notification(machine)
+                return
+            case "FAILED":
+                Notifications.print_error_notification(machine)
+                return
 
     def mqtt_set_status(self, machine, state):
 
         # If the state hasn't changed, we don't need to update it here.
+        currentStatus = self.convert_status(state)
+
+        if currentStatus == self.get_status():
+            return
 
         print(f"[BambuLab3DPrinterDriver] Setting status for {machine.name}: {state}.")
-        if state == "IDLE":
-            machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.IDLE)
-            machine.set_status_text("Printer Idle")
-        elif state == "PREPARE":
-            machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.PREPARING)
-            machine.set_status_text("Print Preparing")
-        elif state == "SLICING":
-            machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.PREPARING)
-            machine.set_status_text("Print Preparing")
-        elif state == "RUNNING":
-            machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.PRINTING)
-            machine.set_status_text("Printing")
-        elif state == "PAUSE":
-            machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.PAUSED)
-            machine.set_status_text("Print Paused")
-        elif state == "FINISH":
-            machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.FINISHED)
-            machine.set_status_text("Print Completed")
-        elif state == "FAILED":
-            machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.FAILED)
-            machine.set_status_text("Print Failed")
+
+        machine.set_status(currentStatus)
+        machine.set_status_test(self.convert_status_text(state))
 
     def mqtt_set_model(self, machine, model):
         print(f"[BambuLab3DPrinterDriver] Setting model for {machine.name}: {model}.")

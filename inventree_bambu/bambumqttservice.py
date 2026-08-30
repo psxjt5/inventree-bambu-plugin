@@ -22,17 +22,19 @@ class BambuMQTTService:
     # Printers should be sending messages regularly, if messages aren't detected for this duration we can assume something is wrong.
     STALE_TIMEOUT = 30 # 30 Seconds
 
-    def __init__(self, ip, port, token, serial, machine, message_callback):
+    def __init__(self, ip, port, token, serial, machine, message_callback, connection_callback):
         self.ip = ip
         self.port = port
         self.token = token
         self.serial = serial
         self.machine = machine
 
-        self.message_callback=lambda s, data: message_callback(machine, s, data)
+        self.message_callback=lambda serialNumber, data: message_callback(machine, serialNumber, data)
+        self.connection_callback=lambda connected, lastConnected: connection_callback(machine, connected, lastConnected)
         
         self.last_message = None
         self.last_pushall = 0
+        self.last_connected = False
         self.connected = False
 
         self.client = mqtt.Client(clean_session=True)
@@ -69,6 +71,11 @@ class BambuMQTTService:
         else:
             print(f"[BambuMQTTService] Connection failed: {rc}")
 
+            self.connected = False
+
+        self.connection_callback(self.connected, self.last_connected)
+        self.last_connected = self.connected;
+
     def on_subscribe(self, client, userdata, mid, granted_qos):
         print(f"[BambuMQTTService] Subscription active for {self.machine.name}")
 
@@ -83,6 +90,9 @@ class BambuMQTTService:
         else:
             print("[BambuMQTTService] Clean disconnect")
 
+        self.connection_callback(self.connected, self.last_connected)
+        self.last_connected = self.connected;
+
     def on_message(self, client, userdata, msg):
         if not msg.payload:
             return
@@ -93,15 +103,15 @@ class BambuMQTTService:
             print(f"[BambuMQTTService] JSON error: {e}")
             return
 
-        serial = self.extract_serial(msg.topic)
+        serialNumber = self.extract_serial(msg.topic)
 
-        if not serial:
+        if not serialNumber:
             return
         
         self.last_message = time.time()
 
         # This printer's cache key
-        cache_key = f"bambu:{serial}"
+        cache_key = f"bambu:{serialNumber}"
 
         # Existing data (from previous snapshots)
         existing = cache.get(cache_key, {})
@@ -123,7 +133,7 @@ class BambuMQTTService:
         # Call the matching callback function
         if self.message_callback:
             try:
-                self.message_callback(serial, merged_payload)
+                self.message_callback(serialNumber, merged_payload)
             except Exception as e:
                 print(f"[BambuMQTTService] Callback error: {e}")
 
