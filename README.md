@@ -25,6 +25,24 @@ Dashboard Widget showing print status:
 - Ability to queue print jobs.
 - Stock updates as prints are finished.
 
+## Class Interaction
+```mermaid
+flowchart
+	n1["**Bambu3DPlugin**<br>(bambu3d_plugin.py)<br>InvenTree Plugin"]
+	n2["**Bambu3D**<br>(bambu3d.py)<br>InvenTree Machine Driver"]
+	n1 ---|"Machine Driver"| n2
+	n3["**BambuPrinterController**<br>(bambuprintercontroller.py)<br>Printer Controller"]
+	n2 ---|"Each Printer Instance"| n3
+	n4["**BambuMQTTService**<br>(bambumqttservice.py)<br>Printer MQTT Comms"]
+	n5["**BambuAPI**<br>(bambuapi.py)<br>Front-End API"]
+	n3 ---|"Continuous Receiving Thread"| n4
+	n1 ---|"Dashboard Widget"| n5["**BambuAPI**<br>(bambuapi.py)<br>Frontend API"]
+	n6["**Notifications**<br>(notifications.py)<br>System Notifications"]
+	n3 ---|"Printer State Changes..."| n6
+	n7["BambuData<br>(bambudata.py)<br>Extracts data from MQTT"]
+	n3 ---|"New MQTT Data Arrives..."| n7["**BambuData**<br>(bambudata.py)<br>Extracts data from MQTT"]
+```
+
 ## Registering a Bambu Lab 3D Printer
 With the plugin installed, a Bambu Lab 3D printer can be added within the Machines Page (in the Admin Centre):
 
