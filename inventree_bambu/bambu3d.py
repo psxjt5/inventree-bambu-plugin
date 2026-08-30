@@ -260,7 +260,7 @@ class BambuLab3DPrinterDriver(ThreeDPrinterBaseDriver):
         print(f"[BambuLab3DPrinterDriver] Setting status for {machine.name}: {state}.")
 
         machine.set_status(currentStatus)
-        machine.set_status_test(self.convert_status_text(state))
+        machine.set_status_text(self.convert_status_text(state))
 
     def mqtt_set_model(self, machine, model):
         print(f"[BambuLab3DPrinterDriver] Setting model for {machine.name}: {model}.")
