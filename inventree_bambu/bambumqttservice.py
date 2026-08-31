@@ -106,7 +106,7 @@ class BambuMQTTService:
         else:
             self.log(f"MQTT Connection Failed: {rc}")
 
-        self.connection_callback(self.client.is_connected())
+        #self.connection_callback(self.client.is_connected())
 
     # Subscribe Event
     def on_subscribe(self, client, userdata, mid, granted_qos):
