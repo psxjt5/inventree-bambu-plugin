@@ -152,21 +152,17 @@ class Notifications:
         
         machine = MachineConfig.objects.get(pk=machinePK)
 
-        try:
-            trigger_notification(
-                obj=machine,
-                category="machine.3dprinting.bambu_lab.printer_online",
-                targets=users,
-                context={
-                    "name": f"Printer Online - {machineName}",
-                    "message": "A printer has come online.",
-                    "link": "/"
-                },
-                check_recent=False,
-            )
-        except Exception:
-            traceback.print_exc()
-            raise
+        trigger_notification(
+            obj=machine,
+            category="machine.3dprinting.bambu_lab.printer_online",
+            targets=users,
+            context={
+                "name": f"Printer Online - {machineName}",
+                "message": "A printer has come online.",
+                "link": "/"
+            },
+            check_recent=False,
+        )
 
     @staticmethod
     def printer_offline_notification(machineName, machinePK):
