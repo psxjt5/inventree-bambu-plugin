@@ -106,7 +106,7 @@ class BambuMQTTService:
                 # Detect if printer seems to have gone silent
                 if self.client.is_connected() and self.last_message is not None and now - self.last_message > self.STALE_TIMEOUT:
                     self.log(f"Printer stale")
-                    self.request_pushall()
+                    self.client.disconnect()
 
                 # Send periodic PushAll messages
                 if now >= next_pushall:
