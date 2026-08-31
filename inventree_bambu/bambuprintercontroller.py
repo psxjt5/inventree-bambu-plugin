@@ -150,6 +150,8 @@ class BambuPrinterController:
         if (connectedStatus == self.connected):
             return
 
+        self.connected = connectedStatus
+
         if (connectedStatus):
             Notifications.printer_online_notification(self.machine.name, self.machine.pk)
         else:
