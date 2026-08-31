@@ -29,7 +29,6 @@ class BambuAPI:
 
         data = serializer.data
 
-        # optional: filter down to only what your widget needs
         simplified = [
             {
                 "pk": m["pk"],

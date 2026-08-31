@@ -19,10 +19,13 @@ class BambuData:
             "093": "H2S",
             "00M": "X1C",
             "03W": "X1E",
+            "20P": "X2D",
             "01P": "P1S",
             "01S": "P1P",
+            "22E": "P2S",
             "039": "A1",
-            "030": "A1 Mini"
+            "030": "A1 Mini",
+            "26A": "A2L"
         }
         prefix = serial[:3]
         return sn_map.get(prefix, "Unknown")
@@ -104,7 +107,6 @@ class BambuData:
     @staticmethod
     def getCameraURL(serial):
         return BambuData.getPayload(serial).get("print", {}).get("ipcam", {}).get("rtsp_url")
-
 
     @staticmethod
     def getAMSUnitCount(serial):
