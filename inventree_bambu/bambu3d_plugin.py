@@ -65,6 +65,20 @@ class Bambu3DPlugin(MachineDriverMixin, UrlsMixin, UserInterfaceMixin, SettingsM
             "type": "boolean",
             "validator": bool
         },
+        "NOTIFY_PRINT_PAUSED": {
+            "name": "Print Paused Notifications",
+            "description": "Receive a notification when a print is paused.",
+            "default": True,
+            "type": "boolean",
+            "validator": bool
+        },
+        "NOTIFY_PRINT_RESUMED": {
+            "name": "Print Resumed Notifications",
+            "description": "Receive a notification when a print is resumed.",
+            "default": True,
+            "type": "boolean",
+            "validator": bool
+        },
         "NOTIFY_PRINT_STOPPED": {
             "name": "Print Stopped Notifications",
             "description": "Receive a notification when a print stops.",

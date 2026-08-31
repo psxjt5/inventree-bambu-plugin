@@ -65,6 +65,46 @@ class Notifications:
         )
 
     @staticmethod
+    def print_paused_notification(machineName, machinePK):
+        Notifications.log(f"Sending Print Paused Notification.", machineName)
+
+        users = Notifications._get_notification_users("NOTIFY_PRINT_PAUSED")
+        
+        machine = MachineConfig.objects.get(pk=machinePK)
+
+        trigger_notification(
+            obj=machine,
+            category="machine.3dprinting.bambu_lab.print_paused",
+            targets=users,
+            context={
+                "name": f"Print Paused - {machineName}",
+                "message": "A print has been paused.",
+                "link": "/"
+            },
+            check_recent=False,
+        )
+
+    @staticmethod
+    def print_resumed_notification(machineName, machinePK):
+        Notifications.log(f"Sending Print Resumed Notification.", machineName)
+
+        users = Notifications._get_notification_users("NOTIFY_PRINT_RESUMED")
+        
+        machine = MachineConfig.objects.get(pk=machinePK)
+
+        trigger_notification(
+            obj=machine,
+            category="machine.3dprinting.bambu_lab.print_resumed",
+            targets=users,
+            context={
+                "name": f"Print Resumed - {machineName}",
+                "message": "A print has been resumed.",
+                "link": "/"
+            },
+            check_recent=False,
+        )
+
+    @staticmethod
     def print_stopped_notification(machineName, machinePK):
         Notifications.log(f"Sending Print Stopped Notification", machineName)
         

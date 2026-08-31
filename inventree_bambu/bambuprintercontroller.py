@@ -17,9 +17,11 @@ class BambuPrinterController:
         # TODO: Make this configurable (setting with default value of 8883)
         self.port: int = 8883
 
-        self.status: str | None = None
         self.connected: bool = False
         self.mqtt_service: BambuMQTTService | None = None
+        
+        self.status: str | None = None
+
 
     def initialise(self):
         self.log("Initialising")
@@ -177,8 +179,8 @@ class BambuPrinterController:
         self.status = newStatus
 
     # Sends the relevant notification when a status change occurs
-    def send_status_notification(self, status):
-        match status:
+    def send_status_notification(self, newStatus):
+        match newStatus:
             case "IDLE":
                 return
             case "PREPARE":
@@ -186,15 +188,22 @@ class BambuPrinterController:
             case "SLICING":
                 return
             case "RUNNING":
-                Notifications.print_started_notification(self.machine.name, self.machine.pk)
+                if self.status == "PAUSE":
+                    Notifications.print_resumed_notification(self.machine.name, self.machine.pk)
+                else:
+                    Notifications.print_started_notification(self.machine.name, self.machine.pk)
+
                 return
             case "PAUSE":
+                Notifications.print_paused_notification(self.machine.name, self.machine.pk)
                 return
             case "FINISH":
                 Notifications.print_finished_notification(self.machine.name, self.machine.pk)
                 return
             case "FAILED":
-                Notifications.print_error_notification(self.machine.name, self.machine.pk)
+                Notifications.print_stopped_notification(self.machine.name, self.machine.pk)
+                return
+            case _:
                 return
 
     # Update a machine property
