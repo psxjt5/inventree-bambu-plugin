@@ -45,19 +45,19 @@ class Notifications:
         return users
 
     @staticmethod
-    def print_started_notification(machine):
-        print(f"[BambuLab3DPrintingNotifications] Sending Print Started Notification for {machine.name}.")
+    def print_started_notification(machineName, machinePK):
+        Notifications.log(f"Sending Print Started Notification.", machineName)
 
         users = Notifications._get_notification_users("NOTIFY_PRINT_START")
         
-        machine = MachineConfig.objects.get(pk=machine.pk)
+        machine = MachineConfig.objects.get(pk=machinePK)
 
         trigger_notification(
             obj=machine,
             category="machine.3dprinting.bambu_lab.print_started",
             targets=users,
             context={
-                "name": f"Print Started - {machine.name}",
+                "name": f"Print Started - {machineName}",
                 "message": "A print has been started.",
                 "link": "/"
             },
@@ -65,19 +65,19 @@ class Notifications:
         )
 
     @staticmethod
-    def print_error_notification(machine):
-        print(f"[BambuLab3DPrintingNotifications] Sending Print Error Notification for {machine.name}.")
+    def print_error_notification(machineName, machinePK):
+        Notifications.log(f"Sending Print Error Notification", machineName)
         
         users = Notifications._get_notification_users("NOTIFY_PRINT_ERROR")
         
-        machine = MachineConfig.objects.get(pk=machine.pk)
+        machine = MachineConfig.objects.get(pk=machinePK)
 
         trigger_notification(
             obj=machine,
             category="machine.3dprinting.bambu_lab.print_error",
             targets=users,
             context={
-                "name": f"Print Error - {machine.name}",
+                "name": f"Print Error - {machineName}",
                 "message": "A print error has occurred.",
                 "link": "/"
             },
@@ -85,19 +85,19 @@ class Notifications:
         )
 
     @staticmethod
-    def print_finished_notification(machine):
-        print(f"[BambuLab3DPrintingNotifications] Sending Print Finished Notification for {machine.name}.")
+    def print_finished_notification(machineName, machinePK):
+        Notifications.log(f"Sending Print Finished Notification", machineName)
         
         users = Notifications._get_notification_users("NOTIFY_PRINT_FINISHED")
         
-        machine = MachineConfig.objects.get(pk=machine.pk)
+        machine = MachineConfig.objects.get(pk=machinePK)
 
         trigger_notification(
             obj=machine,
             category="machine.3dprinting.bambu_lab.print_started",
             targets=users,
             context={
-                "name": f"Print Finished - {machine.name}",
+                "name": f"Print Finished - {machineName}",
                 "message": "A print has finished.",
                 "link": "/"
             },
@@ -105,19 +105,19 @@ class Notifications:
         )
 
     @staticmethod
-    def printer_online_notification(machine):
-        print(f"[BambuLab3DPrintingNotifications] Sending Printer Online Notification for {machine.name}.")
+    def printer_online_notification(machineName, machinePK):
+        Notifications.log(f"Sending Printer Online Notification.", machineName)
     
         users = Notifications._get_notification_users("NOTIFY_PRINTER_ONLINE")
         
-        machine = MachineConfig.objects.get(pk=machine.pk)
+        machine = MachineConfig.objects.get(pk=machinePK)
 
         trigger_notification(
             obj=machine,
             category="machine.3dprinting.bambu_lab.printer_online",
             targets=users,
             context={
-                "name": f"Printer Online - {machine.name}",
+                "name": f"Printer Online - {machineName}",
                 "message": "A printer has come online.",
                 "link": "/"
             },
@@ -125,19 +125,19 @@ class Notifications:
         )
 
     @staticmethod
-    def printer_offline_notification(machine):
-        print(f"[BambuLab3DPrintingNotifications] Sending Printer Offline Notification for {machine.name}.")
+    def printer_offline_notification(machineName, machinePK):
+        print(f"Sending Printer Offline Notification.", machineName)
         
         users = Notifications._get_notification_users("NOTIFY_PRINTER_OFFLINE")
         
-        machine = MachineConfig.objects.get(pk=machine.pk)
+        machine = MachineConfig.objects.get(pk=machinePK)
 
         trigger_notification(
             obj=machine,
             category="machine.3dprinting.bambu_lab.printer_offline",
             targets=users,
             context={
-                "name": f"Printer Offline - {machine.name}",
+                "name": f"Printer Offline - {machineName}",
                 "message": "A printer has gone offline.",
                 "link": "/"
             },
@@ -164,3 +164,7 @@ class Notifications:
             },
             check_recent=False,
         )
+
+    @staticmethod
+    def log(message, machineName):
+        print(f"[BambuLab3DPrintingNotifications - {machineName}] - {message}")
