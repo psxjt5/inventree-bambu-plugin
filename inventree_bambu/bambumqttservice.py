@@ -22,7 +22,11 @@ class BambuMQTTService:
     # Printers should be sending messages regularly, if messages aren't detected for this duration we can assume something is wrong.
     STALE_TIMEOUT = 30 # 30 Seconds
 
+    # If a printer is disconnected for more than 10 seconds, send out a disconnected notification.
+    DISCONNECT_NOTIFICATION_DELAY = 10 # seconds
+
     def __init__(self, printerName, ip, port, token, serial, message_callback, connection_callback):
+
         self.printerName = printerName
         self.ip = ip
         self.port = port
@@ -37,6 +41,7 @@ class BambuMQTTService:
 
         self.thread = None
 
+        self.disconnected_at = None
         self.connection_pending = False
         self.client = mqtt.Client(clean_session=True)
 
@@ -60,7 +65,9 @@ class BambuMQTTService:
         self.thread = threading.Thread(
             target=self.run,
             daemon=True
-        ).start()
+        )
+
+        self.thread.start()
 
     # MQTT connection and monitoring thread
     def run(self):
@@ -86,6 +93,16 @@ class BambuMQTTService:
 
                 now = time.monotonic()
 
+                # Check if connection has been restored
+                if self.client.is_connected():
+                    self.disconnected_at = None
+                elif (
+                    self.disconnected_at is not None
+                    and now - self.disconnected_at >= self.DISCONNECT_NOTIFICATION_DELAY
+                ):
+                    self.connection_callback(False)
+                    self.disconnected_at = None
+
                 # Detect if printer seems to have gone silent
                 if self.client.is_connected() and self.last_message is not None and now - self.last_message > self.STALE_TIMEOUT:
                     self.log(f"Printer stale")
@@ -109,10 +126,10 @@ class BambuMQTTService:
             self.log("MQTT Connected Successfully")
 
             client.subscribe(f"device/{self.serial}/report")
+
+            self.connection_callback(True)
         else:
             self.log(f"MQTT Connection Failed: {rc}")
-
-        self.connection_callback(True)
 
     # Subscribe Event
     def on_subscribe(self, client, userdata, mid, granted_qos):
@@ -130,7 +147,7 @@ class BambuMQTTService:
         else:
             self.log(f"Clean Disconnect")
 
-        self.connection_callback(False)
+        self.disconnected_at = time.monotonic()
 
     # Message Received Event
     # TODO: Stop using the serial number as the message ID and instead use the machine PK
@@ -150,7 +167,7 @@ class BambuMQTTService:
         if not serialNumber:
             return
         
-        self.last_message = time.time()
+        self.last_message = time.monotonic()
 
         # This printer's cache key
         # TODO: Swap to the Machine PK
@@ -186,7 +203,7 @@ class BambuMQTTService:
         if not self.client.is_connected():
             return
 
-        now = time.time()
+        now = time.monotonic()
 
         # Only send a pushall if required.
         if now - self.last_pushall < 10:
@@ -206,7 +223,7 @@ class BambuMQTTService:
         if result.rc != mqtt.MQTT_ERR_SUCCESS:
             self.log(f"PushAll publish failed: {result.rc}")
 
-        self.last_pushall = time.time()
+        self.last_pushall = time.monotonic()
 
         self.log(f"Requested PushAll")
 
