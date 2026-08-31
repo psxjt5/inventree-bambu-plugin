@@ -37,6 +37,7 @@ class BambuMQTTService:
 
         self.thread = None
 
+        self.connection_pending = False
         self.client = mqtt.Client(clean_session=True)
 
         # TODO: Make this a parameter.
@@ -69,13 +70,15 @@ class BambuMQTTService:
         while True:
             try:
 
-                if not self.client.is_connected():
+                if not self.client.is_connected() and not self.connection_pending:
 
                     result = self.client.connect(
                         self.ip,
                         self.port,
                         keepalive=60
                     )
+
+                    self.connection_pending = True
 
                     self.log(f"MQTT Connection Requested: {result}")
                 
@@ -94,11 +97,14 @@ class BambuMQTTService:
                     next_pushall = now + self.PUSHALL_INTERVAL
 
             except Exception as exc:
+                self.connection_pending = False
                 self.log(f"MQTT loop error: {exc}")
                 time.sleep(1)
 
     # Connect Event
     def on_connect(self, client, userdata, flags, rc):
+        self.connection_pending = False
+
         if rc == 0:
             self.log("MQTT Connected Successfully")
 
@@ -106,7 +112,7 @@ class BambuMQTTService:
         else:
             self.log(f"MQTT Connection Failed: {rc}")
 
-        self.connection_callback(self.client.is_connected())
+        self.connection_callback(True)
 
     # Subscribe Event
     def on_subscribe(self, client, userdata, mid, granted_qos):
@@ -116,6 +122,7 @@ class BambuMQTTService:
 
     # Disconnect Event
     def on_disconnect(self, client, userdata, rc):
+        self.connection_pending = False
         self.last_message = None
 
         if rc != 0:
@@ -123,7 +130,7 @@ class BambuMQTTService:
         else:
             self.log(f"Clean Disconnect")
 
-        self.connection_callback(self.client.is_connected())
+        self.connection_callback(False)
 
     # Message Received Event
     # TODO: Stop using the serial number as the message ID and instead use the machine PK
