@@ -42,7 +42,7 @@ class BambuMQTTService:
         # TODO: Make this a parameter.
         self.client.username_pw_set("bblp", token)
 
-        self.client.tls_set(cert_reqs=ssl.CERT_NONE)
+        self.client.tls_set(cert_reqs=ssl.CERT_NONE, tls_version=ssl.PROTOCOL_TLSv1_2)
         self.client.tls_insecure_set(True)
 
         self.client.reconnect_delay_set(min_delay=1, max_delay=30)
