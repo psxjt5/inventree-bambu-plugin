@@ -65,9 +65,9 @@ class Bambu3DPlugin(MachineDriverMixin, UrlsMixin, UserInterfaceMixin, SettingsM
             "type": "boolean",
             "validator": bool
         },
-        "NOTIFY_PRINT_ERROR": {
-            "name": "Print Error Notifications",
-            "description": "Receive a notification when a printer error occurs.",
+        "NOTIFY_PRINT_STOPPED": {
+            "name": "Print Stopped Notifications",
+            "description": "Receive a notification when a print stops.",
             "default": True,
             "type": "boolean",
             "validator": bool

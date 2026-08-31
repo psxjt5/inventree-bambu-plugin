@@ -65,20 +65,20 @@ class Notifications:
         )
 
     @staticmethod
-    def print_error_notification(machineName, machinePK):
-        Notifications.log(f"Sending Print Error Notification", machineName)
+    def print_stopped_notification(machineName, machinePK):
+        Notifications.log(f"Sending Print Stopped Notification", machineName)
         
-        users = Notifications._get_notification_users("NOTIFY_PRINT_ERROR")
+        users = Notifications._get_notification_users("NOTIFY_PRINT_STOPPED")
         
         machine = MachineConfig.objects.get(pk=machinePK)
 
         trigger_notification(
             obj=machine,
-            category="machine.3dprinting.bambu_lab.print_error",
+            category="machine.3dprinting.bambu_lab.print_stopped",
             targets=users,
             context={
-                "name": f"Print Error - {machineName}",
-                "message": "A print error has occurred.",
+                "name": f"Print Stopped - {machineName}",
+                "message": "A print has stopped.",
                 "link": "/"
             },
             check_recent=False,
