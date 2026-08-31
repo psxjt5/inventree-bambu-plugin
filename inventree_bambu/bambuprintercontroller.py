@@ -170,7 +170,8 @@ class BambuPrinterController:
         self.machine.set_status_text(self.convert_status_text(newStatus))
 
         # Send a status update notification
-        self.send_status_notification(newStatus)
+        if self.status != None:
+            self.send_status_notification(newStatus)
 
         # Store the new state
         self.status = newStatus
