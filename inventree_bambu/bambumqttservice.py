@@ -23,7 +23,7 @@ class BambuMQTTService:
     STALE_TIMEOUT = 30 # 30 Seconds
 
     # If a printer is disconnected for more than 10 seconds, send out a disconnected notification.
-    DISCONNECT_NOTIFICATION_DELAY = 10 # seconds
+    DISCONNECT_NOTIFICATION_DELAY = 30 # seconds
 
     def __init__(self, printerName, ip, port, token, serial, message_callback, connection_callback):
 
