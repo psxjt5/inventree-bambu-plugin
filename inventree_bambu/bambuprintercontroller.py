@@ -310,7 +310,7 @@ class BambuPrinterController:
             case "FINISH":
                 return "Print Completed"
             case "FAILED":
-                return "Print Failed"
+                return "Print Stopped"
             case "ERROR":
                 return "Printer Error"
             case _:
