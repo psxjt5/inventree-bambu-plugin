@@ -178,11 +178,11 @@ class BambuPrinterController:
         self.machine.set_status_text(self.convert_status_text(newStatus))
 
         # Send a status update notification
-        if self.status is not None:
-            try:
-                self.send_status_notification(newStatus)
-            except Exception as e:
-                self.log(f"Notification error: {e}")
+        #if self.status is not None:
+        try:
+            self.send_status_notification(newStatus)
+        except Exception as e:
+            self.log(f"Notification error: {e}")
 
         # Store the new state
         self.status = newStatus
