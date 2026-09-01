@@ -28,7 +28,7 @@ function BambuDashboardItem({
 
         300: { label: 'Connected', color: 'blue' },
         301: { label: 'Disconnected', color: 'red' },
-        302: { label: 'Failed', color: 'red' },
+        302: { label: 'Stopped', color: 'red' },
 
         400: { label: 'Misconfigured', color: 'red' },
 

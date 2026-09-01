@@ -145,6 +145,26 @@ class Notifications:
         )
 
     @staticmethod
+    def printer_error_notification(machineName, machinePK, errorText):
+        Notifications.log(f"Sending Printer Error Notification.", machineName)
+    
+        users = Notifications._get_notification_users("NOTIFY_PRINTER_ERROR")
+        
+        machine = MachineConfig.objects.get(pk=machinePK)
+
+        trigger_notification(
+            obj=machine,
+            category="machine.3dprinting.bambu_lab.printer_error",
+            targets=users,
+            context={
+                "name": f"Printer Error - {machineName}",
+                "message": errorText,
+                "link": "/"
+            },
+            check_recent=False,
+        )
+
+    @staticmethod
     def printer_online_notification(machineName, machinePK):
         Notifications.log(f"Sending Printer Online Notification.", machineName)
     

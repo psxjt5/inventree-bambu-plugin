@@ -21,6 +21,7 @@ class BambuPrinterController:
         self.mqtt_service: BambuMQTTService | None = None
         
         self.status: str | None = None
+        self.hms_codes = []
 
 
     def initialise(self):
@@ -72,19 +73,19 @@ class BambuPrinterController:
 
     # Test the connection to the machine
     def test_connection(self) -> bool:
-            self.log(f"Testing Connection")
-    
-            try:
-                with socket.create_connection((self.ipAddress, self.port), timeout=3):
-                    self.log("Connection Test Successful")
-                    self.machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.CONNECTED)
-                    self.machine.set_status_text("Connection Test Successful.")
-                    return True
-            except Exception:
-                self.log("Connection Test Unsuccessful")
-                self.machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.DISCONNECTED)
-                self.machine.set_status_text("Connection Test Unsuccessful.")
-                return False
+        self.log(f"Testing Connection")
+
+        try:
+            with socket.create_connection((self.ipAddress, self.port), timeout=3):
+                self.log("Connection Test Successful")
+                self.machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.CONNECTED)
+                self.machine.set_status_text("Connection Test Successful.")
+                return True
+        except Exception:
+            self.log("Connection Test Unsuccessful")
+            self.machine.set_status(ThreeDPrinterMachine.MACHINE_STATUS.DISCONNECTED)
+            self.machine.set_status_text("Connection Test Unsuccessful.")
+            return False
 
     # Initialise machine property fields
     def init_properties(self):
@@ -110,7 +111,6 @@ class BambuPrinterController:
         ])
 
     # Create an MQTT Service for the machine
-    # TODO: Callbacks?
     def init_mqtt_service(self):
          
         self.mqtt_service = BambuMQTTService(self.machine.name, self.ipAddress, self.port, self.accessToken, self.serial, self.message_received, self.connection_changed)
@@ -121,7 +121,7 @@ class BambuPrinterController:
 
 
     # Gets triggered by the MQTT service when a new MQTT message is received.
-    #TODO: Identified needs to become machine.pk (not serial).
+    #TODO: Identifier needs to become machine.pk (not serial).
     def message_received(self):
         # Set the status of the printer.
         # Data is pulled from the cache (where it will have been stored against the printer's serial).
@@ -161,6 +161,10 @@ class BambuPrinterController:
     # Sets the status of the machine (if changed).
     def set_status(self, newStatus):
 
+        # Check for HMS Errors
+        if (newStatus == "IDLE" or newStatus == "PAUSE") and BambuData.hasHMSErrorCodes(self.serial):
+            newStatus = "ERROR"
+
         # If the state hasn't changed return.
         if newStatus == self.status:
             return
@@ -174,8 +178,11 @@ class BambuPrinterController:
         self.machine.set_status_text(self.convert_status_text(newStatus))
 
         # Send a status update notification
-        if self.status != None:
-            self.send_status_notification(newStatus)
+        if self.status is not None:
+            try:
+                self.send_status_notification(newStatus)
+            except Exception as e:
+                self.log(f"Notification error: {e}")
 
         # Store the new state
         self.status = newStatus
@@ -205,8 +212,37 @@ class BambuPrinterController:
             case "FAILED":
                 Notifications.print_stopped_notification(self.machine.name, self.machine.pk)
                 return
+            case "ERROR":
+                Notifications.printer_error_notification(self.machine.name, self.machine.pk, self.build_hms_error_output())
+                return
             case _:
                 return
+
+    # Builds an error notification message
+    def build_hms_error_output(self):
+        errors = BambuData.getAllHMSErrorCodes(self.serial)
+
+        error_messages = []
+
+        for error in errors:
+            description = BambuData.getHMSCodeDescription(
+                self.serial,
+                error
+            )
+
+            if description:
+                error_messages.append(
+                    f"• {error}\n  {description}"
+                )
+            else:
+                error_messages.append(
+                    f"• {error}\n  Description unavailable."
+                )
+
+        message = "Printer errors have been reported:\n\n" + "\n\n".join(error_messages)
+
+        return message
+
 
     # Update a machine property
     def update_property(self, key, value):
@@ -252,6 +288,8 @@ class BambuPrinterController:
                 return ThreeDPrinterMachine.MACHINE_STATUS.FINISHED
             case "FAILED":
                 return ThreeDPrinterMachine.MACHINE_STATUS.FAILED
+            case "ERROR":
+                return ThreeDPrinterMachine.MACHINE_STATUS.ERROR
             case _:
                 return ThreeDPrinterMachine.MACHINE_STATUS.UNKNOWN
 
@@ -272,6 +310,8 @@ class BambuPrinterController:
             case "FINISH":
                 return "Print Completed"
             case "FAILED":
-                return "Print Failed"
+                return "Print Stopped"
+            case "ERROR":
+                return "Printer Error"
             case _:
                 return ""
