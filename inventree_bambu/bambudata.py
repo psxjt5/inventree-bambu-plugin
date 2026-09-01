@@ -4,6 +4,9 @@ Provides data from the Bambu MQTT Service
 
 from django.core.cache import cache
 
+import json
+from pathlib import Path
+
 class BambuData:
 
     @staticmethod
@@ -29,7 +32,116 @@ class BambuData:
         }
         prefix = serial[:3]
         return sn_map.get(prefix, "Unknown")
-    
+
+    @staticmethod
+    def getHMSModelSeries(serial):
+        sn_map = {
+            "31B": "31B",
+            "094": "094",
+            "239": "239",
+            "093": "093",
+            "00M": "20P",
+            "03W": "20P",
+            "20P": "20P",
+            "01P": "22E",
+            "01S": "22E",
+            "22E": "22E",
+            "039": "26A",
+            "030": "26A",
+            "26A": "26A"
+        }
+        prefix = serial[:3]
+        return sn_map.get(prefix, "Unknown")
+
+    @staticmethod
+    def getAllHMSCodes(serial):
+        hms = BambuData.getPayload(serial).get("print", {}).get("hms", [])
+        codes = []
+
+        for error in hms:
+            attr = error.get("attr")
+            code = error.get("code")
+
+            if not attr or not code:
+                continue
+
+            hms_code = (
+                f"HMS_{attr >> 16:04X}-"
+                f"{attr & 0xFFFF:04X}-"
+                f"{code >> 16:04X}-"
+                f"{code & 0xFFFF:04X}"
+            )
+
+            codes.append(hms_code)
+
+        return codes
+
+    @staticmethod
+    def getAllHMSErrorCodes(serial):
+        hms = BambuData.getPayload(serial).get("print", {}).get("hms", [])
+        codes = []
+
+        for error in hms:
+            attr = error.get("attr")
+            code = error.get("code")
+
+            if not attr or not code:
+                continue
+
+            severity = code >> 16
+
+            if severity not in (1, 2):
+                continue
+
+            hms_code = (
+                f"HMS_{attr >> 16:04X}-"
+                f"{attr & 0xFFFF:04X}-"
+                f"{code >> 16:04X}-"
+                f"{code & 0xFFFF:04X}"
+            )
+
+            codes.append(hms_code)
+
+        return codes
+
+    @staticmethod
+    def hasHMSErrorCodes(serial):
+       return bool(BambuData.getAllHMSErrorCodes(serial))
+
+    @staticmethod
+    def getHMSCodeDescription(serial, hms_code):
+
+        series = BambuData.getHMSModelSeries(serial)
+
+        if series == "Unknown":
+            return ""
+
+        # Expected format:
+        # HMS_XXXX-XXXX-XXXX-XXXX
+        if not hms_code.startswith("HMS_"):
+            return ""
+
+        parts = hms_code[4:].split("-")
+
+        if len(parts) != 4 or any(len(part) != 4 for part in parts):
+            return ""
+
+        ecode = "".join(parts)
+
+        database_file = Path(__file__).parent / "hms_codes.json"
+
+        try:
+            with database_file.open("r", encoding="utf-8") as file:
+                database = json.load(file)
+        except (FileNotFoundError, json.JSONDecodeError):
+            return ""
+
+        series_database = database.get(series, {})
+
+        ecode = hms_code.removeprefix("HMS_").replace("-", "")
+
+        return series_database.get(ecode, "")
+
     @staticmethod
     def getProgress(serial):
         return BambuData.getPayload(serial).get("print", {}).get("mc_percent")
