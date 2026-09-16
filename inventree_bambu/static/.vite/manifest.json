@@ -1,8 +1,24 @@
 {
+  "_IconPlus-CH3sr2-F.js": {
+    "file": "assets/IconPlus-CH3sr2-F.js",
+    "name": "IconPlus"
+  },
+  "src/3DPrintersPanel.tsx": {
+    "file": "3DPrintersPanel.js",
+    "name": "3DPrintersPanel",
+    "src": "src/3DPrintersPanel.tsx",
+    "isEntry": true,
+    "imports": [
+      "_IconPlus-CH3sr2-F.js"
+    ]
+  },
   "src/Dashboard.tsx": {
     "file": "Dashboard.js",
     "name": "Dashboard",
     "src": "src/Dashboard.tsx",
-    "isEntry": true
+    "isEntry": true,
+    "imports": [
+      "_IconPlus-CH3sr2-F.js"
+    ]
   }
 }

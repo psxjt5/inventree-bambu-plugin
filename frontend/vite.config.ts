@@ -48,6 +48,7 @@ export default defineConfig({
       input: [
         
         './src/Dashboard.tsx',
+        './src/3DPrintersPanel.tsx'
         
       ],
       output: {

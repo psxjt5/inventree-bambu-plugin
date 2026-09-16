@@ -4,7 +4,7 @@ import { viteExternalsPlugin } from 'vite-plugin-externals'
 import viteConfig, { externalLibs } from './vite.config'
 
 import react from "@vitejs/plugin-react-swc"
-import { lingui } from "@lingui/vite-plugin"
+// import { lingui } from "@lingui/vite-plugin"
 
 /**
  * Vite config to run the frontend plugin in development mode.
@@ -26,7 +26,16 @@ export default defineConfig((cfg) => {
       cors: {   
         preflightContinue: true,
         origin: '*',  // Allow all origins for development
-      }
+      },
+      watch: {
+        usePolling: true,
+        interval: 100,
+      },
+      '/plugin': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        secure: true
+      },
     },
   };
   
@@ -35,7 +44,7 @@ export default defineConfig((cfg) => {
   delete config.optimizeDeps;
 
   config.plugins = [
-    lingui(),
+    // lingui(),
     react({
       plugins: [["@lingui/swc-plugin", {}]]
     }),

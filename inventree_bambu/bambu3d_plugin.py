@@ -160,3 +160,20 @@ class Bambu3DPlugin(MachineDriverMixin, UrlsMixin, UserInterfaceMixin, SettingsM
         })
 
         return items
+
+    def get_ui_panels(self, request, context, **kwargs):
+        panels = []
+        context = context or {}
+
+        target_model = context.get('target_model', None)
+        target_id = context.get('target_id', None)
+
+        if target_model == "manufacturing":
+            panels.append({
+                'key': '3d-printers-panel',
+                'title': '3D Printers',
+                'source': self.plugin_static_file('3DPrintersPanel.js:render3DPrintersPanel'),
+                'icon': 'ti:badge-3d:outline',
+            })
+
+        return panels
