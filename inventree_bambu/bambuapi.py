@@ -18,7 +18,7 @@ class BambuAPI:
     def get_dashboard_widget_data(request):
         """Return a list of registered printers, along with their serial numbers"""
 
-        print("[BambuAPI] Get Printers")
+        print("[BambuAPI] Get Dashboard Widget Data")
 
         machines = MachineConfig.objects.filter(
             machine_type='3d-printer',
@@ -41,6 +41,51 @@ class BambuAPI:
                 ),
                 "file_name": next(
                     (p["value"] for p in m.get("properties", []) if p["key"] == "File Name"),
+                    None
+                ),
+            }
+            for m in data
+        ]
+
+        return Response(simplified)
+
+    @api_view(["GET"])
+    @permission_classes([IsAuthenticated])
+    def get_printer_tiles_data(request):
+        """Return a list of registered printers, along with the data needed to present their tile in the manufacturing 3D printing dashboard"""
+
+        print("[BambuAPI] Get Printer Tiles Data")
+
+        machines = MachineConfig.objects.filter(
+            machine_type='3d-printer',
+            active=True
+        )
+
+        serializer = MachineConfigSerializer(machines, many=True)
+
+        data = serializer.data
+
+        simplified = [
+            {
+                "pk": m["pk"],
+                "name": m["name"],
+                "status": m["status"],
+                "status_text": m["status_text"],
+                "manufacturer": "Bambu Lab",
+                "model": next(
+                    (p["value"] for p in m.get("properties", []) if p["key"] == "Model"),
+                    None
+                ),
+                "progress": next(
+                    (p["value"] for p in m.get("properties", []) if p["key"] == "Job Progress"),
+                    None
+                ),
+                "file_name": next(
+                    (p["value"] for p in m.get("properties", []) if p["key"] == "File Name"),
+                    None
+                ),
+                "remaining_time": next(
+                    (p["value"] for p in m.get("properties", []) if p["key"] == "Remaining Time"),
                     None
                 ),
             }
