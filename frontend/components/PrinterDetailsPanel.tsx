@@ -1,10 +1,22 @@
 import {
     Grid,
+    Group,
     Paper,
     Stack,
     Table,
     Text,
 } from '@mantine/core';
+import {
+    IconActivity,
+    IconBox,
+    IconClock,
+    IconFile,
+    IconPrinter,
+    IconSettings,
+} from '@tabler/icons-react';
+import {
+    CopyButton,
+} from '@inventreedb/ui';
 
 import type { ThreeDPrinter } from '../types';
 
@@ -12,6 +24,8 @@ type DetailField = {
     name: string;
     label: string;
     value?: React.ReactNode;
+    icon?: React.ReactNode;
+    copy?: boolean;
 };
 
 function DetailsTableField({
@@ -20,29 +34,50 @@ function DetailsTableField({
     field: DetailField;
 }) {
     return (
-        <Table.Tr style={{ verticalAlign: 'top' }}>
+        <Table.Tr style={{ verticalAlign: 'middle' }}>
             <Table.Td
                 style={{
                     minWidth: 75,
                     width: '50%',
                 }}
             >
-                <Text fw={600} size='md'>
-                    {field.label}
-                </Text>
+                <Group gap='xs' wrap='nowrap'>
+                    {field.icon}
+
+                    <Text size='md' pl='sm'>
+                        {field.label}
+                    </Text>
+                </Group>
             </Table.Td>
 
             <Table.Td
                 style={{
                     lineBreak: 'anywhere',
                     minWidth: 100,
-                    width: '50%',
+                    width: field.copy ? '45%' : '50%',
                 }}
             >
-                <Text size='md'>
+                <Text size='sm'>
                     {field.value ?? '—'}
                 </Text>
             </Table.Td>
+
+            {field.copy && (
+                <Table.Td
+                    style={{
+                        width: '5%',
+                        textAlign: 'right',
+                        verticalAlign: 'middle'
+                    }}
+                >
+                    <Group justify='center' align='center'>
+                        <CopyButton
+                            value={String(field.value ?? '')}
+                            size='sm'
+                        />
+                    </Group>
+                </Table.Td>
+            )}
         </Table.Tr>
     );
 }
@@ -89,17 +124,23 @@ export function PrinterDetailsPanel({
         {
             name: 'name',
             label: 'Name',
+            icon: <IconPrinter/>,
             value: printer.name,
+            copy: true
         },
         {
             name: 'manufacturer',
             label: 'Manufacturer',
+            icon: <IconPrinter/>,
             value: printer.manufacturer,
+            copy: true
         },
         {
             name: 'model',
             label: 'Model',
+            icon: <IconBox/>,
             value: printer.model,
+            copy: true
         },
     ];
 
@@ -107,21 +148,25 @@ export function PrinterDetailsPanel({
         {
             name: 'status',
             label: 'Status',
+            icon: <IconActivity/>,
             value: printer.status_text,
         },
         {
             name: 'file',
             label: 'File',
+            icon: <IconFile/>,
             value: printer.file_name,
         },
         {
             name: 'progress',
             label: 'Progress',
+            icon: <IconActivity/>,
             value: `${printer.progress}%`,
         },
         {
             name: 'remaining',
             label: 'Remaining',
+            icon: <IconClock/>,
             value: printer.remaining_time,
         },
     ];
@@ -130,16 +175,19 @@ export function PrinterDetailsPanel({
         {
             name: 'manufacturer',
             label: 'Manufacturer',
+            icon: <IconClock/>,
             value: printer.manufacturer,
         },
         {
             name: 'model',
             label: 'Model',
+            icon: <IconBox/>,
             value: printer.model,
         },
         {
             name: 'status',
             label: 'Status',
+            icon: <IconActivity/>,
             value: printer.status_text,
         },
     ];
@@ -162,77 +210,3 @@ export function PrinterDetailsPanel({
         </Stack>
     );
 }
-
-// export function PrinterDetailsPanel({
-//     printer,
-// }: {
-//     printer: ThreeDPrinter;
-// }) {
-//     return (
-//         <Stack gap='sm'>
-//             <Grid gap='sm'>
-//                 <Grid.Col span={{ base: 12, md: 6 }}>
-//                     <DetailsTable>
-//                         <DetailRow
-//                             label='Name'
-//                             value={printer.name}
-//                         />
-
-//                         <DetailRow
-//                             label='Manufacturer'
-//                             value={printer.manufacturer}
-//                         />
-
-//                         <DetailRow
-//                             label='Model'
-//                             value={printer.model}
-//                         />
-//                     </DetailsTable>
-//                 </Grid.Col>
-
-//                 <Grid.Col span={{ base: 12, md: 6 }}>
-//                     <DetailsTable>
-//                         <DetailRow
-//                             label='Status'
-//                             value={printer.status_text}
-//                         />
-
-//                         <DetailRow
-//                             label='File'
-//                             value={printer.file_name}
-//                         />
-
-//                         <DetailRow
-//                             label='Progress'
-//                             value={`${printer.progress}%`}
-//                         />
-
-//                         <DetailRow
-//                             label='Remaining'
-//                             value={printer.remaining_time}
-//                         />
-//                     </DetailsTable>
-//                 </Grid.Col>
-
-//                 <Grid.Col span={{ base: 12, md: 6 }}>
-//                     <DetailsTable>
-//                         <DetailRow
-//                             label='Name'
-//                             value={printer.name}
-//                         />
-
-//                         <DetailRow
-//                             label='Manufacturer'
-//                             value={printer.manufacturer}
-//                         />
-
-//                         <DetailRow
-//                             label='Model'
-//                             value={printer.model}
-//                         />
-//                     </DetailsTable>
-//                 </Grid.Col>
-//             </Grid>
-//         </Stack>
-//     );
-// }
