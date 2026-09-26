@@ -3,6 +3,12 @@
     "file": "assets/IconPlus-CH3sr2-F.js",
     "name": "IconPlus"
   },
+  "src/3DPrinterDetails.tsx": {
+    "file": "3DPrinterDetails.js",
+    "name": "3DPrinterDetails",
+    "src": "src/3DPrinterDetails.tsx",
+    "isEntry": true
+  },
   "src/3DPrintersPanel.tsx": {
     "file": "3DPrintersPanel.js",
     "name": "3DPrintersPanel",

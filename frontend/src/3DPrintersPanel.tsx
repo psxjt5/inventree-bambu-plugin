@@ -1,4 +1,4 @@
-import { Badge, Card, Group, Progress, SimpleGrid, Stack, Text, ActionIcon, Button, Tooltip } from '@mantine/core';
+import { Badge, Card, Group, Progress, SimpleGrid, Stack, Text, ActionIcon, Button, Tooltip, } from '@mantine/core';
 import { IconPlayerPlay, IconArrowRight, IconCamera, IconBulb } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 
@@ -32,7 +32,7 @@ type ThreeDPrinter = {
     remaining_time: string;
 };
 
-function formatRemainingTime(minutes: number | null): string {
+function formatRemainingTime(minutes: string | number | null): string {
     const value = Number(minutes);
 
     if (minutes === null || minutes === undefined || !Number.isFinite(value)) {
@@ -55,7 +55,7 @@ function formatRemainingTime(minutes: number | null): string {
     return `${remainingMinutes}m`;
 }
 
-function getFinishTime(minutes: number | null): string {
+function getFinishTime(minutes: string | number | null): string {
     const value = Number(minutes);
 
     if (minutes === null || minutes === undefined || !Number.isFinite(value)) {
@@ -82,7 +82,13 @@ function getFinishTime(minutes: number | null): string {
     });
 }
 
-function PrinterTile({ printer }: { printer: ThreeDPrinter }) {
+function PrinterTile({
+    printer,
+    context,
+}: {
+    printer: ThreeDPrinter;
+    context: InvenTreePluginContext;
+}) {
     const printerStatus = STATUS_MAP[printer.status] ?? { label: 'Unknown', color: 'gray' };
     const progress = Number(printer.progress);
 
@@ -150,7 +156,14 @@ function PrinterTile({ printer }: { printer: ThreeDPrinter }) {
                         </Tooltip>
                     </Group>
 
-                    <Button rightSection={<IconArrowRight size={25} />} onClick={() => console.log('Details', printer.pk)}>
+                    <Button
+                        onClick={() =>
+                            context.navigate(
+                                `/plugin/inventree_bambu/3dprinterdetails/${printer.pk}`,
+                            )
+                        }
+                        rightSection={<IconArrowRight size={25} />}
+                    >
                         Details
                     </Button>
                 </Group>
@@ -194,6 +207,7 @@ function ThreeDPrintersPanel({
                 <PrinterTile
                     key={printer.pk}
                     printer={printer}
+                    context={_context}
                 />
             ))}
         </SimpleGrid>

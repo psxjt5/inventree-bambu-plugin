@@ -10,7 +10,6 @@ import { viteExternalsPlugin } from 'vite-plugin-externals'
 export const externalLibs : Record<string, string> = {
   react: 'React',
   'react-dom': 'ReactDOM',
-  'ReactDom': 'ReactDOM',
   '@lingui/core': 'LinguiCore',
   '@lingui/react': 'LinguiReact',
   '@mantine/core': 'MantineCore',
@@ -48,8 +47,10 @@ export default defineConfig({
       input: [
         
         './src/Dashboard.tsx',
-        './src/3DPrintersPanel.tsx'
-        
+        './src/3DPrintersPanel.tsx',
+        './src/3DPrinterDetails.tsx',
+        './components/PanelGroup.tsx',
+        './components/PrinterDetailsPanel.tsx'
       ],
       output: {
         dir: '../inventree_bambu/static',
