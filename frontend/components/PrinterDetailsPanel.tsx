@@ -21,9 +21,11 @@ import {
     IconCirclePercentage,
     IconClock,
     IconFile,
+    IconFileStack,
     IconMapPin,
     IconPrinter,
     IconSettings,
+    IconStack2,
     IconTemperature,
     IconTemperaturePlus,
 } from '@tabler/icons-react';
@@ -303,7 +305,7 @@ export function PrinterDetailsPanel({
         {
             name: 'file',
             label: 'Current Job File',
-            icon: <IconFile/>,
+            icon: <IconFileStack/>,
             value: getShowPrintingStats(printer.status) ? printer.file_name ? (printer.file_name) : ('—') : (<Tooltip label="No active job" withArrow><span>—</span></Tooltip>),
         },
         {
@@ -324,6 +326,28 @@ export function PrinterDetailsPanel({
                         flexShrink: 0,
                     }}>
                         {printer.progress}%
+                    </Text>
+                </Group>
+            ) : (<Tooltip label="No active job" withArrow><span>—</span></Tooltip>),
+        },
+        {
+            name: 'layers',
+            label: 'Job Layers',
+            icon: <IconStack2/>,
+            value: getShowPrintingStats(printer.status) ? (
+                <Group gap='xs' wrap='nowrap' style={{ width: '100%' }}>
+                    <Progress
+                        value={(printer.layer_progress/printer.total_layers)*100}
+                        size='md'
+                        style={{ flex: 1 }}
+                        animated
+                    />
+                    <Text size='sm' style={{
+                        width: '20%',
+                        textAlign: 'right',
+                        flexShrink: 0,
+                    }}>
+                        {printer.layer_progress} / {printer.total_layers}
                     </Text>
                 </Group>
             ) : (<Tooltip label="No active job" withArrow><span>—</span></Tooltip>),
