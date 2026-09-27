@@ -18,6 +18,8 @@ from django.contrib.auth.models import Group
 from .notifications import Notifications
 
 from django.urls import path
+from django.shortcuts import render
+from django.template.response import TemplateResponse
 
 # Backwards compatibility imports
 try:
@@ -115,7 +117,7 @@ class Bambu3DPlugin(MachineDriverMixin, UrlsMixin, UserInterfaceMixin, SettingsM
             "validator": bool
         }
     }
-    
+  
     def __init__(self):
         super().__init__()
 
@@ -132,9 +134,17 @@ class Bambu3DPlugin(MachineDriverMixin, UrlsMixin, UserInterfaceMixin, SettingsM
         print("[BambuLab3DPrinterPlugin] Registering BambuLab 3D API URLs")
 
         return [
-            path("get_printer_data/<str:machine_serial>", BambuAPI.get_printer_data),
+            path("get_printer_data/<str:pk>", BambuAPI.get_printer_data),
             path("get_dashboard_widget_data", BambuAPI.get_dashboard_widget_data),
+            path("get_printer_tiles_data", BambuAPI.get_printer_tiles_data),
+            # path("3dprinterdetails/<str:pk>", self.view_3d_printer_details, name="3dprinterdetails"),
         ]
+
+    def view_3d_printer_details(self, request, pk):
+        return TemplateResponse(request, "3dprinterdetails.html", {
+            "printer_id": pk,
+            "plugin_js": self.plugin_static_file("3DPrinterDetails.js"),
+        })
     
     def get_ui_dashboard_items(self, request, context: dict, **kwargs):
         print("[BambuLab3DPrinterPlugin] Registering Dashboard Widgets")
@@ -160,3 +170,34 @@ class Bambu3DPlugin(MachineDriverMixin, UrlsMixin, UserInterfaceMixin, SettingsM
         })
 
         return items
+
+    def get_ui_panels(self, request, context, **kwargs):
+        panels = []
+        context = context or {}
+
+        target_model = context.get('target_model', None)
+        target_id = context.get('target_id', None)
+
+        if target_model == "manufacturing":
+            panels.append({
+                'key': '3d-printers-panel',
+                'title': '3D Printers',
+                'source': self.plugin_static_file('3DPrintersPanel.js:render3DPrintersPanel'),
+                'icon': 'ti:badge-3d:outline',
+            })
+
+        return panels
+
+    def get_ui_routes(self, request, context, **kwargs):
+        print("[BambuLab3DPrinterPlugin] Registering UI Routes")
+
+        return [{
+            'key': 'bambu-printer-details',
+            'title': '3D Printer Details',
+            'source': self.plugin_static_file(
+                '3DPrinterDetails.js:render3DPrintersPanel'
+            ),
+            'options': {
+                'path': '3dprinterdetails/:pk/:panel?',
+            },
+        }]

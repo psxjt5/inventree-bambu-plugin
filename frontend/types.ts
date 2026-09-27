@@ -1,0 +1,26 @@
+export type ThreeDPrinter = {
+    pk: string;
+    name: string;
+    status: number;
+    status_text: string;
+    progress: number;
+    file_name: string;
+    manufacturer: string;
+    model: string;
+    remaining_time: string;
+    location: string | null;
+    location_name: string | null;
+    serial: string;
+    layer_progress: number;
+    current_layer: number;
+    total_layers: number;
+    nozzle_temperature: number;
+    nozzle_target_temperature: number;
+    bed_temperature: number;
+    bed_target_temperature: number;
+    cooling_fan_speed: number;
+    heatbreak_fan_speed: number;
+    big_fan_1_speed: number;
+    big_fan_2_speed: number;
+    ams_units: number;
+};
