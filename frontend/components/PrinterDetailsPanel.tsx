@@ -8,6 +8,7 @@ import {
     Stack,
     Table,
     Text,
+    Tooltip,
 } from '@mantine/core';
 import {
     IconActivity,
@@ -303,7 +304,7 @@ export function PrinterDetailsPanel({
             name: 'file',
             label: 'Current Job File',
             icon: <IconFile/>,
-            value: getShowPrintingStats(printer.status) ? printer.file_name ? (printer.file_name) : ('—') : ('—'),
+            value: getShowPrintingStats(printer.status) ? printer.file_name ? (printer.file_name) : ('—') : (<Tooltip label="No active job" withArrow><span>—</span></Tooltip>),
         },
         {
             name: 'progress',
@@ -325,19 +326,19 @@ export function PrinterDetailsPanel({
                         {printer.progress}%
                     </Text>
                 </Group>
-            ) : ('—'),
+            ) : (<Tooltip label="No active job" withArrow><span>—</span></Tooltip>),
         },
         {
             name: 'remaining',
             label: 'Time Remaining',
             icon: <IconClock/>,
-            value: getShowPrintingStats(printer.status) ? formatRemainingTime(printer.remaining_time) : ('—'),
+            value: getShowPrintingStats(printer.status) ? formatRemainingTime(printer.remaining_time) : (<Tooltip label="No active job" withArrow><span>—</span></Tooltip>),
         },
         {
             name: 'finishes',
             label: 'Job Finishes',
             icon: <IconClock/>,
-            value: getShowPrintingStats(printer.status) ? getFinishTime(printer.remaining_time) : ('—'),
+            value: getShowPrintingStats(printer.status) ? getFinishTime(printer.remaining_time) : (<Tooltip label="No active job" withArrow><span>—</span></Tooltip>),
         },
     ];
 
