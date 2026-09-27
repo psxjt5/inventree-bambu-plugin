@@ -5,6 +5,7 @@ Provides data from the Bambu MQTT Service
 from django.core.cache import cache
 
 import json
+import math
 from pathlib import Path
 
 class BambuData:
@@ -170,19 +171,19 @@ class BambuData:
 
     @staticmethod
     def getNozzleTemperature(serial):
-        return BambuData.getPayload(serial).get("print", {}).get("nozzle_temper")
+        return math.ceil(BambuData.getPayload(serial).get("print", {}).get("nozzle_temper"))
 
     @staticmethod
     def getNozzleTargetTemperature(serial):
-        return BambuData.getPayload(serial).get("print", {}).get("nozzle_target_temper")
+        return math.ceil(BambuData.getPayload(serial).get("print", {}).get("nozzle_target_temper"))
 
     @staticmethod
     def getBedTemperature(serial):
-        return BambuData.getPayload(serial).get("print", {}).get("bed_temper")
+        return math.ceil(BambuData.getPayload(serial).get("print", {}).get("bed_temper"))
 
     @staticmethod
     def getBedTargetTemperature(serial):
-        return BambuData.getPayload(serial).get("print", {}).get("bed_target_temper")
+        return math.ceil(BambuData.getPayload(serial).get("print", {}).get("bed_target_temper"))
 
     @staticmethod
     def getCoolingFanSpeed(serial):

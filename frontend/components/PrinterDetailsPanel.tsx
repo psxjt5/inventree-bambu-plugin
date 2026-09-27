@@ -1,7 +1,10 @@
 import {
+    Anchor,
+    Badge,
     Grid,
     Group,
     Paper,
+    Progress,
     Stack,
     Table,
     Text,
@@ -9,16 +12,100 @@ import {
 import {
     IconActivity,
     IconBox,
+    IconCarFan,
+    IconCarFan1,
+    IconCarFan2,
+    IconCircleLetterA,
+    IconCirclePercentage,
     IconClock,
     IconFile,
+    IconMapPin,
     IconPrinter,
     IconSettings,
+    IconTemperature,
+    IconTemperaturePlus,
 } from '@tabler/icons-react';
 import {
-    CopyButton,
+    CopyButton, InvenTreePluginContext
 } from '@inventreedb/ui';
 
 import type { ThreeDPrinter } from '../types';
+
+function formatRemainingTime(minutes: string | number | null): string {
+    const value = Number(minutes);
+
+    if (minutes === null || minutes === undefined || !Number.isFinite(value)) {
+        return '-';
+    }
+
+    const totalMinutes = Math.max(0, Math.round(value));
+    const days = Math.floor(totalMinutes / (24 * 60));
+    const hours = Math.floor((totalMinutes % (24 * 60)) / 60);
+    const remainingMinutes = totalMinutes % 60;
+
+    if (days > 0) {
+        return `${days}d ${hours}h ${remainingMinutes}m`;
+    }
+
+    if (hours > 0) {
+        return `${hours}h ${remainingMinutes}m`;
+    }
+
+    return `${remainingMinutes}m`;
+}
+
+function getFinishTime(minutes: string | number | null): string {
+    const value = Number(minutes);
+
+    if (minutes === null || minutes === undefined || !Number.isFinite(value)) {
+        return '-';
+    }
+
+    const finishTime = new Date(Date.now() + Math.round(value) * 60 * 1000);
+    const now = new Date();
+
+    const sameDay = finishTime.toDateString() === now.toDateString();
+
+    if (sameDay) {
+        return finishTime.toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+        });
+    }
+
+    return finishTime.toLocaleDateString([], {
+        weekday: 'short',
+    }) + ' ' + finishTime.toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+    });
+}
+
+function getStatusColor(status: number): string {
+    switch (Number(status)) {
+        case 101: // Idle
+        case 102: // Preparing
+        case 103: // Printing
+        case 300: // Connected
+            return 'blue';
+
+        case 104: // Paused
+        case 500: // Unknown
+            return 'gray';
+
+        case 105: // Finished
+            return 'green';
+
+        case 301: // Disconnected
+        case 302: // Failed
+        case 303: // Error
+        case 400: // Misconfigured
+            return 'red';
+
+        default:
+            return 'gray';
+    }
+}
 
 type DetailField = {
     name: string;
@@ -117,8 +204,10 @@ function DetailsTable({
 
 export function PrinterDetailsPanel({
     printer,
+    context,
 }: {
     printer: ThreeDPrinter;
+    context: InvenTreePluginContext;
 }) {
     const printerFields: DetailField[] = [
         {
@@ -142,14 +231,50 @@ export function PrinterDetailsPanel({
             value: printer.model,
             copy: true
         },
+        {
+            name: 'amstotal',
+            label: 'AMS Units',
+            icon: <IconCircleLetterA/>,
+            value: printer.ams_units,
+            copy: true
+        },
+        {
+            name: 'location',
+            label: 'Location',
+            icon: <IconMapPin/>,
+            value: printer.location_name ? (
+                <Anchor
+                    href={`/stock/location/${printer.location}`}
+                    onClick={(event) => {
+                        event.preventDefault();
+
+                        context.navigate(
+                            `/stock/location/${printer.location}`,
+                        );
+                    }}
+                >
+                    {printer.location_name}
+                </Anchor>
+            ) : (
+                '—'
+            ),
+            copy: true
+        },
     ];
 
-    const printFields: DetailField[] = [
+    const jobFields: DetailField[] = [
         {
             name: 'status',
             label: 'Status',
             icon: <IconActivity/>,
-            value: printer.status_text,
+            value: (
+                <Badge
+                    color={getStatusColor(printer.status)}
+                    variant='light'
+                >
+                    {printer.status_text}
+                </Badge>
+            ),
         },
         {
             name: 'file',
@@ -159,36 +284,106 @@ export function PrinterDetailsPanel({
         },
         {
             name: 'progress',
-            label: 'Progress',
-            icon: <IconActivity/>,
-            value: `${printer.progress}%`,
+            label: 'Job Progress',
+            icon: <IconCirclePercentage/>,
+            value: (
+                <Group gap='xs' wrap='nowrap' style={{ width: '100%' }}>
+                    <Progress
+                        value={printer.progress}
+                        size='md'
+                        style={{ flex: 1 }}
+                        animated
+                    />
+                    <Text size='sm' style={{
+                        width: '20%',
+                        textAlign: 'right',
+                        flexShrink: 0,
+                    }}>
+                        {printer.progress}%
+                    </Text>
+                </Group>
+            ),
         },
         {
             name: 'remaining',
-            label: 'Remaining',
+            label: 'Time Remaining',
             icon: <IconClock/>,
-            value: printer.remaining_time,
+            value: formatRemainingTime(printer.remaining_time),
+        },
+        {
+            name: 'finishes',
+            label: 'Job Finishes',
+            icon: <IconClock/>,
+            value: getFinishTime(printer.remaining_time),
         },
     ];
 
-    const connectionFields: DetailField[] = [
+    const statsFields: DetailField[] = [
         {
-            name: 'manufacturer',
-            label: 'Manufacturer',
-            icon: <IconClock/>,
-            value: printer.manufacturer,
+            name: 'nozzletemp',
+            label: 'Nozzle Temperature',
+            icon: <IconTemperature/>,
+            value: (
+                <Group gap='xs' wrap='nowrap' style={{ width: '100%' }}>
+                    <Progress
+                        value={(printer.nozzle_temperature/printer.nozzle_target_temperature)*100}
+                        size='md'
+                        style={{ flex: 1 }}
+                    />
+                    <Text size='sm' style={{
+                        width: '20%',
+                        textAlign: 'right',
+                        flexShrink: 0,
+                    }}>
+                        {printer.nozzle_temperature} / {printer.nozzle_target_temperature}
+                    </Text>
+                </Group>
+            ),
         },
         {
-            name: 'model',
-            label: 'Model',
-            icon: <IconBox/>,
-            value: printer.model,
+            name: 'bedtemp',
+            label: 'Bed Temperature',
+            icon: <IconTemperature/>,
+            value: (
+                <Group gap='xs' wrap='nowrap' style={{ width: '100%' }}>
+                    <Progress
+                        value={(printer.bed_temperature/printer.bed_target_temperature)*100}
+                        size='md'
+                        style={{ flex: 1 }}
+                    />
+                    <Text size='sm' style={{
+                        width: '20%',
+                        textAlign: 'right',
+                        flexShrink: 0,
+                    }}>
+                        {printer.bed_temperature} / {printer.bed_target_temperature}
+                    </Text>
+                </Group>
+            ),
         },
         {
-            name: 'status',
-            label: 'Status',
-            icon: <IconActivity/>,
-            value: printer.status_text,
+            name: 'coolingfan',
+            label: 'Cooling Fan Speed',
+            icon: <IconCarFan/>,
+            value: printer.cooling_fan_speed,
+        },
+        {
+            name: 'heatbreakfan',
+            label: 'Heatbreak Fan Speed',
+            icon: <IconCarFan/>,
+            value: printer.heatbreak_fan_speed,
+        },
+        {
+            name: 'bigfan1',
+            label: 'Big Fan 1 Speed',
+            icon: <IconCarFan1/>,
+            value: printer.big_fan_1_speed,
+        },
+        {
+            name: 'bigfan2',
+            label: 'Big Fan 2 Speed',
+            icon: <IconCarFan2/>,
+            value: printer.big_fan_2_speed,
         },
     ];
 
@@ -200,11 +395,11 @@ export function PrinterDetailsPanel({
                 </Grid.Col>
 
                 <Grid.Col span={{ base: 12, md: 6 }}>
-                    <DetailsTable fields={printFields} />
+                    <DetailsTable fields={jobFields} />
                 </Grid.Col>
 
                 <Grid.Col span={{ base: 12, md: 6 }}>
-                    <DetailsTable fields={connectionFields} />
+                    <DetailsTable fields={statsFields} />
                 </Grid.Col>
             </Grid>
         </Stack>

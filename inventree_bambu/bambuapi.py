@@ -7,7 +7,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from machine.models import MachineConfig
+from machine.models import MachineSetting
 from machine.serializers import MachineConfigSerializer
+from stock.models import StockLocation
 
 from .bambudata import BambuData
 
@@ -68,6 +70,11 @@ class BambuAPI:
         simplified = [
             {
                 "pk": m["pk"],
+                "serial": MachineSetting.objects.get(
+                    machine_config_id=m["pk"],
+                    config_type=MachineSetting.ConfigType.DRIVER,
+                    key="SERIAL",
+                ).value,
                 "name": m["name"],
                 "status": m["status"],
                 "status_text": m["status_text"],
@@ -96,30 +103,63 @@ class BambuAPI:
 
     @api_view(["GET"])
     @permission_classes([IsAuthenticated])
-    def get_printer_data(request, machine_serial):
+    def get_printer_data(request, pk):
         """Return data for a specific printer"""
 
         print("[BambuAPI] Get Printer Data")
 
-        data = {
-            "serial": machine_serial,
-            "model": BambuData.getModel(machine_serial),
-            "status": BambuData.getStatus(machine_serial),
-            "progress": BambuData.getProgress(machine_serial),
-            "layer_progress": BambuData.getLayerProgress(machine_serial),
-            "current_layer": BambuData.getCurrentLayer(machine_serial),
-            "total_layers": BambuData.getTotalLayers(machine_serial),
-            "remaining_time": BambuData.getRemainingTime(machine_serial),
-            "file_name": BambuData.getFileName(machine_serial),
-            "nozzle_temperature": BambuData.getNozzleTemperature(machine_serial),
-            "nozzle_target_temperature": BambuData.getNozzleTargetTemperature(machine_serial),
-            "bed_temperature": BambuData.getBedTemperature(machine_serial),
-            "bed_target_temperature": BambuData.getBedTargetTemperature(machine_serial),
-            "cooling_fan_speed": BambuData.getCoolingFanSpeed(machine_serial),
-            "heatbreak_fan_speed": BambuData.getHeatBreakFanSpeed(machine_serial),
-            "big_fan_1_speed": BambuData.getBigFan1Speed(machine_serial),
-            "big_fan_2_speed": BambuData.getBigFan2Speed(machine_serial),
-            "ams_count": BambuData.getAMSUnitCount(machine_serial)
+        machine = MachineConfig.objects.get(
+            machine_type='3d-printer',
+            pk=pk,
+        )
+
+        serializer = MachineConfigSerializer(machine)
+        data = serializer.data
+
+        properties = {
+            p["key"]: p["value"]
+            for p in data.get("properties", [])
         }
 
-        return Response(data)
+        serial = MachineSetting.objects.get(
+            machine_config_id=pk,
+            key="SERIAL",
+        ).value
+
+        location = MachineSetting.objects.filter(
+            machine_config_id=pk,
+            key="LOCATION",
+        ).values_list("value", flat=True).first()
+
+        location_name = None
+
+        if location:
+            location_name = StockLocation.objects.filter(
+                pk=location,
+            ).values_list("name", flat=True).first()
+
+        return Response({
+            "serial": serial,
+            "name": data["name"],
+            "manufacturer": "Bambu Lab",
+            "model": properties.get("Model"),
+            "location": location,
+            "location_name": location_name,
+            "status": data["status"],
+            "status_text": data["status_text"],
+            "progress": properties.get("Job Progress"),
+            "layer_progress": properties.get("Layer Progress"),
+            "current_layer": properties.get("Current Layer"),
+            "total_layers": properties.get("Total Layers"),
+            "remaining_time": properties.get("Remaining Time"),
+            "file_name": properties.get("File Name"),
+            "nozzle_temperature": properties.get("Nozzle Temperature"),
+            "nozzle_target_temperature": properties.get("Nozzle Target Temperature"),
+            "bed_temperature": properties.get("Bed Temperature"),
+            "bed_target_temperature": properties.get("Bed Target Temperature"),
+            "cooling_fan_speed": properties.get("Cooling Fan Speed"),
+            "heatbreak_fan_speed": properties.get("Heatbreak Fan Speed"),
+            "big_fan_1_speed": properties.get("Big Fan 1 Speed"),
+            "big_fan_2_speed": properties.get("Big Fan 2 Speed"),
+            "ams_units": properties.get("AMS Units"),
+        })

@@ -1,50 +1,90 @@
-import { Group, Paper, Stack, Tabs, Text } from '@mantine/core';
-import { checkPluginVersion, StylishText, type PanelType, type InvenTreePluginContext } from '@inventreedb/ui';
+import { Group, Paper, Stack, Text } from '@mantine/core';
+import {
+    checkPluginVersion,
+    StylishText,
+    type PanelType,
+    type InvenTreePluginContext,
+} from '@inventreedb/ui';
 import { useEffect, useState } from 'react';
-import { IconInfoCircle, IconCamera, IconFile, IconPlayerPlay, IconPrinter, IconClipboardList, IconHistory, IconTool, IconCircleLetterA, IconExclamationCircle, IconDeviceGamepad3} from '@tabler/icons-react';
+import {
+    IconInfoCircle,
+    IconCamera,
+    IconFile,
+    IconPrinter,
+    IconClipboardList,
+    IconHistory,
+    IconTool,
+    IconCircleLetterA,
+    IconExclamationCircle,
+    IconDeviceGamepad3,
+} from '@tabler/icons-react';
 
-import { PanelGroup } from '../components/PanelGroup'
-import { PrinterDetailsPanel } from '../components/PrinterDetailsPanel'
+import { PanelGroup } from '../components/PanelGroup';
+import { PrinterDetailsPanel } from '../components/PrinterDetailsPanel';
 
-type ThreeDPrinter = {
-    pk: string;
-    name: string;
-    status: number;
-    status_text: string;
-    progress: number;
-    file_name: string;
-    manufacturer: string;
-    model: string;
-    remaining_time: string;
-};
+import type { ThreeDPrinter } from '../types';
 
 function PrinterDetailHeader({ printer }: { printer: ThreeDPrinter }) {
     return (
         <Paper p='xs' radius='xs' shadow='xs'>
-            <Group justify='space-between' gap='xs' wrap='nowrap' align='flex-start'>
-                <Group justify='space-between' wrap='nowrap' align='flex-start' style={{ flexGrow: 1 }}>
-                    <Group justify='start' wrap='nowrap' align='flex-start'>
+            <Group
+                justify='space-between'
+                gap='xs'
+                wrap='nowrap'
+                align='flex-start'
+            >
+                <Group
+                    justify='space-between'
+                    wrap='nowrap'
+                    align='flex-start'
+                    style={{ flexGrow: 1 }}
+                >
+                    <Group
+                        justify='start'
+                        wrap='nowrap'
+                        align='flex-start'
+                    >
                         <Stack gap='xs'>
-                            <StylishText size='lg'>{printer.name}</StylishText>
+                            <StylishText size='lg'>
+                                {printer.name}
+                            </StylishText>
 
                             {(printer.manufacturer || printer.model) && (
                                 <Group gap='xs'>
-                                    <Text size='sm'>{printer.manufacturer} {printer.model}</Text>
+                                    <Text size='sm'>
+                                        {printer.manufacturer}{' '}
+                                        {printer.model}
+                                    </Text>
                                 </Group>
                             )}
                         </Stack>
                     </Group>
                 </Group>
 
-                {/* Action buttons go here */}
-                <Group gap={5} justify='right' wrap='nowrap' align='center' />
+                <Group
+                    gap={5}
+                    justify='right'
+                    wrap='nowrap'
+                    align='center'
+                />
             </Group>
         </Paper>
     );
 }
 
-function PrinterOverview({ printer }: { printer: ThreeDPrinter }) {
-    return <PrinterDetailsPanel printer={printer} />;
+function PrinterOverview({
+    printer,
+    context,
+}: {
+    printer: ThreeDPrinter;
+    context: InvenTreePluginContext;
+}) {
+    return (
+        <PrinterDetailsPanel
+            printer={printer}
+            context={context}
+        />
+    );
 }
 
 function PrinterCamera() {
@@ -83,7 +123,7 @@ function PrinterControls() {
 function PrinterFilament() {
     return (
         <Stack gap='md'>
-            <Text>Filament</Text>
+            <Text>Printer filament</Text>
             <Text c='dimmed'>
                 AMS and filament information will be displayed here.
             </Text>
@@ -91,27 +131,74 @@ function PrinterFilament() {
     );
 }
 
-function PrinterDetails({ context }: { context: InvenTreePluginContext }) {
+function PrinterDetails({
+    context: _context,
+}: {
+    context: InvenTreePluginContext;
+}) {
     const pathParts = window.location.pathname.split('/');
     const detailsIndex = pathParts.indexOf('3dprinterdetails');
-    const pk = detailsIndex >= 0 ? pathParts[detailsIndex + 1] : undefined;
+    const pk =
+        detailsIndex >= 0
+            ? pathParts[detailsIndex + 1]
+            : undefined;
 
-    const [printer, setPrinter] = useState<ThreeDPrinter | null>(null);
+    const [printer, setPrinter] =
+        useState<ThreeDPrinter | null>(null);
 
     useEffect(() => {
         if (!pk) {
+            console.error('[Bambu] No printer PK found in URL');
             return;
         }
 
-        fetch('/plugin/inventree_bambu/get_printer_tiles_data')
-            .then((res) => res.json())
-            .then((data: ThreeDPrinter[]) => {
-                const matchingPrinter = data.find((printer) => String(printer.pk) === pk);
-                setPrinter(matchingPrinter ?? null);
+        const fetchLiveData = () => {
+            const url =
+                `/plugin/inventree_bambu/get_printer_data/${encodeURIComponent(pk)}`;
+
+            console.log('[Bambu] Calling printer data endpoint:', url);
+
+            fetch(url, {
+                cache: 'no-store',
             })
-            .catch(() => {
-                setPrinter(null);
-            });
+                .then((res) => {
+                    console.log(
+                        '[Bambu] Printer data response:',
+                        res.status,
+                    );
+
+                    if (!res.ok) {
+                        throw new Error(
+                            `get_printer_data failed: ${res.status}`,
+                        );
+                    }
+
+                    return res.json();
+                })
+                .then((data: ThreeDPrinter) => {
+                    console.log('[Bambu] Live printer data:', data);
+
+                    setPrinter(data);
+                })
+                .catch((error) => {
+                    console.error(
+                        '[Bambu] Live printer request failed:',
+                        error,
+                    );
+
+                    setPrinter(null);
+                });
+        };
+
+        // Call immediately.
+        fetchLiveData();
+
+        // Then every second.
+        const interval = setInterval(fetchLiveData, 1000);
+
+        return () => {
+            clearInterval(interval);
+        };
     }, [pk]);
 
     if (!printer) {
@@ -119,72 +206,89 @@ function PrinterDetails({ context }: { context: InvenTreePluginContext }) {
     }
 
     const printerPanels: PanelType[] = [
-    {
-        name: 'overview',
-        label: 'Overview',
-        icon: <IconInfoCircle/>,
-        content: <PrinterOverview printer={printer} />,
-    },
-    {
-        name: 'controls',
-        label: 'Controls',
-        icon: <IconDeviceGamepad3/>,
-        content: <PrinterControls />,
-    },
-    {
-        name: 'ams',
-        label: 'AMS',
-        icon: <IconCircleLetterA/>,
-        content: <PrinterFilament />,
-    },
-    {
-        name: 'scheduledjobs',
-        label: 'Scheduled Jobs',
-        icon: <IconClipboardList/>,
-        content: <PrinterOverview printer={printer} />,
-    },
-    {
-        name: 'jobhistory',
-        label: 'Job History',
-        icon: <IconHistory/>,
-        content: <PrinterOverview printer={printer} />,
-    },
-    {
-        name: 'errorhistory',
-        label: 'Error History',
-        icon: <IconExclamationCircle/>,
-        content: <PrinterOverview printer={printer} />,
-    },
-    {
-        name: 'maintenance',
-        label: 'Maintenance',
-        icon: <IconTool/>,
-        content: <PrinterOverview printer={printer} />,
-    },
-    {
-        name: 'files',
-        label: 'Printer Files',
-        icon: <IconFile/>,
-        content: <PrinterFiles />,
-    },
-    {
-        name: 'camera',
-        label: 'Camera',
-        icon: <IconCamera/>,
-        content: <PrinterCamera />,
-    },
-  ];
+        {
+            name: 'overview',
+            label: 'Overview',
+            icon: <IconInfoCircle />,
+            content: (
+                <PrinterOverview printer={printer} context={_context} />
+            ),
+        },
+        {
+            name: 'controls',
+            label: 'Controls',
+            icon: <IconDeviceGamepad3 />,
+            content: <PrinterControls />,
+        },
+        {
+            name: 'ams',
+            label: 'AMS',
+            icon: <IconCircleLetterA />,
+            content: <PrinterFilament />,
+        },
+        {
+            name: 'scheduledjobs',
+            label: 'Scheduled Jobs',
+            icon: <IconClipboardList />,
+            content: (
+                <PrinterOverview printer={printer} />
+            ),
+        },
+        {
+            name: 'jobhistory',
+            label: 'Job History',
+            icon: <IconHistory />,
+            content: (
+                <PrinterOverview printer={printer} />
+            ),
+        },
+        {
+            name: 'errorhistory',
+            label: 'Error History',
+            icon: <IconExclamationCircle />,
+            content: (
+                <PrinterOverview printer={printer} />
+            ),
+        },
+        {
+            name: 'maintenance',
+            label: 'Maintenance',
+            icon: <IconTool />,
+            content: (
+                <PrinterOverview printer={printer} />
+            ),
+        },
+        {
+            name: 'files',
+            label: 'Printer Files',
+            icon: <IconFile />,
+            content: <PrinterFiles />,
+        },
+        {
+            name: 'camera',
+            label: 'Camera',
+            icon: <IconCamera />,
+            content: <PrinterCamera />,
+        },
+    ];
 
-  return (
-    <Stack gap='md' style={{height: '100%',}}>
-        <PrinterDetailHeader printer={printer} />
+    return (
+        <Stack
+            gap='md'
+            style={{
+                height: '100%',
+            }}
+        >
+            <PrinterDetailHeader printer={printer} />
 
-        <PanelGroup panels={printerPanels}/>
-    </Stack>
-  );
+            <PanelGroup panels={printerPanels} />
+        </Stack>
+    );
 }
 
-export function render3DPrintersPanel(context: InvenTreePluginContext) {
+export function render3DPrintersPanel(
+    context: InvenTreePluginContext,
+) {
     checkPluginVersion(context);
 
     return <PrinterDetails context={context} />;
