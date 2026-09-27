@@ -9,7 +9,10 @@ To aid with developing 3D printer plugins for other printer types, a significant
 Development of this plugin is still ongoing. Current capabilities include the ability to:
 - Add a printer into InvenTree's Machine Registry (within the Admin Center).
 - Continually communicate with each printer via MQTT to retrieve printer data (status etc.).
-- Show each printer, it's job progress, status and print file in a dashboard widget.
+- Show each printer, it's job progress, status and current file in a dashboard widget.
+- Receive notifications for various printer events (Printer Online, Printer Offline, Print Started, Print Stopped, Printer Error, Print Paused, Print Resumed, Print Finished).
+- Monitor all printers in the "3D Printing" panel in under the InvenTree Manufacturing module.
+- Use the "Details" buttons in the Manufacturing module to see printer details.
 
 Admin Center Machine Registry with Bambu Lab printers connected:
 
@@ -19,9 +22,21 @@ Dashboard Widget showing print status:
 
 <img height="150" alt="image" src="https://github.com/user-attachments/assets/d8225385-75f1-4882-8000-eb61bbf372e5" />
 
+Printer Notifications:
+
+<img height="150" height="201" alt="image" src="https://github.com/user-attachments/assets/5bdddf9e-7702-4579-b8b6-2db164e4ffaf" />
+
+Manufacturing Panel showing printer tiles:
+
+<img height="300" alt="image" src="https://github.com/user-attachments/assets/3d4ec0f9-0fba-4cab-8b31-d90ecc3c6325" />
+
+Printer details page:
+
+<img height="300" alt="image" src="https://github.com/user-attachments/assets/1d348d29-416a-44f6-a3ef-b8c66cca38cf" />
+
 ## Roadmap
-- Printer status notifications.
-- Ability to manage and control printers through a panel in the Manufacturing module of InvenTree.
+- Additional printer details panels.
+- Printer control (start and stop jobs, run maintenance tasks etc.)
 - Ability to queue print jobs.
 - Stock updates as prints are finished.
 
