@@ -347,7 +347,7 @@ export function PrinterDetailsPanel({
                         textAlign: 'right',
                         flexShrink: 0,
                     }}>
-                        {printer.layer_progress} / {printer.total_layers}
+                        <Tooltip label="Current Layer" withArrow><span>{printer.layer_progress}</span></Tooltip> / <Tooltip label="Total Layers" withArrow><span>{printer.total_layers}</span></Tooltip>
                     </Text>
                 </Group>
             ) : (<Tooltip label="No active job" withArrow><span>—</span></Tooltip>),
@@ -383,7 +383,7 @@ export function PrinterDetailsPanel({
                         textAlign: 'right',
                         flexShrink: 0,
                     }}>
-                        {printer.nozzle_temperature} / {printer.nozzle_target_temperature}
+                        <Tooltip label="Current Temperature" withArrow><span>{printer.nozzle_temperature}</span></Tooltip> / <Tooltip label="Target Temperature" withArrow><span>{printer.nozzle_target_temperature}</span></Tooltip>
                     </Text>
                 </Group>
             ),
@@ -404,7 +404,7 @@ export function PrinterDetailsPanel({
                         textAlign: 'right',
                         flexShrink: 0,
                     }}>
-                        {printer.bed_temperature} / {printer.bed_target_temperature}
+                        <Tooltip label="Current Temperature" withArrow><span>{printer.bed_temperature}</span></Tooltip> / <Tooltip label="Target Temperature" withArrow><span>{printer.bed_target_temperature}</span></Tooltip>
                     </Text>
                 </Group>
             ),
