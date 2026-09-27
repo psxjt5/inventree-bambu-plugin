@@ -12,6 +12,7 @@ import {
 import {
     IconActivity,
     IconBox,
+    IconBuildingFactory2,
     IconCarFan,
     IconCarFan1,
     IconCarFan2,
@@ -124,8 +125,8 @@ function DetailsTableField({
         <Table.Tr style={{ verticalAlign: 'middle' }}>
             <Table.Td
                 style={{
+                    width: '45%',
                     minWidth: 75,
-                    width: '50%',
                 }}
             >
                 <Group gap='xs' wrap='nowrap'>
@@ -139,9 +140,9 @@ function DetailsTableField({
 
             <Table.Td
                 style={{
-                    lineBreak: 'anywhere',
+                    width: '45%',
                     minWidth: 100,
-                    width: field.copy ? '45%' : '50%',
+                    lineBreak: 'anywhere',
                 }}
             >
                 <Text size='sm'>
@@ -149,22 +150,23 @@ function DetailsTableField({
                 </Text>
             </Table.Td>
 
-            {field.copy && (
-                <Table.Td
-                    style={{
-                        width: '5%',
-                        textAlign: 'right',
-                        verticalAlign: 'middle'
-                    }}
-                >
+            <Table.Td
+                style={{
+                    width: '4%',
+                    minWidth: 40,
+                    textAlign: 'center',
+                    verticalAlign: 'middle',
+                }}
+            >
+                {field.copy && (
                     <Group justify='center' align='center'>
                         <CopyButton
                             value={String(field.value ?? '')}
                             size='sm'
                         />
                     </Group>
-                </Table.Td>
-            )}
+                )}
+            </Table.Td>
         </Table.Tr>
     );
 }
@@ -220,7 +222,7 @@ export function PrinterDetailsPanel({
         {
             name: 'manufacturer',
             label: 'Manufacturer',
-            icon: <IconPrinter/>,
+            icon: <IconBuildingFactory2/>,
             value: printer.manufacturer,
             copy: true
         },
@@ -257,8 +259,7 @@ export function PrinterDetailsPanel({
                 </Anchor>
             ) : (
                 '—'
-            ),
-            copy: true
+            )
         },
     ];
 
@@ -280,7 +281,7 @@ export function PrinterDetailsPanel({
             name: 'file',
             label: 'File',
             icon: <IconFile/>,
-            value: printer.file_name,
+            value: printer.file_name ? (printer.file_name) : ('—'),
         },
         {
             name: 'progress',
