@@ -72,7 +72,7 @@ function PrinterDetailHeader({ printer }: { printer: ThreeDPrinter }) {
     );
 }
 
-function PrinterOverview({
+function PrinterDetails({
     printer,
     context,
 }: {
@@ -131,7 +131,7 @@ function PrinterFilament() {
     );
 }
 
-function PrinterDetails({
+function PrinterDetailsPage({
     context: _context,
 }: {
     context: InvenTreePluginContext;
@@ -207,11 +207,11 @@ function PrinterDetails({
 
     const printerPanels: PanelType[] = [
         {
-            name: 'overview',
-            label: 'Overview',
+            name: 'details',
+            label: 'Printer Details',
             icon: <IconInfoCircle />,
             content: (
-                <PrinterOverview printer={printer} context={_context} />
+                <PrinterDetails printer={printer} context={_context} />
             ),
         },
         {
@@ -231,7 +231,7 @@ function PrinterDetails({
             label: 'Scheduled Jobs',
             icon: <IconClipboardList />,
             content: (
-                <PrinterOverview printer={printer} />
+                <PrinterDetailsPage printer={printer} />
             ),
         },
         {
@@ -239,7 +239,7 @@ function PrinterDetails({
             label: 'Job History',
             icon: <IconHistory />,
             content: (
-                <PrinterOverview printer={printer} />
+                <PrinterDetailsPage printer={printer} />
             ),
         },
         {
@@ -247,7 +247,7 @@ function PrinterDetails({
             label: 'Error History',
             icon: <IconExclamationCircle />,
             content: (
-                <PrinterOverview printer={printer} />
+                <PrinterDetailsPage printer={printer} />
             ),
         },
         {
@@ -255,7 +255,7 @@ function PrinterDetails({
             label: 'Maintenance',
             icon: <IconTool />,
             content: (
-                <PrinterOverview printer={printer} />
+                <PrinterDetailsPage printer={printer} />
             ),
         },
         {
@@ -291,5 +291,5 @@ export function render3DPrintersPanel(
 ) {
     checkPluginVersion(context);
 
-    return <PrinterDetails context={context} />;
+    return <PrinterDetailsPage context={context} />;
 }
