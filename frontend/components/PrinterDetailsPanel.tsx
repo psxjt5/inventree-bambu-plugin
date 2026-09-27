@@ -108,6 +108,28 @@ function getStatusColor(status: number): string {
     }
 }
 
+function getShowPrintingStats(status: number): boolean {
+     switch (Number(status)) {
+        case 101: // Idle
+        case 300: // Connected
+        case 500: // Unknown
+        case 301: // Disconnected
+        case 400: // Misconfigured
+            return false;
+
+        case 102: // Preparing
+        case 103: // Printing
+        case 302: // Failed
+        case 303: // Error
+        case 104: // Paused
+        case 105: // Finished
+            return true;
+
+        default:
+            return false;
+    }
+}
+
 type DetailField = {
     name: string;
     label: string;
@@ -279,15 +301,15 @@ export function PrinterDetailsPanel({
         },
         {
             name: 'file',
-            label: 'File',
+            label: 'Current Job File',
             icon: <IconFile/>,
-            value: printer.file_name ? (printer.file_name) : ('—'),
+            value: getShowPrintingStats(printer.status) ? printer.file_name ? (printer.file_name) : ('—') : ('—'),
         },
         {
             name: 'progress',
             label: 'Job Progress',
             icon: <IconCirclePercentage/>,
-            value: (
+            value: getShowPrintingStats(printer.status) ? (
                 <Group gap='xs' wrap='nowrap' style={{ width: '100%' }}>
                     <Progress
                         value={printer.progress}
@@ -303,19 +325,19 @@ export function PrinterDetailsPanel({
                         {printer.progress}%
                     </Text>
                 </Group>
-            ),
+            ) : ('—'),
         },
         {
             name: 'remaining',
             label: 'Time Remaining',
             icon: <IconClock/>,
-            value: formatRemainingTime(printer.remaining_time),
+            value: getShowPrintingStats(printer.status) ? formatRemainingTime(printer.remaining_time) : ('—'),
         },
         {
             name: 'finishes',
             label: 'Job Finishes',
             icon: <IconClock/>,
-            value: getFinishTime(printer.remaining_time),
+            value: getShowPrintingStats(printer.status) ? getFinishTime(printer.remaining_time) : ('—'),
         },
     ];
 
