@@ -214,62 +214,62 @@ function PrinterDetailsPage({
                 <PrinterDetails printer={printer} context={_context} />
             ),
         },
-        {
-            name: 'controls',
-            label: 'Controls',
-            icon: <IconDeviceGamepad3 />,
-            content: <PrinterControls />,
-        },
-        {
-            name: 'ams',
-            label: 'AMS',
-            icon: <IconCircleLetterA />,
-            content: <PrinterFilament />,
-        },
-        {
-            name: 'scheduledjobs',
-            label: 'Scheduled Jobs',
-            icon: <IconClipboardList />,
-            content: (
-                <PrinterDetailsPage printer={printer} />
-            ),
-        },
-        {
-            name: 'jobhistory',
-            label: 'Job History',
-            icon: <IconHistory />,
-            content: (
-                <PrinterDetailsPage printer={printer} />
-            ),
-        },
-        {
-            name: 'errorhistory',
-            label: 'Error History',
-            icon: <IconExclamationCircle />,
-            content: (
-                <PrinterDetailsPage printer={printer} />
-            ),
-        },
-        {
-            name: 'maintenance',
-            label: 'Maintenance',
-            icon: <IconTool />,
-            content: (
-                <PrinterDetailsPage printer={printer} />
-            ),
-        },
-        {
-            name: 'files',
-            label: 'Printer Files',
-            icon: <IconFile />,
-            content: <PrinterFiles />,
-        },
-        {
-            name: 'camera',
-            label: 'Camera',
-            icon: <IconCamera />,
-            content: <PrinterCamera />,
-        },
+        // {
+        //     name: 'controls',
+        //     label: 'Controls',
+        //     icon: <IconDeviceGamepad3 />,
+        //     content: <PrinterControls />,
+        // },
+        // {
+        //     name: 'ams',
+        //     label: 'AMS',
+        //     icon: <IconCircleLetterA />,
+        //     content: <PrinterFilament />,
+        // },
+        // {
+        //     name: 'scheduledjobs',
+        //     label: 'Scheduled Jobs',
+        //     icon: <IconClipboardList />,
+        //     content: (
+        //         <PrinterDetailsPage printer={printer} />
+        //     ),
+        // },
+        // {
+        //     name: 'jobhistory',
+        //     label: 'Job History',
+        //     icon: <IconHistory />,
+        //     content: (
+        //         <PrinterDetailsPage printer={printer} />
+        //     ),
+        // },
+        // {
+        //     name: 'errorhistory',
+        //     label: 'Error History',
+        //     icon: <IconExclamationCircle />,
+        //     content: (
+        //         <PrinterDetailsPage printer={printer} />
+        //     ),
+        // },
+        // {
+        //     name: 'maintenance',
+        //     label: 'Maintenance',
+        //     icon: <IconTool />,
+        //     content: (
+        //         <PrinterDetailsPage printer={printer} />
+        //     ),
+        // },
+        // {
+        //     name: 'files',
+        //     label: 'Printer Files',
+        //     icon: <IconFile />,
+        //     content: <PrinterFiles />,
+        // },
+        // {
+        //     name: 'camera',
+        //     label: 'Camera',
+        //     icon: <IconCamera />,
+        //     content: <PrinterCamera />,
+        // },
     ];
 
     return (
