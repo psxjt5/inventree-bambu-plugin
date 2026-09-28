@@ -28,6 +28,7 @@ import {
     IconStack2,
     IconTemperature,
     IconTemperaturePlus,
+    IconTooltip,
 } from '@tabler/icons-react';
 import {
     CopyButton, InvenTreePluginContext
@@ -367,6 +368,18 @@ export function PrinterDetailsPanel({
     ];
 
     const statsFields: DetailField[] = [
+        {
+            name: 'nozzletype',
+            label: 'Nozzle Type',
+            icon: <IconTooltip/>,
+            value: printer.nozzle_type,
+        },
+        {
+            name: 'nozzlediameter',
+            label: 'Nozzle Diameter',
+            icon: <IconTooltip/>,
+            value: printer.nozzle_diameter,
+        },
         {
             name: 'nozzletemp',
             label: 'Nozzle Temperature',
