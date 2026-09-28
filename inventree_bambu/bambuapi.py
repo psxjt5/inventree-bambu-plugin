@@ -162,7 +162,10 @@ class BambuAPI:
             "big_fan_1_speed": properties.get("Big Fan 1 Speed"),
             "big_fan_2_speed": properties.get("Big Fan 2 Speed"),
             "ams_units": properties.get("AMS Units"),
+            "ams_active_tray": BambuData.getAMSActiveTray(pk),
             "wifi_strength": BambuData.getWifiSignal(pk),
             "chamber_light": BambuData.getChamberLightStatus(pk),
-            "work_light": BambuData.getWorkLightStatus(pk)
+            "work_light": BambuData.getWorkLightStatus(pk),
+            "camera_url": BambuData.getCameraURL(pk),
+            "ams": BambuData.getAMSData(pk)
         })

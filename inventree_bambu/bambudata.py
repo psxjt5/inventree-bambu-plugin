@@ -247,12 +247,17 @@ class BambuData:
     
     @staticmethod
     def getAMSActiveTray(pk):
+        # 0-253 = Tray ID
+        # 254 = External Spool
+        # 255 = No filament loaded
+
         return BambuData.getPayload(pk).get("print", {}).get("ams", {}).get("tray_now")
     
     @staticmethod
     def getAMSData(pk):
         ams_data = BambuData.getPayload(pk).get("print", {}).get("ams", {})
         ams_list = ams_data.get("ams", {})
+        active_tray = BambuData.getAMSActiveTray(pk)
 
         result = []
 
@@ -266,16 +271,16 @@ class BambuData:
                     "id": tray_id,
                     "type": tray.get("tray_type"),
                     "name": tray.get("tray_sub_brands"),
-                    "color": BambuDataService._parse_color(tray.get("tray_color")),
+                    "color": tray.get("tray_color"),
                     "remaining": tray.get("remain"),
-                    "state": tray.get("state"),
+                    # "state": tray.get("state"), - see https://github.com/greghesp/ha-bambulab/blob/0e027ff135a6d9265cb756d3e246747954c76722/custom_components/bambu_lab/pybambu/const.py#L323
                     "is_active": tray_id == active_tray
                 })
 
             result.append({
                 "id": ams.get("id"),
-                "temp": BambuDataService._safe_float(ams.get("temp")),
-                "humidity": BambuDataService._safe_int(ams.get("humidity")),
+                # "temp": BambuDataService._safe_float(ams.get("temp")),
+                # "humidity": BambuDataService._safe_int(ams.get("humidity")),
                 "trays": trays
             })
 
