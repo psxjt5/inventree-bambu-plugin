@@ -15,6 +15,9 @@ import {
     IconBox,
     IconBuildingFactory2,
     IconBulb,
+    IconCamera,
+    IconCameraSpark,
+    IconCameraStar,
     IconCarFan,
     IconCarFan1,
     IconCarFan2,
@@ -25,12 +28,14 @@ import {
     IconFile,
     IconFileStack,
     IconMapPin,
+    IconPhotoSpark,
     IconPrinter,
     IconSettings,
     IconStack2,
     IconTemperature,
     IconTemperaturePlus,
     IconTooltip,
+    IconVideo,
     IconWifi,
 } from '@tabler/icons-react';
 import {
@@ -469,6 +474,24 @@ export function PrinterDetailsPanel({
             label: 'Wifi Strength',
             icon: <IconWifi/>,
             value: printer.wifi_strength,
+        },
+        {
+            name: 'camtimelapse',
+            label: 'Camera Timelapse',
+            icon: <IconCamera/>,
+            value: printer.camera_timelapse ? 'Yes' : 'No',
+        },
+        {
+            name: 'camrecord',
+            label: 'Camera Recording',
+            icon: <IconVideo/>,
+            value: printer.camera_record ? 'Yes' : 'No',
+        },
+        {
+            name: 'camres',
+            label: 'Camera Resolution',
+            icon: <IconCameraStar/>,
+            value: printer.camera_resolution,
         },
     ];
 
