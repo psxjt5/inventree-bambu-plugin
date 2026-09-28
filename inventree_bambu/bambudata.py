@@ -197,6 +197,11 @@ class BambuData:
 
 
     @staticmethod
+    def getNozzleDiameter(pk):
+        return BambuData.getPayload(pk).get("print", {}).get("nozzle_diameter")
+
+
+    @staticmethod
     def getCoolingFanSpeed(pk):
         return BambuData.getPayload(pk).get("print", {}).get("cooling_fan_speed")
     
@@ -322,7 +327,6 @@ class BambuData:
 
     @staticmethod
     def getRaw(pk):
-        print(cache.get(f"3dprinter:{pk}"))
         return cache.get(f"3dprinter:{pk}")
 
     @staticmethod

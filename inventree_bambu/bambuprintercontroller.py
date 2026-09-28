@@ -135,6 +135,7 @@ class BambuPrinterController:
         self.update_property('Total Layers', BambuData.getTotalLayers(self.machine.pk))
         self.update_property('Remaining Time', BambuData.getRemainingTime(self.machine.pk))
         self.update_property('File Name', BambuData.getFileName(self.machine.pk))
+        self.update_property('Nozzle Diameter', BambuData.getNozzleDiameter(self.machine.pk))
         self.update_property('Nozzle Temperature', BambuData.getNozzleTemperature(self.machine.pk))
         self.update_property('Nozzle Target Temperature', BambuData.getNozzleTargetTemperature(self.machine.pk))
         self.update_property('Bed Temperature', BambuData.getBedTemperature(self.machine.pk))
