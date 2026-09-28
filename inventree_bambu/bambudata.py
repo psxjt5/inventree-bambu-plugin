@@ -277,11 +277,15 @@ class BambuData:
 
     @staticmethod
     def getCameraRecordStatus(pk):
-        return BambuData.getPayload(pk).get("print", {}).get("ipcam", {}).get("ipcam_record")
+        if (BambuData.getPayload(pk).get("print", {}).get("ipcam", {}).get("ipcam_record")) == "disable":
+            return False
+        return True
 
     @staticmethod
     def getCameraTimelapseStatus(pk):
-        return BambuData.getPayload(pk).get("print", {}).get("ipcam", {}).get("timelapse")
+        if (BambuData.getPayload(pk).get("print", {}).get("ipcam", {}).get("timelapse")) == "disable":
+            return False
+        return True
 
     @staticmethod
     def getCameraResolution(pk):
