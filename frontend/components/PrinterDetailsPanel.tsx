@@ -14,12 +14,14 @@ import {
     IconActivity,
     IconBox,
     IconBuildingFactory2,
+    IconBulb,
     IconCarFan,
     IconCarFan1,
     IconCarFan2,
     IconCircleLetterA,
     IconCirclePercentage,
     IconClock,
+    IconDeviceSdCard,
     IconFile,
     IconFileStack,
     IconMapPin,
@@ -29,6 +31,7 @@ import {
     IconTemperature,
     IconTemperaturePlus,
     IconTooltip,
+    IconWifi,
 } from '@tabler/icons-react';
 import {
     CopyButton, InvenTreePluginContext
@@ -287,6 +290,12 @@ export function PrinterDetailsPanel({
                 '—'
             )
         },
+        {
+            name: 'chamberlight',
+            label: 'Chamber Light',
+            icon: <IconBulb/>,
+            value: printer.chamber_light ? 'On' : 'Off',
+        },
     ];
 
     const jobFields: DetailField[] = [
@@ -448,6 +457,21 @@ export function PrinterDetailsPanel({
         },
     ];
 
+    const miscFields: DetailField[] = [
+        {
+            name: 'sd',
+            label: 'SD/USB Installed',
+            icon: <IconDeviceSdCard/>,
+            value: printer.sdcard ? 'Yes' : 'No',
+        },
+        {
+            name: 'wifistrength',
+            label: 'Wifi Strength',
+            icon: <IconWifi/>,
+            value: printer.wifi_strength,
+        },
+    ];
+
     return (
         <Stack gap='sm'>
             <Grid gap='xs'>
@@ -461,6 +485,10 @@ export function PrinterDetailsPanel({
 
                 <Grid.Col span={{ base: 12, md: 6 }}>
                     <DetailsTable fields={statsFields} />
+                </Grid.Col>
+
+                <Grid.Col span={{ base: 12, md: 6 }}>
+                    <DetailsTable fields={miscFields} />
                 </Grid.Col>
             </Grid>
         </Stack>

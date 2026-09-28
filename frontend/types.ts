@@ -39,7 +39,7 @@ export type ThreeDPrinter = {
     wifi_strength: number | null;
     sdcard: unknown;
 
-    chamber_light: string | null;
+    chamber_light: boolean | null;
     work_light: string | null;
 
     camera_present: boolean;
