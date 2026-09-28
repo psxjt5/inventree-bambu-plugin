@@ -212,10 +212,30 @@ class BambuData:
     @staticmethod
     def getWifiSignal(pk):
         return BambuData.getPayload(pk).get("print", {}).get("wifi_signal")
+        
+    @staticmethod
+    def getChamberLightStatus(pk):
+        chamber_light_mode = next(
+            (
+                light.get("mode")
+                for light in BambuData.getPayload(pk).get("print", {}).get("lights_report", [])
+                if light.get("node") == "chamber_light"
+            ),
+            None,
+        )        
+        return chamber_light_mode
 
     @staticmethod
-    def getLightsData(pk):
-        return BambuData.getPayload(pk).get("print", {}).get("lights_report", [])
+    def getWorkLightStatus(pk):
+        work_light_mode = next(
+            (
+                light.get("mode")
+                for light in BambuData.getPayload(pk).get("print", {}).get("lights_report", [])
+                if light.get("node") == "work_light"
+            ),
+            None,
+        )        
+        return work_light_mode
 
     @staticmethod
     def getCameraURL(pk):
