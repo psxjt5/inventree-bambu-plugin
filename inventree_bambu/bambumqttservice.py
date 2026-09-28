@@ -25,9 +25,11 @@ class BambuMQTTService:
     # If a printer is disconnected for more than 60 seconds, send out a disconnected notification.
     DISCONNECT_NOTIFICATION_DELAY = 60 # seconds
 
-    def __init__(self, printerName, ip, port, token, serial, message_callback, connection_callback):
+    def __init__(self, machine, ip, port, token, serial, message_callback, connection_callback):
 
-        self.printerName = printerName
+        self.machine = machine
+        self.printerName = machine.name
+        self.machinepk = machine.pk
         self.ip = ip
         self.port = port
         self.token = token
@@ -150,7 +152,6 @@ class BambuMQTTService:
         self.disconnected_at = time.monotonic()
 
     # Message Received Event
-    # TODO: Stop using the serial number as the message ID and instead use the machine PK
     def on_message(self, client, userdata, msg):
         if not msg.payload:
             return
@@ -160,18 +161,11 @@ class BambuMQTTService:
         except Exception as e:
             self.log(f"JSON error: {e}")
             return
-
-        # Extract the Serial Number
-        serialNumber = self.extract_serial(msg.topic)
-
-        if not serialNumber:
-            return
         
         self.last_message = time.monotonic()
 
         # This printer's cache key
-        # TODO: Swap to the Machine PK
-        cache_key = f"bambu:{serialNumber}"
+        cache_key = f"3dprinter:{self.machinepk}"
 
         # Get the existing data (from previous snapshots)
         existing = cache.get(cache_key, {})
@@ -246,13 +240,6 @@ class BambuMQTTService:
                 merged[key] = value
 
         return merged
-
-    # Extract the serial number of the printer from the MQTT Payload
-    def extract_serial(self, topic):
-        parts = topic.split("/")
-        if len(parts) >= 3:
-            return parts[1]
-        return None
 
     # Log a message about this MQTT Service
     def log(self, message):

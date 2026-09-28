@@ -11,8 +11,8 @@ from pathlib import Path
 class BambuData:
 
     @staticmethod
-    def getStatus(serial):
-        return BambuData.getPayload(serial).get("print", {}).get("gcode_state")
+    def getStatus(pk):
+        return BambuData.getPayload(pk).get("print", {}).get("gcode_state")
         
     @staticmethod
     def getModel(serial):
@@ -35,7 +35,7 @@ class BambuData:
         return sn_map.get(prefix, "Unknown")
 
     @staticmethod
-    def getHMSModelSeries(serial):
+    def getHMSModelSeries(pk):
         sn_map = {
             "31B": "31B",
             "094": "094",
@@ -51,12 +51,12 @@ class BambuData:
             "030": "26A",
             "26A": "26A"
         }
-        prefix = serial[:3]
+        prefix = pk[:3]
         return sn_map.get(prefix, "Unknown")
 
     @staticmethod
-    def getAllHMSCodes(serial):
-        hms = BambuData.getPayload(serial).get("print", {}).get("hms", [])
+    def getAllHMSCodes(pk):
+        hms = BambuData.getPayload(pk).get("print", {}).get("hms", [])
         codes = []
 
         for error in hms:
@@ -78,8 +78,8 @@ class BambuData:
         return codes
 
     @staticmethod
-    def getAllHMSErrorCodes(serial):
-        hms = BambuData.getPayload(serial).get("print", {}).get("hms", [])
+    def getAllHMSErrorCodes(pk):
+        hms = BambuData.getPayload(pk).get("print", {}).get("hms", [])
         codes = []
 
         for error in hms:
@@ -106,13 +106,13 @@ class BambuData:
         return codes
 
     @staticmethod
-    def hasHMSErrorCodes(serial):
-       return bool(BambuData.getAllHMSErrorCodes(serial))
+    def hasHMSErrorCodes(pk):
+       return bool(BambuData.getAllHMSErrorCodes(pk))
 
     @staticmethod
-    def getHMSCodeDescription(serial, hms_code):
+    def getHMSCodeDescription(pk, hms_code):
 
-        series = BambuData.getHMSModelSeries(serial)
+        series = BambuData.getHMSModelSeries(pk)
 
         if series == "Unknown":
             return ""
@@ -144,94 +144,94 @@ class BambuData:
         return series_database.get(ecode, "")
 
     @staticmethod
-    def getProgress(serial):
-        return BambuData.getPayload(serial).get("print", {}).get("mc_percent")
+    def getProgress(pk):
+        return BambuData.getPayload(pk).get("print", {}).get("mc_percent")
     
     @staticmethod
-    def getLayerProgress(serial):
-        layer = BambuData.getPayload(serial).get("print", {}).get("layer_num", 0)
-        total = BambuData.getPayload(serial).get("print", {}).get("total_layer_num", 0)
+    def getLayerProgress(pk):
+        layer = BambuData.getPayload(pk).get("print", {}).get("layer_num", 0)
+        total = BambuData.getPayload(pk).get("print", {}).get("total_layer_num", 0)
         return int((layer / total) * 100) if total else 0
 
     @staticmethod
-    def getCurrentLayer(serial):
-        return BambuData.getPayload(serial).get("print", {}).get("layer_num")
+    def getCurrentLayer(pk):
+        return BambuData.getPayload(pk).get("print", {}).get("layer_num")
 
     @staticmethod
-    def getTotalLayers(serial):
-        return BambuData.getPayload(serial).get("print", {}).get("total_layer_num")
+    def getTotalLayers(pk):
+        return BambuData.getPayload(pk).get("print", {}).get("total_layer_num")
 
     @staticmethod
-    def getRemainingTime(serial):
-        return BambuData.getPayload(serial).get("print", {}).get("mc_remaining_time")
+    def getRemainingTime(pk):
+        return BambuData.getPayload(pk).get("print", {}).get("mc_remaining_time")
 
     @staticmethod
-    def getFileName(serial):
-        return BambuData.getPayload(serial).get("print", {}).get("subtask_name")
+    def getFileName(pk):
+        return BambuData.getPayload(pk).get("print", {}).get("subtask_name")
 
     @staticmethod
-    def getNozzleTemperature(serial):
-        return math.ceil(BambuData.getPayload(serial).get("print", {}).get("nozzle_temper"))
+    def getNozzleTemperature(pk):
+        return math.ceil(BambuData.getPayload(pk).get("print", {}).get("nozzle_temper"))
 
     @staticmethod
-    def getNozzleTargetTemperature(serial):
-        return math.ceil(BambuData.getPayload(serial).get("print", {}).get("nozzle_target_temper"))
+    def getNozzleTargetTemperature(pk):
+        return math.ceil(BambuData.getPayload(pk).get("print", {}).get("nozzle_target_temper"))
 
     @staticmethod
-    def getBedTemperature(serial):
-        return math.ceil(BambuData.getPayload(serial).get("print", {}).get("bed_temper"))
+    def getBedTemperature(pk):
+        return math.ceil(BambuData.getPayload(pk).get("print", {}).get("bed_temper"))
 
     @staticmethod
-    def getBedTargetTemperature(serial):
-        return math.ceil(BambuData.getPayload(serial).get("print", {}).get("bed_target_temper"))
+    def getBedTargetTemperature(pk):
+        return math.ceil(BambuData.getPayload(pk).get("print", {}).get("bed_target_temper"))
 
     @staticmethod
-    def getCoolingFanSpeed(serial):
-        return BambuData.getPayload(serial).get("print", {}).get("cooling_fan_speed")
+    def getCoolingFanSpeed(pk):
+        return BambuData.getPayload(pk).get("print", {}).get("cooling_fan_speed")
     
     @staticmethod
-    def getHeatBreakFanSpeed(serial):
-        return BambuData.getPayload(serial).get("print", {}).get("heatbreak_fan_speed")
+    def getHeatBreakFanSpeed(pk):
+        return BambuData.getPayload(pk).get("print", {}).get("heatbreak_fan_speed")
     
     @staticmethod
-    def getBigFan1Speed(serial):
-        return BambuData.getPayload(serial).get("print", {}).get("big_fan1_speed")
+    def getBigFan1Speed(pk):
+        return BambuData.getPayload(pk).get("print", {}).get("big_fan1_speed")
     
     @staticmethod
-    def getBigFan2Speed(serial):
-        return BambuData.getPayload(serial).get("print", {}).get("big_fan2_speed")
+    def getBigFan2Speed(pk):
+        return BambuData.getPayload(pk).get("print", {}).get("big_fan2_speed")
 
     @staticmethod
-    def getErrorCode(serial):
-        return BambuData.getPayload(serial).get("print", {}).get("print_error")
+    def getErrorCode(pk):
+        return BambuData.getPayload(pk).get("print", {}).get("print_error")
 
     @staticmethod
-    def getFailReason(serial):
-        return BambuData.getPayload(serial).get("print", {}).get("fail_reason")
+    def getFailReason(pk):
+        return BambuData.getPayload(pk).get("print", {}).get("fail_reason")
 
     @staticmethod
-    def getWifiSignal(serial):
-        return BambuData.getPayload(serial).get("print", {}).get("wifi_signal")
+    def getWifiSignal(pk):
+        return BambuData.getPayload(pk).get("print", {}).get("wifi_signal")
 
     @staticmethod
-    def getLightsData(serial):
-        return BambuData.getPayload(serial).get("print", {}).get("lights_report", [])
+    def getLightsData(pk):
+        return BambuData.getPayload(pk).get("print", {}).get("lights_report", [])
 
     @staticmethod
-    def getCameraURL(serial):
-        return BambuData.getPayload(serial).get("print", {}).get("ipcam", {}).get("rtsp_url")
+    def getCameraURL(pk):
+        return BambuData.getPayload(pk).get("print", {}).get("ipcam", {}).get("rtsp_url")
 
     @staticmethod
-    def getAMSUnitCount(serial):
-        return len(BambuData.getPayload(serial).get("print", {}).get("ams", {}).get("ams", []))
+    def getAMSUnitCount(pk):
+        return len(BambuData.getPayload(pk).get("print", {}).get("ams", {}).get("ams", []))
     
     @staticmethod
-    def getAMSActiveTray(serial):
-        return BambuData.getPayload(serial).get("print", {}).get("ams", {}).get("tray_now")
+    def getAMSActiveTray(pk):
+        return BambuData.getPayload(pk).get("print", {}).get("ams", {}).get("tray_now")
     
     @staticmethod
-    def getAMSData(serial):
-        ams_data = BambuData.getPayload(serial).get("print", {}).get("ams", {})
+    def getAMSData(pk):
+        ams_data = BambuData.getPayload(pk).get("print", {}).get("ams", {})
         ams_list = ams_data.get("ams", {})
 
         result = []
@@ -264,10 +264,10 @@ class BambuData:
 
 
     @staticmethod
-    def getRaw(serial):
-        return cache.get(f"bambu:{serial}")
+    def getRaw(pk):
+        return cache.get(f"3dprinter:{pk}")
 
     @staticmethod
-    def getPayload(serial):
-        data = BambuData.getRaw(serial)
+    def getPayload(pk):
+        data = BambuData.getRaw(pk)
         return data.get("payload") if data else None
