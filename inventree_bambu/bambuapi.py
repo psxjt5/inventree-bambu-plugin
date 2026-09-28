@@ -166,6 +166,11 @@ class BambuAPI:
             "wifi_strength": BambuData.getWifiSignal(pk),
             "chamber_light": BambuData.getChamberLightStatus(pk),
             "work_light": BambuData.getWorkLightStatus(pk),
+            "camera_present": BambuData.getCameraPresent(pk),
             "camera_url": BambuData.getCameraURL(pk),
-            "ams": BambuData.getAMSData(pk)
+            "camera_record": BambuData.getCameraRecordStatus(pk),
+            "camera_timelapse": BambuData.getCameraTimelapseStatus(pk),
+            "camera_resolution": BambuData.getCameraResolution(pk),
+            "ams": BambuData.getAMSData(pk),
+
         })

@@ -34,6 +34,7 @@ class BambuData:
         prefix = serial[:3]
         return sn_map.get(prefix, "Unknown")
 
+
     @staticmethod
     def getHMSModelSeries(pk):
         sn_map = {
@@ -143,6 +144,7 @@ class BambuData:
 
         return series_database.get(ecode, "")
 
+
     @staticmethod
     def getProgress(pk):
         return BambuData.getPayload(pk).get("print", {}).get("mc_percent")
@@ -169,6 +171,7 @@ class BambuData:
     def getFileName(pk):
         return BambuData.getPayload(pk).get("print", {}).get("subtask_name")
 
+
     @staticmethod
     def getNozzleTemperature(pk):
         return math.ceil(BambuData.getPayload(pk).get("print", {}).get("nozzle_temper"))
@@ -184,6 +187,7 @@ class BambuData:
     @staticmethod
     def getBedTargetTemperature(pk):
         return math.ceil(BambuData.getPayload(pk).get("print", {}).get("bed_target_temper"))
+
 
     @staticmethod
     def getCoolingFanSpeed(pk):
@@ -201,6 +205,7 @@ class BambuData:
     def getBigFan2Speed(pk):
         return BambuData.getPayload(pk).get("print", {}).get("big_fan2_speed")
 
+
     @staticmethod
     def getErrorCode(pk):
         return BambuData.getPayload(pk).get("print", {}).get("print_error")
@@ -209,10 +214,12 @@ class BambuData:
     def getFailReason(pk):
         return BambuData.getPayload(pk).get("print", {}).get("fail_reason")
 
+
     @staticmethod
     def getWifiSignal(pk):
         return BambuData.getPayload(pk).get("print", {}).get("wifi_signal")
-        
+
+
     @staticmethod
     def getChamberLightStatus(pk):
         chamber_light_mode = next(
@@ -223,7 +230,7 @@ class BambuData:
             ),
             None,
         )        
-        return chamber_light_mode
+        return chamber_light_mode == "on"
 
     @staticmethod
     def getWorkLightStatus(pk):
@@ -237,9 +244,27 @@ class BambuData:
         )        
         return work_light_mode
 
+
+    @staticmethod
+    def getCameraPresent(pk):
+        return BambuData.getPayload(pk).get("print", {}).get("ipcam", {}).get("ipcam_dev") == "1"
+
     @staticmethod
     def getCameraURL(pk):
         return BambuData.getPayload(pk).get("print", {}).get("ipcam", {}).get("rtsp_url")
+
+    @staticmethod
+    def getCameraRecordStatus(pk):
+        return BambuData.getPayload(pk).get("print", {}).get("ipcam", {}).get("ipcam_record")
+
+    @staticmethod
+    def getCameraTimelapseStatus(pk):
+        return BambuData.getPayload(pk).get("print", {}).get("ipcam", {}).get("timelapse")
+
+    @staticmethod
+    def getCameraResolution(pk):
+        return BambuData.getPayload(pk).get("print", {}).get("ipcam", {}).get("resolution")
+    
 
     @staticmethod
     def getAMSUnitCount(pk):
