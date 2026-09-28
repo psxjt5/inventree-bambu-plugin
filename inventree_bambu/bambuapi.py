@@ -153,12 +153,13 @@ class BambuAPI:
             "total_layers": properties.get("Total Layers"),
             "remaining_time": properties.get("Remaining Time"),
             "file_name": properties.get("File Name"),
+            "nozzle_diameter": properties.get("Nozzle Diameter"),
+            "nozzle_type": properties.get("Nozzle Type"),
             "nozzle_temperature": properties.get("Nozzle Temperature"),
             "nozzle_target_temperature": properties.get("Nozzle Target Temperature"),
             "bed_temperature": properties.get("Bed Temperature"),
             "bed_target_temperature": properties.get("Bed Target Temperature"),
             "chamber_temperature": properties.get("Chamber Temperature"),
-            "nozzle_diameter": properties.get("Nozzle Diameter"),
             "cooling_fan_speed": properties.get("Cooling Fan Speed"),
             "heatbreak_fan_speed": properties.get("Heatbreak Fan Speed"),
             "big_fan_1_speed": properties.get("Big Fan 1 Speed"),
@@ -173,6 +174,5 @@ class BambuAPI:
             "camera_record": BambuData.getCameraRecordStatus(pk),
             "camera_timelapse": BambuData.getCameraTimelapseStatus(pk),
             "camera_resolution": BambuData.getCameraResolution(pk),
-            "ams": BambuData.getAMSData(pk),
-
+            "ams": BambuData.getAMSData(pk)
         })

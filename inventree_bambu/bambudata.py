@@ -200,6 +200,9 @@ class BambuData:
     def getNozzleDiameter(pk):
         return BambuData.getPayload(pk).get("print", {}).get("nozzle_diameter")
 
+    @staticmethod
+    def getNozzleType(pk):
+        return BambuData.getPayload(pk).get("print", {}).get("nozzle_type")
 
     @staticmethod
     def getCoolingFanSpeed(pk):
@@ -230,7 +233,7 @@ class BambuData:
     @staticmethod
     def getWifiSignal(pk):
         return BambuData.getPayload(pk).get("print", {}).get("wifi_signal")
-
+    
 
     @staticmethod
     def getChamberLightStatus(pk):
