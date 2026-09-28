@@ -139,6 +139,7 @@ class BambuPrinterController:
         self.update_property('Nozzle Target Temperature', BambuData.getNozzleTargetTemperature(self.machine.pk))
         self.update_property('Bed Temperature', BambuData.getBedTemperature(self.machine.pk))
         self.update_property('Bed Target Temperature', BambuData.getBedTargetTemperature(self.machine.pk))
+        self.update_property('Chamber Temperature', BambuData.getChamberTemperature(self.machine.pk))
         self.update_property('Cooling Fan Speed', BambuData.getCoolingFanSpeed(self.machine.pk))
         self.update_property('Heatbreak Fan Speed', BambuData.getHeatBreakFanSpeed(self.machine.pk))
         self.update_property('Big Fan 1 Speed', BambuData.getBigFan1Speed(self.machine.pk))

@@ -157,6 +157,7 @@ class BambuAPI:
             "nozzle_target_temperature": properties.get("Nozzle Target Temperature"),
             "bed_temperature": properties.get("Bed Temperature"),
             "bed_target_temperature": properties.get("Bed Target Temperature"),
+            "chamber_temperature": properties.get("Chamber Temperature"),
             "cooling_fan_speed": properties.get("Cooling Fan Speed"),
             "heatbreak_fan_speed": properties.get("Heatbreak Fan Speed"),
             "big_fan_1_speed": properties.get("Big Fan 1 Speed"),

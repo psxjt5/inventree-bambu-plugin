@@ -188,6 +188,13 @@ class BambuData:
     def getBedTargetTemperature(pk):
         return math.ceil(BambuData.getPayload(pk).get("print", {}).get("bed_target_temper"))
 
+    @staticmethod
+    def getChamberTemperature(pk):
+        chamber_temp = BambuData.getPayload(pk).get("print", {}).get("chamber_temper")
+        if (chamber_temp == None):
+            chamber_temp = 0
+        return math.ceil(chamber_temp)
+
 
     @staticmethod
     def getCoolingFanSpeed(pk):
@@ -315,6 +322,7 @@ class BambuData:
 
     @staticmethod
     def getRaw(pk):
+        print(cache.get(f"3dprinter:{pk}"))
         return cache.get(f"3dprinter:{pk}")
 
     @staticmethod
