@@ -234,6 +234,9 @@ class BambuData:
     def getWifiSignal(pk):
         return BambuData.getPayload(pk).get("print", {}).get("wifi_signal")
     
+    @staticmethod
+    def getSDCard(pk):
+        return bool(BambuData.getPayload(pk).get("print", {}).get("sdcard"))
 
     @staticmethod
     def getChamberLightStatus(pk):
@@ -279,7 +282,36 @@ class BambuData:
     @staticmethod
     def getCameraResolution(pk):
         return BambuData.getPayload(pk).get("print", {}).get("ipcam", {}).get("resolution")
-    
+
+
+    @staticmethod
+    def getSkipPartsAllowed(pk):
+        return bool(BambuData.getPayload(pk).get("print", {}).get("xcam", {}).get("allow_skip_parts"))
+
+    @staticmethod
+    def getBuildPlateDetectionEnabled(pk):
+        return bool(BambuData.getPayload(pk).get("print", {}).get("xcam", {}).get("buildplate_marker_detector"))
+
+    @staticmethod
+    def getFirstLayerInspectionEnabled(pk):
+        return bool(BambuData.getPayload(pk).get("print", {}).get("xcam", {}).get("first_layer_inspector"))
+
+    @staticmethod
+    def getPrintHaltInspectionSensitivity(pk):
+        return BambuData.getPayload(pk).get("print", {}).get("xcam", {}).get("halt_print_sensitivity")
+
+    @staticmethod
+    def getPrintHaltEnabled(pk):
+        return bool(BambuData.getPayload(pk).get("print", {}).get("xcam", {}).get("print_halt"))
+
+    @staticmethod
+    def getPrintMonitoringEnabled(pk):
+        return bool(BambuData.getPayload(pk).get("print", {}).get("xcam", {}).get("printing_monitor"))
+
+    @staticmethod
+    def getSpaghettiDetectionEnabled(pk):
+        return bool(BambuData.getPayload(pk).get("print", {}).get("xcam", {}).get("spaghetti_detector"))
+
 
     @staticmethod
     def getAMSUnitCount(pk):

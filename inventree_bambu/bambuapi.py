@@ -167,6 +167,7 @@ class BambuAPI:
             "ams_units": properties.get("AMS Units"),
             "ams_active_tray": BambuData.getAMSActiveTray(pk),
             "wifi_strength": BambuData.getWifiSignal(pk),
+            "sdcard": BambuData.getSDCard(pk),
             "chamber_light": BambuData.getChamberLightStatus(pk),
             "work_light": BambuData.getWorkLightStatus(pk),
             "camera_present": BambuData.getCameraPresent(pk),
@@ -174,5 +175,12 @@ class BambuAPI:
             "camera_record": BambuData.getCameraRecordStatus(pk),
             "camera_timelapse": BambuData.getCameraTimelapseStatus(pk),
             "camera_resolution": BambuData.getCameraResolution(pk),
-            "ams": BambuData.getAMSData(pk)
+            "skip_parts_enabled": BambuData.getSkipPartsAllowed(pk),
+            "build_plate_detection_enabled": BambuData.getBuildPlateDetectionEnabled(pk),
+            "first_layer_inspection_enabled": BambuData.getFirstLayerInspectionEnabled(pk),
+            "print_halt_enabled": BambuData.getPrintHaltEnabled(pk),
+            "print_halt_sensitivity": BambuData.getPrintHaltInspectionSensitivity(pk),
+            "print_monitoring_enabled": BambuData.getPrintMonitoringEnabled(pk),
+            "spaghetti_detection_enabled": BambuData.getSpaghettiDetectionEnabled(pk),
+            "ams": BambuData.getAMSData(pk),
         })
