@@ -53,7 +53,7 @@ export type ThreeDPrinter = {
     first_layer_inspection_enabled: boolean;
 
     print_halt_enabled: boolean;
-    print_halt_sensitivity: number | null;
+    print_halt_sensitivity: string | null;
     print_monitoring_enabled: boolean;
     spaghetti_detection_enabled: boolean;
 };

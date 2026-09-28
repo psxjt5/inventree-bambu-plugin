@@ -12,6 +12,8 @@ import {
 } from '@mantine/core';
 import {
     IconActivity,
+    IconAdjustmentsPause,
+    IconBinoculars,
     IconBox,
     IconBuildingFactory2,
     IconBulb,
@@ -24,13 +26,18 @@ import {
     IconCircleLetterA,
     IconCirclePercentage,
     IconClock,
+    IconCongruentTo,
     IconDeviceSdCard,
     IconFile,
     IconFileStack,
     IconMapPin,
     IconPhotoSpark,
+    IconPlayerPause,
+    IconPlayerSkipForward,
     IconPrinter,
+    IconQrcode,
     IconSettings,
+    IconSquareNumber1,
     IconStack2,
     IconTemperature,
     IconTemperaturePlus,
@@ -471,27 +478,76 @@ export function PrinterDetailsPanel({
         },
         {
             name: 'wifistrength',
-            label: 'Wifi Strength',
+            label: 'Wifi Signal Strength',
             icon: <IconWifi/>,
             value: printer.wifi_strength,
         },
+        ...(printer.camera_present
+            ? [
+                {
+                    name: 'camtimelapse',
+                    label: 'Camera Timelapse',
+                    icon: <IconCamera />,
+                    value: printer.camera_timelapse ? 'Yes' : 'No',
+                },
+                {
+                    name: 'camrecord',
+                    label: 'Camera Recording',
+                    icon: <IconVideo />,
+                    value: printer.camera_record ? 'Yes' : 'No',
+                },
+                {
+                    name: 'camres',
+                    label: 'Camera Resolution',
+                    icon: <IconCameraStar />,
+                    value: printer.camera_resolution,
+                },
+            ]
+            : []),
+    ];
+
+    const aiFields: DetailField[] = [
         {
-            name: 'camtimelapse',
-            label: 'Camera Timelapse',
-            icon: <IconCamera/>,
-            value: printer.camera_timelapse ? 'Yes' : 'No',
+            name: 'skipparts',
+            label: 'Part Skipping',
+            icon: <IconPlayerSkipForward/>,
+            value: printer.skip_parts_enabled ? 'Enabled' : 'Disabled',
         },
         {
-            name: 'camrecord',
-            label: 'Camera Recording',
-            icon: <IconVideo/>,
-            value: printer.camera_record ? 'Yes' : 'No',
+            name: 'buildplatedetect',
+            label: 'Build Plate Detection',
+            icon: <IconQrcode/>,
+            value: printer.skip_parts_enabled ? 'Enabled' : 'Disabled',
         },
         {
-            name: 'camres',
-            label: 'Camera Resolution',
-            icon: <IconCameraStar/>,
-            value: printer.camera_resolution,
+            name: 'firstlayerinspection',
+            label: 'First Layer Inspection',
+            icon: <IconSquareNumber1/>,
+            value: printer.first_layer_inspection_enabled ? 'Enabled' : 'Disabled',
+        },
+        {
+            name: 'printhaltenabled',
+            label: 'Print Halt',
+            icon: <IconPlayerPause/>,
+            value: printer.print_halt_enabled ? 'Enabled' : 'Disabled',
+        },
+        {
+            name: 'printhaltsensitivity',
+            label: 'Print Halt Sensitivity',
+            icon: <IconAdjustmentsPause/>,
+            value: printer.print_halt_sensitivity ? printer.print_halt_sensitivity.charAt(0).toUpperCase() + printer.print_halt_sensitivity.slice(1) : '',
+        },
+        {
+            name: 'printmonitoringenabled',
+            label: 'Print Monitoring',
+            icon: <IconBinoculars/>,
+            value: printer.print_monitoring_enabled ? 'Enabled' : 'Disabled',
+        },
+        {
+            name: 'spaghettidetectionenabled',
+            label: 'Spaghetti Detection',
+            icon: <IconCongruentTo/>,
+            value: printer.spaghetti_detection_enabled ? 'Enabled' : 'Disabled',
         },
     ];
 
@@ -512,6 +568,10 @@ export function PrinterDetailsPanel({
 
                 <Grid.Col span={{ base: 12, md: 6 }}>
                     <DetailsTable fields={miscFields} />
+                </Grid.Col>
+
+                <Grid.Col span={{ base: 12, md: 6 }}>
+                    <DetailsTable fields={aiFields} />
                 </Grid.Col>
             </Grid>
         </Stack>
