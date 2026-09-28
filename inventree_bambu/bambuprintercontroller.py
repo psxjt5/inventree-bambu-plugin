@@ -113,7 +113,7 @@ class BambuPrinterController:
     # Create an MQTT Service for the machine
     def init_mqtt_service(self):
          
-        self.mqtt_service = BambuMQTTService(self.machine.name, self.ipAddress, self.port, self.accessToken, self.serial, self.message_received, self.connection_changed)
+        self.mqtt_service = BambuMQTTService(self.machine, self.ipAddress, self.port, self.accessToken, self.serial, self.message_received, self.connection_changed)
 
         self.mqtt_service.start();
 
@@ -121,29 +121,28 @@ class BambuPrinterController:
 
 
     # Gets triggered by the MQTT service when a new MQTT message is received.
-    #TODO: Identifier needs to become machine.pk (not serial).
     def message_received(self):
         # Set the status of the printer.
         # Data is pulled from the cache (where it will have been stored against the printer's serial).
-        self.set_status(BambuData.getStatus(self.serial))
+        self.set_status(BambuData.getStatus(self.machine.pk))
 
         # Set the properties of the printer.
         self.update_property('Model', BambuData.getModel(self.serial))
-        self.update_property('AMS Units', BambuData.getAMSUnitCount(self.serial))
-        self.update_property('Job Progress', BambuData.getProgress(self.serial))
-        self.update_property('Layer Progress', BambuData.getLayerProgress(self.serial))
-        self.update_property('Current Layer', BambuData.getCurrentLayer(self.serial))
-        self.update_property('Total Layers', BambuData.getTotalLayers(self.serial))
-        self.update_property('Remaining Time', BambuData.getRemainingTime(self.serial))
-        self.update_property('File Name', BambuData.getFileName(self.serial))
-        self.update_property('Nozzle Temperature', BambuData.getNozzleTemperature(self.serial))
-        self.update_property('Nozzle Target Temperature', BambuData.getNozzleTargetTemperature(self.serial))
-        self.update_property('Bed Temperature', BambuData.getBedTemperature(self.serial))
-        self.update_property('Bed Target Temperature', BambuData.getBedTargetTemperature(self.serial))
-        self.update_property('Cooling Fan Speed', BambuData.getCoolingFanSpeed(self.serial))
-        self.update_property('Heatbreak Fan Speed', BambuData.getHeatBreakFanSpeed(self.serial))
-        self.update_property('Big Fan 1 Speed', BambuData.getBigFan1Speed(self.serial))
-        self.update_property('Big Fan 2 Speed', BambuData.getBigFan2Speed(self.serial))
+        self.update_property('AMS Units', BambuData.getAMSUnitCount(self.machine.pk))
+        self.update_property('Job Progress', BambuData.getProgress(self.machine.pk))
+        self.update_property('Layer Progress', BambuData.getLayerProgress(self.machine.pk))
+        self.update_property('Current Layer', BambuData.getCurrentLayer(self.machine.pk))
+        self.update_property('Total Layers', BambuData.getTotalLayers(self.machine.pk))
+        self.update_property('Remaining Time', BambuData.getRemainingTime(self.machine.pk))
+        self.update_property('File Name', BambuData.getFileName(self.machine.pk))
+        self.update_property('Nozzle Temperature', BambuData.getNozzleTemperature(self.machine.pk))
+        self.update_property('Nozzle Target Temperature', BambuData.getNozzleTargetTemperature(self.machine.pk))
+        self.update_property('Bed Temperature', BambuData.getBedTemperature(self.machine.pk))
+        self.update_property('Bed Target Temperature', BambuData.getBedTargetTemperature(self.machine.pk))
+        self.update_property('Cooling Fan Speed', BambuData.getCoolingFanSpeed(self.machine.pk))
+        self.update_property('Heatbreak Fan Speed', BambuData.getHeatBreakFanSpeed(self.machine.pk))
+        self.update_property('Big Fan 1 Speed', BambuData.getBigFan1Speed(self.machine.pk))
+        self.update_property('Big Fan 2 Speed', BambuData.getBigFan2Speed(self.machine.pk))
 
     # Gets triggered by the MQTT service when the connection state changes.
     def connection_changed(self, connectedStatus):
@@ -162,7 +161,7 @@ class BambuPrinterController:
     def set_status(self, newStatus):
 
         # Check for HMS Errors
-        if (newStatus == "IDLE" or newStatus == "PAUSE") and BambuData.hasHMSErrorCodes(self.serial):
+        if (newStatus == "IDLE" or newStatus == "PAUSE") and BambuData.hasHMSErrorCodes(self.machine.pk):
             newStatus = "ERROR"
 
         # If the state hasn't changed return.
