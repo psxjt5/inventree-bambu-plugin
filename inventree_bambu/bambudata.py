@@ -205,18 +205,22 @@ class BambuData:
         return BambuData.getPayload(pk).get("print", {}).get("nozzle_type")
 
     @staticmethod
+    # Part Cooling Fan
     def getCoolingFanSpeed(pk):
         return BambuData.getPayload(pk).get("print", {}).get("cooling_fan_speed")
     
     @staticmethod
+    # (Fan on Nozzle Heatsink)
     def getHeatBreakFanSpeed(pk):
         return BambuData.getPayload(pk).get("print", {}).get("heatbreak_fan_speed")
     
     @staticmethod
+    # Auxiliary Fan
     def getBigFan1Speed(pk):
         return BambuData.getPayload(pk).get("print", {}).get("big_fan1_speed")
     
     @staticmethod
+    # Chamber Fan
     def getBigFan2Speed(pk):
         return BambuData.getPayload(pk).get("print", {}).get("big_fan2_speed")
 

@@ -411,7 +411,7 @@ export function PrinterDetailsPanel({
         },
         {
             name: 'coolingfan',
-            label: 'Cooling Fan Speed',
+            label: 'Part Cooling Fan Speed',
             icon: <IconCarFan/>,
             value: printer.cooling_fan_speed,
         },
@@ -423,13 +423,13 @@ export function PrinterDetailsPanel({
         },
         {
             name: 'bigfan1',
-            label: 'Big Fan 1 Speed',
+            label: 'Auxiliary Fan Speed',
             icon: <IconCarFan1/>,
             value: printer.big_fan_1_speed,
         },
         {
             name: 'bigfan2',
-            label: 'Big Fan 2 Speed',
+            label: 'Chamber Fan Speed',
             icon: <IconCarFan2/>,
             value: printer.big_fan_2_speed,
         },
