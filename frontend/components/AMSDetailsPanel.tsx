@@ -39,7 +39,7 @@ export function AMSDetailsPanel({
                                 <IconCircleLetterA size={24} />
 
                                 <Text fw={600}>
-                                    AMS {Number(ams.id) + 1}
+                                    AMS {String.fromCharCode(65 + Number(ams.id))}
                                 </Text>
                             </Group>
 
