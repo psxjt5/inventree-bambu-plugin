@@ -33,8 +33,8 @@ export type ThreeDPrinter = {
     big_fan_2_speed: number | null;
 
     ams_units: number | null;
-    ams_active_tray: number | null;
-    ams: unknown;
+    ams_active_tray: string | null;
+    ams: AMSUnit[];
 
     wifi_strength: number | null;
     sdcard: unknown;
@@ -56,4 +56,18 @@ export type ThreeDPrinter = {
     print_halt_sensitivity: string | null;
     print_monitoring_enabled: boolean;
     spaghetti_detection_enabled: boolean;
+};
+
+export type AMSTray = {
+    id: string;
+    type: string | null;
+    name: string | null;
+    color: string | null;
+    remaining: number | null;
+    is_active: boolean;
+};
+
+export type AMSUnit = {
+    id: string;
+    trays: AMSTray[];
 };

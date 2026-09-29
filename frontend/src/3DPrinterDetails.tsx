@@ -21,6 +21,7 @@ import {
 
 import { PanelGroup } from '../components/PanelGroup';
 import { PrinterDetailsPanel } from '../components/PrinterDetailsPanel';
+import { AMSDetailsPanel } from '../components/AMSDetailsPanel';
 
 import type { ThreeDPrinter } from '../types';
 
@@ -72,21 +73,6 @@ function PrinterDetailHeader({ printer }: { printer: ThreeDPrinter }) {
     );
 }
 
-function PrinterDetails({
-    printer,
-    context,
-}: {
-    printer: ThreeDPrinter;
-    context: InvenTreePluginContext;
-}) {
-    return (
-        <PrinterDetailsPanel
-            printer={printer}
-            context={context}
-        />
-    );
-}
-
 function PrinterCamera() {
     return (
         <Stack gap='md'>
@@ -115,17 +101,6 @@ function PrinterControls() {
             <Text>Printer controls</Text>
             <Text c='dimmed'>
                 Printer controls will be displayed here.
-            </Text>
-        </Stack>
-    );
-}
-
-function PrinterFilament() {
-    return (
-        <Stack gap='md'>
-            <Text>Printer filament</Text>
-            <Text c='dimmed'>
-                AMS and filament information will be displayed here.
             </Text>
         </Stack>
     );
@@ -211,7 +186,10 @@ function PrinterDetailsPage({
             label: 'Printer Details',
             icon: <IconInfoCircle />,
             content: (
-                <PrinterDetails printer={printer} context={_context} />
+                <PrinterDetailsPanel
+                    printer={printer}
+                    context={_context}
+                />
             ),
         },
         // {
@@ -220,12 +198,17 @@ function PrinterDetailsPage({
         //     icon: <IconDeviceGamepad3 />,
         //     content: <PrinterControls />,
         // },
-        // {
-        //     name: 'ams',
-        //     label: 'AMS',
-        //     icon: <IconCircleLetterA />,
-        //     content: <PrinterFilament />,
-        // },
+        {
+            name: 'ams',
+            label: 'AMS',
+            icon: <IconCircleLetterA />,
+            content: (
+                <AMSDetailsPanel
+                    printer={printer}
+                    context={_context}
+                />
+            ),
+        },
         // {
         //     name: 'scheduledjobs',
         //     label: 'Scheduled Jobs',

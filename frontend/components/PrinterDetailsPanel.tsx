@@ -359,7 +359,7 @@ export function PrinterDetailsPanel({
             value: getShowPrintingStats(printer.status) ? (
                 <Group gap='xs' wrap='nowrap' style={{ width: '100%' }}>
                     <Progress
-                        value={(printer.layer_progress/printer.total_layers)*100}
+                        value={(printer.current_layer/printer.total_layers)*100}
                         size='md'
                         style={{ flex: 1 }}
                         animated
@@ -369,7 +369,7 @@ export function PrinterDetailsPanel({
                         textAlign: 'right',
                         flexShrink: 0,
                     }}>
-                        <Tooltip label="Current Layer" withArrow><span>{printer.layer_progress}</span></Tooltip> / <Tooltip label="Total Layers" withArrow><span>{printer.total_layers}</span></Tooltip>
+                        <Tooltip label="Current Layer" withArrow><span>{printer.current_layer}</span></Tooltip> / <Tooltip label="Total Layers" withArrow><span>{printer.total_layers}</span></Tooltip>
                     </Text>
                 </Group>
             ) : (<Tooltip label="No active job" withArrow><span>—</span></Tooltip>),
@@ -517,7 +517,7 @@ export function PrinterDetailsPanel({
             name: 'buildplatedetect',
             label: 'Build Plate Detection',
             icon: <IconQrcode/>,
-            value: printer.skip_parts_enabled ? 'Enabled' : 'Disabled',
+            value: printer.build_plate_detection_enabled ? 'Enabled' : 'Disabled',
         },
         {
             name: 'firstlayerinspection',
