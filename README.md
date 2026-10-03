@@ -32,13 +32,17 @@ Manufacturing Panel showing printer tiles:
 
 Printer details page:
 
-<img height="300" alt="image" src="https://github.com/user-attachments/assets/1d348d29-416a-44f6-a3ef-b8c66cca38cf" />
+<img width="1896" height="1036" alt="image" src="https://github.com/user-attachments/assets/f864cb30-121d-47d2-a6cc-589b6bf40659" />
+
+AMS details page:
+
+<img width="1886" height="668" alt="image" src="https://github.com/user-attachments/assets/989b8f4f-9075-4849-9701-3cc241e8f0a5" />
 
 ## Roadmap
 - Additional printer details panels.
 - Printer control (start and stop jobs, run maintenance tasks etc.)
-- Ability to queue print jobs.
 - Stock updates as prints are finished.
+- Ability to queue print jobs.
 
 ## Registering a Bambu Lab 3D Printer
 With the plugin installed, a Bambu Lab 3D printer can be added within the Machines Page (in the Admin Centre):
