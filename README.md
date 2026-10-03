@@ -44,6 +44,12 @@ AMS details page:
 - Stock updates as prints are finished.
 - Ability to queue print jobs.
 
+## Plugin Installation and Setup
+
+TODO:
+- Installation
+- Creating Groups and Permissions
+
 ## Registering a Bambu Lab 3D Printer
 With the plugin installed, a Bambu Lab 3D printer can be added within the Machines Page (in the Admin Centre):
 
