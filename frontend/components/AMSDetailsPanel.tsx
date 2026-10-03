@@ -7,7 +7,7 @@ import {
     Table,
     Text,
 } from '@mantine/core';
-import { IconCircleLetterA } from '@tabler/icons-react';
+import { IconCircleLetterA, IconCircleLetterE } from '@tabler/icons-react';
 import type { InvenTreePluginContext } from '@inventreedb/ui';
 
 import type { ThreeDPrinter } from '../types';
@@ -160,7 +160,7 @@ export function AMSDetailsPanel({
                     <Stack gap='sm'>
                         <Group justify='space-between'>
                             <Group gap='xs'>
-                                <IconCircleLetterA size={24} />
+                                <IconCircleLetterE size={24} />
 
                                 <Text fw={600}>
                                     External Spool
