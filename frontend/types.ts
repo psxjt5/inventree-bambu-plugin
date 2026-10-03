@@ -38,6 +38,8 @@ export type ThreeDPrinter = {
     chamber_light: boolean | null;
     work_light: string | null;
 
+    door_open: boolean | null;
+
     camera_present: boolean;
     camera_url: string | null;
     camera_record: boolean;

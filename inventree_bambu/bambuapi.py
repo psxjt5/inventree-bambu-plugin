@@ -170,6 +170,7 @@ class BambuAPI:
             "sdcard": BambuData.getSDCard(pk),
             "chamber_light": BambuData.getChamberLightStatus(pk),
             "work_light": BambuData.getWorkLightStatus(pk),
+            "door_open": BambuData.getDoorOpenStatus(pk),
             "camera_present": BambuData.getCameraPresent(pk),
             "camera_url": BambuData.getCameraURL(pk),
             "camera_record": BambuData.getCameraRecordStatus(pk),

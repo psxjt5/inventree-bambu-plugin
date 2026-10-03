@@ -28,6 +28,7 @@ import {
     IconClock,
     IconCongruentTo,
     IconDeviceSdCard,
+    IconDoor,
     IconFile,
     IconFileStack,
     IconMapPin,
@@ -470,6 +471,12 @@ export function PrinterDetailsPanel({
     ];
 
     const miscFields: DetailField[] = [
+        {
+            name: 'door',
+            label: 'Door State',
+            icon: <IconDoor/>,
+            value: printer.door_open ? 'Open' : 'Closed',
+        },
         {
             name: 'sd',
             label: 'SD/USB Installed',

@@ -267,6 +267,11 @@ class BambuData:
         )        
         return work_light_mode
 
+    @staticmethod
+    def getDoorOpenStatus(pk):
+        home_flag = BambuData.getPayload(pk).get("print", {}).get("home_flag", 0)
+        return bool(home_flag & 0x00800000)
+
 
     @staticmethod
     def getCameraPresent(pk):
