@@ -3,6 +3,7 @@ Provides data from the Bambu MQTT Service
 """
 
 from django.core.cache import cache
+from typing import Any
 
 import json
 import math
@@ -33,6 +34,7 @@ class BambuData:
         }
         prefix = serial[:3]
         return sn_map.get(prefix, "Unknown")
+
 
     @staticmethod
     def getHMSModelSeries(pk):
@@ -143,6 +145,7 @@ class BambuData:
 
         return series_database.get(ecode, "")
 
+
     @staticmethod
     def getProgress(pk):
         return BambuData.getPayload(pk).get("print", {}).get("mc_percent")
@@ -169,6 +172,7 @@ class BambuData:
     def getFileName(pk):
         return BambuData.getPayload(pk).get("print", {}).get("subtask_name")
 
+
     @staticmethod
     def getNozzleTemperature(pk):
         return math.ceil(BambuData.getPayload(pk).get("print", {}).get("nozzle_temper"))
@@ -186,20 +190,41 @@ class BambuData:
         return math.ceil(BambuData.getPayload(pk).get("print", {}).get("bed_target_temper"))
 
     @staticmethod
+    def getChamberTemperature(pk):
+        chamber_temp = BambuData.getPayload(pk).get("print", {}).get("chamber_temper")
+        if (chamber_temp == None):
+            chamber_temp = 0
+        return math.ceil(chamber_temp)
+
+
+    @staticmethod
+    def getNozzleDiameter(pk):
+        return BambuData.getPayload(pk).get("print", {}).get("nozzle_diameter")
+
+    @staticmethod
+    def getNozzleType(pk):
+        return BambuData.getPayload(pk).get("print", {}).get("nozzle_type")
+
+    @staticmethod
+    # Part Cooling Fan
     def getCoolingFanSpeed(pk):
         return BambuData.getPayload(pk).get("print", {}).get("cooling_fan_speed")
     
     @staticmethod
+    # (Fan on Nozzle Heatsink)
     def getHeatBreakFanSpeed(pk):
         return BambuData.getPayload(pk).get("print", {}).get("heatbreak_fan_speed")
     
     @staticmethod
+    # Auxiliary Fan
     def getBigFan1Speed(pk):
         return BambuData.getPayload(pk).get("print", {}).get("big_fan1_speed")
     
     @staticmethod
+    # Chamber Fan
     def getBigFan2Speed(pk):
         return BambuData.getPayload(pk).get("print", {}).get("big_fan2_speed")
+
 
     @staticmethod
     def getErrorCode(pk):
@@ -209,17 +234,98 @@ class BambuData:
     def getFailReason(pk):
         return BambuData.getPayload(pk).get("print", {}).get("fail_reason")
 
+
     @staticmethod
     def getWifiSignal(pk):
         return BambuData.getPayload(pk).get("print", {}).get("wifi_signal")
+    
+    @staticmethod
+    def getSDCard(pk):
+        return bool(BambuData.getPayload(pk).get("print", {}).get("sdcard"))
 
     @staticmethod
-    def getLightsData(pk):
-        return BambuData.getPayload(pk).get("print", {}).get("lights_report", [])
+    def getChamberLightStatus(pk):
+        chamber_light_mode = next(
+            (
+                light.get("mode")
+                for light in BambuData.getPayload(pk).get("print", {}).get("lights_report", [])
+                if light.get("node") == "chamber_light"
+            ),
+            None,
+        )        
+        return chamber_light_mode == "on"
+
+    @staticmethod
+    def getWorkLightStatus(pk):
+        work_light_mode = next(
+            (
+                light.get("mode")
+                for light in BambuData.getPayload(pk).get("print", {}).get("lights_report", [])
+                if light.get("node") == "work_light"
+            ),
+            None,
+        )        
+        return work_light_mode
+
+    @staticmethod
+    def getDoorOpenStatus(pk):
+        home_flag = BambuData.getPayload(pk).get("print", {}).get("home_flag", 0)
+        return bool(home_flag & 0x00800000)
+
+
+    @staticmethod
+    def getCameraPresent(pk):
+        return BambuData.getPayload(pk).get("print", {}).get("ipcam", {}).get("ipcam_dev") == "1"
 
     @staticmethod
     def getCameraURL(pk):
         return BambuData.getPayload(pk).get("print", {}).get("ipcam", {}).get("rtsp_url")
+
+    @staticmethod
+    def getCameraRecordStatus(pk):
+        if (BambuData.getPayload(pk).get("print", {}).get("ipcam", {}).get("ipcam_record")) == "disable":
+            return False
+        return True
+
+    @staticmethod
+    def getCameraTimelapseStatus(pk):
+        if (BambuData.getPayload(pk).get("print", {}).get("ipcam", {}).get("timelapse")) == "disable":
+            return False
+        return True
+
+    @staticmethod
+    def getCameraResolution(pk):
+        return BambuData.getPayload(pk).get("print", {}).get("ipcam", {}).get("resolution")
+
+
+    @staticmethod
+    def getSkipPartsAllowed(pk):
+        return bool(BambuData.getPayload(pk).get("print", {}).get("xcam", {}).get("allow_skip_parts"))
+
+    @staticmethod
+    def getBuildPlateDetectionEnabled(pk):
+        return bool(BambuData.getPayload(pk).get("print", {}).get("xcam", {}).get("buildplate_marker_detector"))
+
+    @staticmethod
+    def getFirstLayerInspectionEnabled(pk):
+        return bool(BambuData.getPayload(pk).get("print", {}).get("xcam", {}).get("first_layer_inspector"))
+
+    @staticmethod
+    def getPrintHaltInspectionSensitivity(pk):
+        return BambuData.getPayload(pk).get("print", {}).get("xcam", {}).get("halt_print_sensitivity")
+
+    @staticmethod
+    def getPrintHaltEnabled(pk):
+        return bool(BambuData.getPayload(pk).get("print", {}).get("xcam", {}).get("print_halt"))
+
+    @staticmethod
+    def getPrintMonitoringEnabled(pk):
+        return bool(BambuData.getPayload(pk).get("print", {}).get("xcam", {}).get("printing_monitor"))
+
+    @staticmethod
+    def getSpaghettiDetectionEnabled(pk):
+        return bool(BambuData.getPayload(pk).get("print", {}).get("xcam", {}).get("spaghetti_detector"))
+
 
     @staticmethod
     def getAMSUnitCount(pk):
@@ -227,12 +333,17 @@ class BambuData:
     
     @staticmethod
     def getAMSActiveTray(pk):
+        # 0-253 = Tray ID
+        # 254 = External Spool
+        # 255 = No filament loaded
+
         return BambuData.getPayload(pk).get("print", {}).get("ams", {}).get("tray_now")
     
     @staticmethod
     def getAMSData(pk):
         ams_data = BambuData.getPayload(pk).get("print", {}).get("ams", {})
         ams_list = ams_data.get("ams", {})
+        active_tray = BambuData.getAMSActiveTray(pk)
 
         result = []
 
@@ -246,28 +357,49 @@ class BambuData:
                     "id": tray_id,
                     "type": tray.get("tray_type"),
                     "name": tray.get("tray_sub_brands"),
-                    "color": BambuDataService._parse_color(tray.get("tray_color")),
+                    "color": tray.get("tray_color"),
                     "remaining": tray.get("remain"),
-                    "state": tray.get("state"),
+                    # "state": tray.get("state"), - see https://github.com/greghesp/ha-bambulab/blob/0e027ff135a6d9265cb756d3e246747954c76722/custom_components/bambu_lab/pybambu/const.py#L323
                     "is_active": tray_id == active_tray
                 })
 
             result.append({
                 "id": ams.get("id"),
-                "temp": BambuDataService._safe_float(ams.get("temp")),
-                "humidity": BambuDataService._safe_int(ams.get("humidity")),
+                # "temp": BambuDataService._safe_float(ams.get("temp")),
+                # "humidity": BambuDataService._safe_int(ams.get("humidity")),
                 "trays": trays
             })
 
         return result
 
+    @staticmethod
+    def getExternalSpoolData(pk):
+        print_data = BambuData.getPayload(pk).get("print", {})
+
+        if BambuData.getModel(pk) == "P1S":
+            slots = print_data.get("vir_slot", [])
+            vt_data = slots[0] if slots else {}
+        else:
+            vt_data = print_data.get("vt_tray", {})
+
+        return [{
+            "id": vt_data.get("id"),
+            "type": vt_data.get("tray_type"),
+            "name": vt_data.get("tray_sub_brands"),
+            "color": vt_data.get("tray_color"),
+            "remaining": vt_data.get("remain"),
+            "is_active": (
+                vt_data.get("id") == BambuData.getAMSActiveTray(pk)
+            ),
+        }]
+
 
 
     @staticmethod
-    def getRaw(pk):
+    def getRaw(pk) -> dict[str, Any]:
         return cache.get(f"3dprinter:{pk}")
 
     @staticmethod
-    def getPayload(pk):
+    def getPayload(pk) -> dict[str, Any] | None:
         data = BambuData.getRaw(pk)
         return data.get("payload") if data else None
