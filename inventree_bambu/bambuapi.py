@@ -183,4 +183,5 @@ class BambuAPI:
             "print_monitoring_enabled": BambuData.getPrintMonitoringEnabled(pk),
             "spaghetti_detection_enabled": BambuData.getSpaghettiDetectionEnabled(pk),
             "ams": BambuData.getAMSData(pk),
+            "external_spool": BambuData.getExternalSpoolData(pk),
         })

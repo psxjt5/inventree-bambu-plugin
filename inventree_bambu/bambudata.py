@@ -3,6 +3,7 @@ Provides data from the Bambu MQTT Service
 """
 
 from django.core.cache import cache
+from typing import Any
 
 import json
 import math
@@ -366,13 +367,34 @@ class BambuData:
 
         return result
 
+    @staticmethod
+    def getExternalSpoolData(pk):
+        print_data = BambuData.getPayload(pk).get("print", {})
+
+        if BambuData.getModel(pk) == "P1S":
+            slots = print_data.get("vir_slot", [])
+            vt_data = slots[0] if slots else {}
+        else:
+            vt_data = print_data.get("vt_tray", {})
+
+        return [{
+            "id": vt_data.get("id"),
+            "type": vt_data.get("tray_type"),
+            "name": vt_data.get("tray_sub_brands"),
+            "color": vt_data.get("tray_color"),
+            "remaining": vt_data.get("remain"),
+            "is_active": (
+                vt_data.get("id") == BambuData.getAMSActiveTray(pk)
+            ),
+        }]
+
 
 
     @staticmethod
-    def getRaw(pk):
+    def getRaw(pk) -> dict[str, Any]:
         return cache.get(f"3dprinter:{pk}")
 
     @staticmethod
-    def getPayload(pk):
+    def getPayload(pk) -> dict[str, Any] | None:
         data = BambuData.getRaw(pk)
         return data.get("payload") if data else None
