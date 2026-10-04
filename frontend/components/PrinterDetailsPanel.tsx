@@ -542,7 +542,7 @@ export function PrinterDetailsPanel({
             name: 'printhaltsensitivity',
             label: 'Print Halt Sensitivity',
             icon: <IconAdjustmentsPause/>,
-            value: printer.print_halt_sensitivity ? printer.print_halt_sensitivity.charAt(0).toUpperCase() + printer.print_halt_sensitivity.slice(1) : '',
+            value: printer.print_halt_sensitivity ? printer.print_halt_sensitivity.charAt(0).toUpperCase() + printer.print_halt_sensitivity.slice(1) : '—',
         },
         {
             name: 'printmonitoringenabled',
