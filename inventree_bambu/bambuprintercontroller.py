@@ -1,5 +1,6 @@
 from inventree_3d.threed import ThreeDPrinterBaseDriver, ThreeDPrinterMachine
 from .bambumqttservice import BambuMQTTService
+from .bambuftpsservice import BambuFTPSService
 from .bambudata import BambuData
 from .notifications import Notifications
 
@@ -11,14 +12,15 @@ class BambuPrinterController:
     def __init__(self, machine):
         self.machine = machine
 
-        self.ipAddress: str | None = None
-        self.accessToken: str | None = None
+        self.ipAddress: str = ""
+        self.accessToken: str = ""
         self.serial: str | None = None
         # TODO: Make this configurable (setting with default value of 8883)
         self.port: int = 8883
 
         self.connected: bool = False
         self.mqtt_service: BambuMQTTService | None = None
+        self.ftps_service: BambuFTPSService | None = None
         
         self.status: str | None = None
         self.hms_codes = []
@@ -42,6 +44,8 @@ class BambuPrinterController:
         self.init_properties()
 
         self.init_mqtt_service()
+
+        self.init_ftps_service()
 
         return
 
@@ -67,9 +71,22 @@ class BambuPrinterController:
 
     # Fetch the printer settings
     def set_printer_settings(self):
-         self.ipAddress = self.machine.get_setting("IP_ADDRESS", "D")
-         self.accessToken = self.machine.get_setting("ACCESS_TOKEN", "D")
-         self.serial = self.machine.get_setting("SERIAL", "D")
+        ipAddress = self.machine.get_setting("IP_ADDRESS", "D")
+        accessToken = self.machine.get_setting("ACCESS_TOKEN", "D")
+        serial = self.machine.get_setting("SERIAL", "D")
+
+        if not isinstance(ipAddress, str):
+            raise ValueError("Printer IP address is not configured")
+
+        if not isinstance(accessToken, str):
+            raise ValueError("Printer access token is not configured")
+
+        if not isinstance(serial, str):
+            raise ValueError("Printer serial is not configured")
+
+        self.ipAddress = ipAddress
+        self.accessToken = accessToken
+        self.serial = serial
 
     # Test the connection to the machine
     def test_connection(self) -> bool:
@@ -115,10 +132,18 @@ class BambuPrinterController:
          
         self.mqtt_service = BambuMQTTService(self.machine, self.ipAddress, self.port, self.accessToken, self.serial, self.message_received, self.connection_changed)
 
-        self.mqtt_service.start();
+        self.mqtt_service.start()
 
         self.log("Started MQTT Service")
 
+    # Create an FTPS Service for the machine
+    def init_ftps_service(self):
+
+        self.ftps_service = BambuFTPSService(self.ipAddress, self.accessToken)
+
+        self.ftps_service.test_connection()
+
+        self.log("Started FTPS Service")
 
     # Gets triggered by the MQTT service when a new MQTT message is received.
     def message_received(self):
