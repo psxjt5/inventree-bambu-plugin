@@ -5,7 +5,7 @@ from contextlib import contextmanager
 from collections.abc import Generator
 
 class ImplicitFTP_TLS(ftplib.FTP_TLS):
-    """FTP_TLS subclass supporting implicit FTPS."""
+    """FTP_TLS subclass supporting implicit FTPS with TLS session reuse."""
 
     @property
     def sock(self):
@@ -14,9 +14,25 @@ class ImplicitFTP_TLS(ftplib.FTP_TLS):
     @sock.setter
     def sock(self, value):
         if value is not None and not isinstance(value, ssl.SSLSocket):
-            value = self.context.wrap_socket(value) # hostname verification? add , server_hostname=self.host
+            value = self.context.wrap_socket(value)
 
         self._sock = value
+
+    def ntransfercmd(self, cmd, rest=None):
+        conn, size = super(ftplib.FTP_TLS, self).ntransfercmd(cmd, rest)
+
+        control_sock = self.sock
+
+        if control_sock is None:
+            raise RuntimeError("FTPS control socket is not connected")
+
+        conn = self.context.wrap_socket(
+            conn,
+            #server_hostname=self.host,
+            session=control_sock.session,
+        )
+
+        return conn, size
 
 class BambuFTPSService:
 
@@ -33,9 +49,17 @@ class BambuFTPSService:
             return ftp.voidcmd("NOOP").startswith("200")
 
     def list_directory(self, path: str = "/") -> list[str]:
-        """Return the raw directory listing for a path."""
+
         with self._create_connection() as ftp:
-            return ftp.nlst(path)
+            try:
+                result = ftp.nlst(path)
+                return result
+            except Exception as e:
+                print(
+                    f"[BambuFTPS] NLST failed: "
+                    f"{type(e).__name__}: {e}"
+                )
+                raise
 
     def list_directory_details(self, path: str = "/") -> list[str]:
         """Return detailed LIST output for a path."""

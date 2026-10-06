@@ -141,9 +141,9 @@ class BambuPrinterController:
 
         self.ftps_service = BambuFTPSService(self.ipAddress, self.accessToken)
 
-        self.ftps_service.test_connection()
+        if self.ftps_service.test_connection():
+            self.log("Started FTPS Service")
 
-        self.log("Started FTPS Service")
 
     # Gets triggered by the MQTT service when a new MQTT message is received.
     def message_received(self):
