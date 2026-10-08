@@ -137,7 +137,7 @@ class Bambu3DPlugin(MachineDriverMixin, UrlsMixin, UserInterfaceMixin, SettingsM
             path("get_printer_data/<str:pk>", BambuAPI.get_printer_data),
             path("get_dashboard_widget_data", BambuAPI.get_dashboard_widget_data),
             path("get_printer_tiles_data", BambuAPI.get_printer_tiles_data),
-            # path("3dprinterdetails/<str:pk>", self.view_3d_printer_details, name="3dprinterdetails"),
+            path("get_printer_files/<str:pk>", BambuAPI.get_printer_files),
         ]
 
     def view_3d_printer_details(self, request, pk):

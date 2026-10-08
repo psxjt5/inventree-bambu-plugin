@@ -34,6 +34,9 @@ class ImplicitFTP_TLS(ftplib.FTP_TLS):
 
         return conn, size
 
+class BambuFTPSPathError(Exception):
+    """Raised when a requested printer filesystem path is invalid."""
+
 class BambuFTPSService:
 
     PORT = 990
@@ -49,17 +52,13 @@ class BambuFTPSService:
             return ftp.voidcmd("NOOP").startswith("200")
 
     def list_directory(self, path: str = "/") -> list[str]:
-
         with self._create_connection() as ftp:
             try:
-                result = ftp.nlst(path)
-                return result
-            except Exception as e:
-                print(
-                    f"[BambuFTPS] NLST failed: "
-                    f"{type(e).__name__}: {e}"
-                )
-                raise
+                ftp.cwd(path)
+            except ftplib.error_perm as e:
+                raise BambuFTPSPathError(path) from e
+
+            return ftp.nlst()
 
     def list_directory_details(self, path: str = "/") -> list[str]:
         """Return detailed LIST output for a path."""

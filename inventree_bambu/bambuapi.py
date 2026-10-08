@@ -12,6 +12,7 @@ from machine.serializers import MachineConfigSerializer
 from stock.models import StockLocation
 
 from .bambudata import BambuData
+from .bambuftpsservice import BambuFTPSService, BambuFTPSPathError
 
 class BambuAPI:
 
@@ -186,3 +187,77 @@ class BambuAPI:
             "ams": BambuData.getAMSData(pk),
             "external_spool": BambuData.getExternalSpoolData(pk),
         })
+
+    @api_view(["GET"])
+    @permission_classes([IsAuthenticated])
+    def get_printer_files(request, pk):
+        """Return the files and directories within the specified directory"""
+
+        path = request.query_params.get("path", "/")
+
+        try:
+            machine = MachineConfig.objects.get(
+                machine_type="3d-printer",
+                pk=pk,
+                active=True,
+            )
+        except MachineConfig.DoesNotExist:
+            return Response(
+                {"error": "Printer not found"},
+                status=404,
+            )
+
+        serializer = MachineConfigSerializer(machine)
+        data = serializer.data
+
+        ip_address = MachineSetting.objects.get(
+                    machine_config_id=pk,
+                    key="IP_ADDRESS",
+                ).value
+
+        access_token = MachineSetting.objects.get(
+                            machine_config_id=pk,
+                            key="ACCESS_TOKEN",
+                        ).value
+
+        if not isinstance(ip_address, str) or not ip_address:
+            return Response(
+                {"error": "Printer IP address is not configured"},
+                status=400,
+            )
+
+        if not isinstance(access_token, str) or not access_token:
+            return Response(
+                {"error": "Printer access token is not configured"},
+                status=400,
+            )
+
+        try:
+            ftps = BambuFTPSService(
+                ip_address,
+                access_token,
+            )
+
+            try:
+                files = ftps.list_directory(path)
+
+            except BambuFTPSPathError:
+                return Response(
+                    {
+                        "error": "Path not found",
+                        "path": path,
+                    },
+                    status=404,
+                )
+
+            return Response({
+                "path": path,
+                "files": files,
+            })
+
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=500,
+            )
+        
