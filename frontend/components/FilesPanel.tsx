@@ -1,16 +1,23 @@
 import { useCallback, useMemo, useState } from 'react';
 import {
+    ActionBarDivider,
     ActionIcon,
     Anchor,
     Breadcrumbs,
+    Button,
+    Divider,
     Group,
+    Menu,
+    Modal,
     Paper,
     Stack,
     Text,
+    TextInput,
     Tooltip,
 } from '@mantine/core';
-import { IconArrowUp, IconCube, IconFile, IconFile3d, IconFileCode, IconFileText, IconFileZip, IconFolder, IconMovie, IconPhoto, IconRefresh } from '@tabler/icons-react';
+import { IconArrowLeft, IconArrowRight, IconArrowUp, IconCalendarPlus, IconChevronDown, IconCube, IconCursorText, IconDots, IconDownload, IconFile, IconFile3d, IconFileArrowRight, IconFileCode, IconFileText, IconFileUpload, IconFileZip, IconFolder, IconFolderPlus, IconHome, IconMovie, IconPhoto, IconPlus, IconPrinter, IconRefresh, IconTrash } from '@tabler/icons-react';
 import {
+    ActionButton,
     InvenTreeTable,
     useTable,
     type InvenTreePluginContext,
@@ -90,7 +97,10 @@ export function FilesPanel({
     printer: ThreeDPrinter;
     context: InvenTreePluginContext;
 }) {
-    const [path, setPath] = useState<string>('/');
+    // const [path, setPath] = useState<string>('/');
+    const [history, setHistory] = useState<string[]>(['/']);
+    const [index, setIndex] = useState(0);
+    const path = history[index];
 
     // File names are unique within a directory, so use them as the row key
     const table = useTable('3d-printer-files', { idAccessor: 'name' });
@@ -123,6 +133,7 @@ export function FilesPanel({
         });
     }, [table.searchTerm]);
 
+    // Table Columns
     const columns: TableColumn<PrinterFile>[] = useMemo(
         () => [
             {
@@ -159,6 +170,7 @@ export function FilesPanel({
         [],
     );
 
+    // Path Breadcrumbs
     const crumbs = useMemo(() => {
         const parts = path.split('/').filter(Boolean);
         return [
@@ -170,19 +182,108 @@ export function FilesPanel({
         ];
     }, [path]);
 
+    // Navigate to a new location.
+    const go = useCallback(
+        (newIndex: number, newHistory = history) => {
+            table.clearSelectedRecords();
+            table.setSearchTerm('');
+            setHistory(newHistory);
+            setIndex(newIndex);
+        },
+        [table, history],
+    );
+
+    // Opening a folder, a breadcrumb or "up": drop any forward entries and add the new path
+    const navigate = (target: string) => {
+        if (target !== path) {
+            go(index + 1, [...history.slice(0, index + 1), target]);
+        }
+    };
+
+    // Back and Forward Stacks
+    const back = () => go(index - 1);
+    const forward = () => go(index + 1);
+
+    // New Folder Dialog
+    const newFolder = context.forms.create({
+        url: `/plugin/inventree_bambu/create_printer_directory/${encodeURIComponent(printer.pk)}`,
+        title: `Create New Folder on ${printer.name}`,
+        fields: {
+            path: { value: path, hidden: true },
+            name: {},
+        },
+        successMessage: 'Folder created',
+        onFormSuccess: () => table.refreshTable(),
+    });
+
+    // Upload File Dialog
+    const uploadFile = context.forms.create({
+        url: `/plugin/inventree_bambu/upload_printer_file/${encodeURIComponent(printer.pk)}`,
+        title: `Upload File to ${printer.name}`,
+        fields: {
+            path: { value: path, hidden: true },
+            file: {},
+        },
+        submitText: 'Upload',
+        successMessage: 'File uploaded',
+        timeout: 5 * 60 * 1000,
+        onFormSuccess: () => table.refreshTable(),
+    });
+
+    // Determines if the current selection can be printed (1 file, not a dir, .gcode.3mf)
+    const canPrint =
+    table.selectedRecords.length === 1 &&
+    !table.selectedRecords[0].is_directory &&
+    table.selectedRecords[0].name.toLowerCase().endsWith('.gcode.3mf');
+
+    // Table Action Buttons
     const tableActions = useMemo(
         () => [
-            <Tooltip key='up' label='Up one level'>
-                <ActionIcon
-                    variant='transparent'
-                    disabled={path === '/'}
-                    onClick={() => setPath(getParentPath(path))}
-                >
-                    <IconArrowUp />
-                </ActionIcon>
-            </Tooltip>,
+            <ActionButton key='back' icon={<IconArrowLeft />} tooltip='Back' disabled={index === 0} onClick={back} />,
+            
+            <ActionButton key='forward' icon={<IconArrowRight />} tooltip='Forward' disabled={index === history.length - 1} onClick={forward} />,
+
+            <ActionButton variant='transparent' disabled={path === '/'} onClick={() => navigate('/')} icon={<IconHome />} tooltip='Go to Root Folder' />,
+            
+            <ActionButton variant='transparent' disabled={path === '/'} onClick={() => navigate(getParentPath(path))} icon={<IconArrowUp />} tooltip='Up one level' />,
+
+            // <Divider key='divider-1' orientation='vertical' />,
+
+            // <Menu key='file-actions' position='bottom-end'>
+            //     <Menu.Target>
+            //         <Tooltip label='File actions' position='left'>
+            //             <ActionIcon variant='light' radius='xs' h={36} w='auto' px={2}>
+            //                 <Group gap={0} wrap='nowrap'>
+            //                     <IconPlus />
+            //                     <IconChevronDown />
+            //                 </Group>
+            //             </ActionIcon>
+            //         </Tooltip>
+            //     </Menu.Target>
+
+            //     <Menu.Dropdown>
+            //         <Menu.Item leftSection={<IconFolderPlus color='var(--mantine-primary-color-filled)' />} onClick={() => newFolder.open()}>
+            //             New Folder
+            //         </Menu.Item>
+            //         <Menu.Item leftSection={<IconFileUpload color='var(--mantine-primary-color-filled)' />} onClick={() => uploadFile.open()}>
+            //             Upload File
+            //         </Menu.Item>
+            //     </Menu.Dropdown>
+            // </Menu>,
+
+            // <ActionButton variant='transparent' onClick={() => {}} icon={<IconCursorText />} tooltip='Rename' disabled={!table.hasSelectedRecords} />,
+
+            // <ActionButton variant='transparent' onClick={() => {}} icon={<IconFileArrowRight />} tooltip='Move' disabled={!table.hasSelectedRecords} />,
+
+            // <ActionButton variant='transparent' onClick={() => {}} icon={<IconTrash />} tooltip='Delete' color='red' disabled={!table.hasSelectedRecords} />,
+
+            // <Divider key='divider-1' orientation='vertical' />,
+
+            // <ActionButton variant='transparent' onClick={() => {}} icon={<IconPrinter />} tooltip='Print' disabled={!canPrint} />,
+
+            // <ActionButton variant='transparent' onClick={() => {}} icon={<IconCalendarPlus />} tooltip='Schedule Print' disabled={!canPrint} />,
         ],
-        [path],
+        [path, table.hasSelectedRecords, table.selectedRecords],
     );
 
     return (
@@ -198,7 +299,7 @@ export function FilesPanel({
                             <Anchor
                                 key={crumb.target}
                                 size='sm'
-                                onClick={() => setPath(crumb.target)}
+                                onClick={() => navigate(crumb.target)}
                             >
                                 {crumb.label}
                             </Anchor>
@@ -233,13 +334,25 @@ export function FilesPanel({
                     noRecordsText: 'This folder is empty',
                     onRowClick: (record: PrinterFile) => {
                         if (record.is_directory) {
-                            setPath(joinPath(path, record.name));
+                            table.clearSelectedRecords();
+                            navigate(joinPath(path, record.name));
+                            return;
                         }
+
+                        const isSelected = table.selectedRecords.some((r) => r.name === record.name);
+
+                        table.setSelectedRecords(
+                            isSelected
+                                ? table.selectedRecords.filter((r) => r.name !== record.name)
+                                : [...table.selectedRecords, record],
+                        );
                     },
-                    rowStyle: (record: PrinterFile) =>
-                        record.is_directory ? { cursor: 'pointer' } : undefined,
+                    rowStyle: () => ({ cursor: 'pointer' }),
                 }}
             />
+
+            {/* {newFolder.modal}
+            {uploadFile.modal} */}
         </Stack>
     );
 }

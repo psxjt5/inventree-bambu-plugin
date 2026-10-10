@@ -17,6 +17,9 @@ from .bambuapi import BambuAPI
 from django.contrib.auth.models import Group
 from .notifications import Notifications
 
+from .dialogs.createprinterdirectorydialog import CreatePrinterDirectory
+from .dialogs.uploadprinterfiledialog import UploadPrinterFile
+
 from django.urls import path
 from django.shortcuts import render
 from django.template.response import TemplateResponse
@@ -138,6 +141,10 @@ class Bambu3DPlugin(MachineDriverMixin, UrlsMixin, UserInterfaceMixin, SettingsM
             path("get_dashboard_widget_data", BambuAPI.get_dashboard_widget_data),
             path("get_printer_tiles_data", BambuAPI.get_printer_tiles_data),
             path("get_printer_files/<str:pk>", BambuAPI.get_printer_files),
+
+            # Dialogs
+            path("create_printer_directory/<str:pk>", CreatePrinterDirectory.as_view()),
+            path("upload_printer_file/<str:pk>", UploadPrinterFile.as_view()),
         ]
 
     def view_3d_printer_details(self, request, pk):
