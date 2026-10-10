@@ -22,6 +22,7 @@ import {
 import { PanelGroup } from '../components/PanelGroup';
 import { PrinterDetailsPanel } from '../components/PrinterDetailsPanel';
 import { AMSDetailsPanel } from '../components/AMSDetailsPanel';
+import { FilesPanel } from '../components/FilesPanel';
 
 import type { ThreeDPrinter } from '../types';
 
@@ -79,17 +80,6 @@ function PrinterCamera() {
             <Text>Printer camera</Text>
             <Text c='dimmed'>
                 Camera feed will be displayed here.
-            </Text>
-        </Stack>
-    );
-}
-
-function PrinterFiles() {
-    return (
-        <Stack gap='md'>
-            <Text>Printer files</Text>
-            <Text c='dimmed'>
-                Files available on the printer will be displayed here.
             </Text>
         </Stack>
     );
@@ -241,12 +231,17 @@ function PrinterDetailsPage({
         //         <PrinterDetailsPage printer={printer} />
         //     ),
         // },
-        // {
-        //     name: 'files',
-        //     label: 'Printer Files',
-        //     icon: <IconFile />,
-        //     content: <PrinterFiles />,
-        // },
+        {
+            name: 'files',
+            label: 'Printer Files',
+            icon: <IconFile />,
+            content: (
+                <FilesPanel
+                        printer={printer}
+                        context={_context}
+                />
+            ),
+        },
         // {
         //     name: 'camera',
         //     label: 'Camera',

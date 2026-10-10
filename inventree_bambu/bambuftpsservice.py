@@ -1,6 +1,7 @@
 import ftplib
 import ssl
 
+from datetime import datetime
 from contextlib import contextmanager
 from collections.abc import Generator
 
@@ -51,14 +52,35 @@ class BambuFTPSService:
         with self._create_connection() as ftp:
             return ftp.voidcmd("NOOP").startswith("200")
 
-    def list_directory(self, path: str = "/") -> list[str]:
+    def list_directory(self, path: str = "/",) -> list[dict[str, str | bool]]:
         with self._create_connection() as ftp:
             try:
                 ftp.cwd(path)
             except ftplib.error_perm as e:
                 raise BambuFTPSPathError(path) from e
 
-            return ftp.nlst()
+            lines: list[str] = []
+            try:
+                ftp.retrlines("LIST", lines.append)
+            except ftplib.error_perm:
+                return []  # empty directory on some servers
+
+            result = []
+            for line in lines:
+                # "drwxr-xr-x 2 root root 4096 Oct 08 21:00 cache"
+                parts = line.split(maxsplit=8)
+                if len(parts) < 9:
+                    continue
+                name = parts[8]
+                if name in (".", ".."):
+                    continue
+                result.append({
+                    "name": name,
+                    "is_directory": parts[0].startswith("d"),
+                    "size": int(parts[4]) if parts[4].isdigit() else None,
+                    "modified": self._parse_list_date(parts[5], parts[6], parts[7])
+                })
+            return result
 
     def list_directory_details(self, path: str = "/") -> list[str]:
         """Return detailed LIST output for a path."""
@@ -120,3 +142,17 @@ class BambuFTPSService:
                     ftp.quit()
             except (Exception):
                 ftp.close()
+
+    def _parse_list_date(self, month: str, day: str, time_or_year: str) -> str | None:
+        try:
+            if ":" in time_or_year:
+                now = datetime.now()
+                dt = datetime.strptime(f"{month} {day} {now.year} {time_or_year}", "%b %d %Y %H:%M")
+                # No year given means "within the last ~6 months", so a future date belongs to last year
+                if dt > now:
+                    dt = dt.replace(year=now.year - 1)
+            else:
+                dt = datetime.strptime(f"{month} {day} {time_or_year}", "%b %d %Y")
+            return dt.isoformat()
+        except ValueError:
+            return None

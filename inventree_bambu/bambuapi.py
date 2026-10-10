@@ -140,6 +140,7 @@ class BambuAPI:
             ).values_list("name", flat=True).first()
 
         return Response({
+            "pk": pk,
             "serial": serial,
             "name": data["name"],
             "manufacturer": "Bambu Lab",
@@ -206,9 +207,6 @@ class BambuAPI:
                 {"error": "Printer not found"},
                 status=404,
             )
-
-        serializer = MachineConfigSerializer(machine)
-        data = serializer.data
 
         ip_address = MachineSetting.objects.get(
                     machine_config_id=pk,
