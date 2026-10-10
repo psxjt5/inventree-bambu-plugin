@@ -14,7 +14,7 @@ class CreateDirectorySerializer(serializers.Serializer):
         return value
 
 
-class CreatePrinterDirectory(generics.GenericAPIView):
+class CreatePrinterDirectoryDialog(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = CreateDirectorySerializer
 

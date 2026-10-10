@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from 'react';
 import {
     ActionBarDivider,
     ActionIcon,
+    Alert,
     Anchor,
     Breadcrumbs,
     Button,
@@ -252,6 +253,33 @@ export function FilesPanel({
         onFormSuccess: () => table.refreshTable(),
     });
 
+    // Delete File Confirmation
+    const deleteFiles = context.forms.delete({
+        url: `/plugin/inventree_bambu/delete_printer_files/${encodeURIComponent(printer.pk)}`,
+        method: 'POST',
+        title: 'Delete',
+        fields: {
+            path: { hidden: true },
+            names: { hidden: true },
+        },
+        initialData: {
+            path,
+            names: table.selectedRecords.map((r: PrinterFile) => r.name),
+        },
+        preFormContent: (
+            <Alert color='red' title='This cannot be undone'>
+                Delete {table.selectedRecords.length === 1
+                    ? `"${table.selectedRecords[0].name}"`
+                    : `${table.selectedRecords.length} items`} from the printer?
+            </Alert>
+        ),
+        successMessage: 'Deleted',
+        onFormSuccess: () => {
+            table.clearSelectedRecords();
+            table.refreshTable();
+        },
+    });
+
     // Determines if the current selection can be printed (1 file, not a dir, .gcode.3mf)
     const canPrint =
     table.selectedRecords.length === 1 &&
@@ -297,7 +325,7 @@ export function FilesPanel({
 
             <ActionButton variant='transparent' onClick={() => {}} icon={<IconFileArrowRight />} tooltip='Move' disabled={!table.hasSelectedRecords} />,
 
-            <ActionButton variant='transparent' onClick={() => {}} icon={<IconTrash />} tooltip='Delete' color='red' disabled={!table.hasSelectedRecords} />,
+            <ActionButton variant='transparent' icon={<IconTrash />} tooltip='Delete' color='red' disabled={!table.hasSelectedRecords} onClick={() => deleteFiles.open()}/>,
 
             <Divider key='divider-1' orientation='vertical' />,
 
@@ -376,6 +404,7 @@ export function FilesPanel({
             {newFolder.modal}
             {uploadFile.modal}
             {renameFile.modal}
+            {deleteFiles.modal}
         </Stack>
     );
 }
