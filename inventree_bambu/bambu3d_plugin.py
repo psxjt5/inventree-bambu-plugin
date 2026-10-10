@@ -19,6 +19,7 @@ from .notifications import Notifications
 
 from .dialogs.createprinterdirectorydialog import CreatePrinterDirectory
 from .dialogs.uploadprinterfiledialog import UploadPrinterFile
+from .dialogs.renameprinterfiledialog import RenamePrinterFileDialog
 
 from django.urls import path
 from django.shortcuts import render
@@ -145,6 +146,7 @@ class Bambu3DPlugin(MachineDriverMixin, UrlsMixin, UserInterfaceMixin, SettingsM
             # Dialogs
             path("create_printer_directory/<str:pk>", CreatePrinterDirectory.as_view()),
             path("upload_printer_file/<str:pk>", UploadPrinterFile.as_view()),
+            path("rename_printer_file/<str:pk>", RenamePrinterFileDialog.as_view()),
         ]
 
     def view_3d_printer_details(self, request, pk):

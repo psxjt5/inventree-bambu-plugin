@@ -204,6 +204,9 @@ export function FilesPanel({
     const back = () => go(index - 1);
     const forward = () => go(index + 1);
 
+    // Currently selected file
+    const selectedFile: PrinterFile | undefined = table.selectedRecords[0];
+
     // New Folder Dialog
     const newFolder = context.forms.create({
         url: `/plugin/inventree_bambu/create_printer_directory/${encodeURIComponent(printer.pk)}`,
@@ -230,6 +233,25 @@ export function FilesPanel({
         onFormSuccess: () => table.refreshTable(),
     });
 
+    // Rename File Dialog
+    const renameFile = context.forms.create({
+        url: `/plugin/inventree_bambu/rename_printer_file/${encodeURIComponent(printer.pk)}`,
+        title: `Rename File on ${printer.name}`,
+        fields: {
+            path: { value: path, hidden: true },
+            old_name: { value: path, hidden: true },
+            new_name: {},
+        },
+        initialData: {
+            path,
+            old_name: selectedFile?.name ?? '',
+            new_name: selectedFile?.name ?? '',
+        },
+        submitText: 'Rename',
+        successMessage: 'File renamed',
+        onFormSuccess: () => table.refreshTable(),
+    });
+
     // Determines if the current selection can be printed (1 file, not a dir, .gcode.3mf)
     const canPrint =
     table.selectedRecords.length === 1 &&
@@ -247,41 +269,41 @@ export function FilesPanel({
             
             <ActionButton variant='transparent' disabled={path === '/'} onClick={() => navigate(getParentPath(path))} icon={<IconArrowUp />} tooltip='Up one level' />,
 
-            // <Divider key='divider-1' orientation='vertical' />,
+            <Divider key='divider-1' orientation='vertical' />,
 
-            // <Menu key='file-actions' position='bottom-end'>
-            //     <Menu.Target>
-            //         <Tooltip label='File actions' position='left'>
-            //             <ActionIcon variant='light' radius='xs' h={36} w='auto' px={2}>
-            //                 <Group gap={0} wrap='nowrap'>
-            //                     <IconPlus />
-            //                     <IconChevronDown />
-            //                 </Group>
-            //             </ActionIcon>
-            //         </Tooltip>
-            //     </Menu.Target>
+            <Menu key='file-actions' position='bottom-end'>
+                <Menu.Target>
+                    <Tooltip label='File actions' position='left'>
+                        <ActionIcon variant='light' radius='xs' h={36} w='auto' px={2}>
+                            <Group gap={0} wrap='nowrap'>
+                                <IconPlus />
+                                <IconChevronDown />
+                            </Group>
+                        </ActionIcon>
+                    </Tooltip>
+                </Menu.Target>
 
-            //     <Menu.Dropdown>
-            //         <Menu.Item leftSection={<IconFolderPlus color='var(--mantine-primary-color-filled)' />} onClick={() => newFolder.open()}>
-            //             New Folder
-            //         </Menu.Item>
-            //         <Menu.Item leftSection={<IconFileUpload color='var(--mantine-primary-color-filled)' />} onClick={() => uploadFile.open()}>
-            //             Upload File
-            //         </Menu.Item>
-            //     </Menu.Dropdown>
-            // </Menu>,
+                <Menu.Dropdown>
+                    <Menu.Item leftSection={<IconFolderPlus color='var(--mantine-primary-color-filled)' />} onClick={() => newFolder.open()}>
+                        New Folder
+                    </Menu.Item>
+                    <Menu.Item leftSection={<IconFileUpload color='var(--mantine-primary-color-filled)' />} onClick={() => uploadFile.open()}>
+                        Upload File
+                    </Menu.Item>
+                </Menu.Dropdown>
+            </Menu>,
 
-            // <ActionButton variant='transparent' onClick={() => {}} icon={<IconCursorText />} tooltip='Rename' disabled={!table.hasSelectedRecords} />,
+            <ActionButton variant='transparent' icon={<IconCursorText />} tooltip='Rename' disabled={!table.hasSelectedRecords} onClick={() => renameFile.open()}/>,
 
-            // <ActionButton variant='transparent' onClick={() => {}} icon={<IconFileArrowRight />} tooltip='Move' disabled={!table.hasSelectedRecords} />,
+            <ActionButton variant='transparent' onClick={() => {}} icon={<IconFileArrowRight />} tooltip='Move' disabled={!table.hasSelectedRecords} />,
 
-            // <ActionButton variant='transparent' onClick={() => {}} icon={<IconTrash />} tooltip='Delete' color='red' disabled={!table.hasSelectedRecords} />,
+            <ActionButton variant='transparent' onClick={() => {}} icon={<IconTrash />} tooltip='Delete' color='red' disabled={!table.hasSelectedRecords} />,
 
-            // <Divider key='divider-1' orientation='vertical' />,
+            <Divider key='divider-1' orientation='vertical' />,
 
-            // <ActionButton variant='transparent' onClick={() => {}} icon={<IconPrinter />} tooltip='Print' disabled={!canPrint} />,
+            <ActionButton variant='transparent' onClick={() => {}} icon={<IconPrinter />} tooltip='Print' disabled={!canPrint} />,
 
-            // <ActionButton variant='transparent' onClick={() => {}} icon={<IconCalendarPlus />} tooltip='Schedule Print' disabled={!canPrint} />,
+            <ActionButton variant='transparent' onClick={() => {}} icon={<IconCalendarPlus />} tooltip='Schedule Print' disabled={!canPrint} />,
         ],
         [path, table.hasSelectedRecords, table.selectedRecords],
     );
@@ -351,8 +373,9 @@ export function FilesPanel({
                 }}
             />
 
-            {/* {newFolder.modal}
-            {uploadFile.modal} */}
+            {newFolder.modal}
+            {uploadFile.modal}
+            {renameFile.modal}
         </Stack>
     );
 }
