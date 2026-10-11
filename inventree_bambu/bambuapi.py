@@ -2,9 +2,13 @@
 BambuAPI: API methods for Bambu Lab printers.
 """
 
+import tempfile
+
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+
+from django.http import FileResponse
 
 from machine.models import MachineConfig
 from machine.models import MachineSetting
@@ -12,6 +16,8 @@ from machine.serializers import MachineConfigSerializer
 from stock.models import StockLocation
 
 from .bambudata import BambuData
+from .bambuftpsservice import BambuFTPSService, BambuFTPSPathError
+from .bambuutils import BambuUtils, PrinterNotFound, PrinterFTPSServiceNotFound
 
 class BambuAPI:
 
@@ -139,6 +145,7 @@ class BambuAPI:
             ).values_list("name", flat=True).first()
 
         return Response({
+            "pk": pk,
             "serial": serial,
             "name": data["name"],
             "manufacturer": "Bambu Lab",
@@ -186,3 +193,69 @@ class BambuAPI:
             "ams": BambuData.getAMSData(pk),
             "external_spool": BambuData.getExternalSpoolData(pk),
         })
+
+    @api_view(["GET"])
+    @permission_classes([IsAuthenticated])
+    def get_printer_files(request, pk):
+        """Return the files and directories within the specified directory"""
+
+        # Get the file path from the query string.
+        path = request.query_params.get("path", "/")
+
+        try:
+            files = BambuUtils.get_printer_ftps_service(pk).list_directory(path)
+
+        except BambuFTPSPathError:
+            return Response({"error": "Path not found", "path": path}, status=404)
+
+        except PrinterNotFound:
+            return Response({"error": "Printer not found", "path": path}, status=404)
+
+        except PrinterFTPSServiceNotFound:
+            return Response({"error": "Printer FTPS Service not found", "path": path}, status=404)
+
+        return Response({
+            "path": path,
+            "files": files,
+        })
+
+    @api_view(["GET"])
+    @permission_classes([IsAuthenticated])
+    def get_printer_directories(request, pk):
+
+        """Return all printer directories"""
+
+        try:
+            return Response({"directories": BambuUtils.get_printer_ftps_service(pk).list_all_directories()})
+
+        except PrinterNotFound:
+            return Response({"error": "Printer not found"}, status=404)
+
+        except PrinterFTPSServiceNotFound:
+            return Response({"error": "Printer FTPS Service not found"}, status=404)
+
+    @api_view(["GET"])
+    @permission_classes([IsAuthenticated])
+    def download_printer_files(request, pk):
+        """Download the selected files (one file as-is, several as a zip)."""
+        path = request.query_params.get("path", "/")
+        names = request.query_params.getlist("names")
+
+        if not names:
+            return Response({"error": "No files selected"}, status=400)
+
+        try:
+            ftps = BambuUtils.get_printer_ftps_service(pk)
+        except PrinterNotFound:
+            return Response({"error": "Printer not found"}, status=404)
+        except PrinterFTPSServiceNotFound:
+            return Response({"error": "Printer FTPS Service not found"}, status=404)
+
+        # Temporary file on the server; deleted automatically once the response is sent
+        temp = tempfile.TemporaryFile()
+        ftps.download_files(path, names, temp)
+        temp.seek(0)
+
+        filename = names[0] if len(names) == 1 else "printer-files.zip"
+        return FileResponse(temp, as_attachment=True, filename=filename)
+        

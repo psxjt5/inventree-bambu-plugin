@@ -1,0 +1,230 @@
+import ftplib
+import ssl
+import zipfile
+
+from datetime import datetime
+from contextlib import contextmanager
+from collections.abc import Generator
+
+class ImplicitFTP_TLS(ftplib.FTP_TLS):
+    """FTP_TLS subclass supporting implicit FTPS with TLS session reuse."""
+
+    @property
+    def sock(self):
+        return self._sock
+
+    @sock.setter
+    def sock(self, value):
+        if value is not None and not isinstance(value, ssl.SSLSocket):
+            value = self.context.wrap_socket(value)
+
+        self._sock = value
+
+    def ntransfercmd(self, cmd, rest=None):
+        conn, size = super(ftplib.FTP_TLS, self).ntransfercmd(cmd, rest)
+
+        control_sock = self.sock
+
+        if control_sock is None:
+            raise RuntimeError("FTPS control socket is not connected")
+
+        conn = self.context.wrap_socket(
+            conn,
+            #server_hostname=self.host,
+            session=control_sock.session,
+        )
+
+        return conn, size
+
+class BambuFTPSPathError(Exception):
+    """Raised when a requested printer filesystem path is invalid."""
+
+class BambuFTPSService:
+
+    PORT = 990
+    USERNAME = "bblp"
+    TIMEOUT = 10
+
+    def __init__(self, host: str, access_token: str):
+        self.host = host
+        self.access_token = access_token
+
+    # Create a connection to the printer and test that it succeeds
+    def test_connection(self) -> bool:
+        with self._create_connection() as ftp:
+            return ftp.voidcmd("NOOP").startswith("200")
+
+    # List the contents of an printer directory (with the name, whether it's a dir, size and date modified).
+    def list_directory(self, path: str = "/",) -> list[dict[str, str | bool]]:
+        with self._create_connection() as ftp:
+            try:
+                ftp.cwd(path)
+            except ftplib.error_perm as e:
+                raise BambuFTPSPathError(path) from e
+
+            lines: list[str] = []
+            try:
+                ftp.retrlines("LIST", lines.append)
+            except ftplib.error_perm:
+                return []  # empty directory on some servers
+
+            result = []
+            for line in lines:
+                # "drwxr-xr-x 2 root root 4096 Oct 08 21:00 cache"
+                parts = line.split(maxsplit=8)
+                if len(parts) < 9:
+                    continue
+                name = parts[8]
+                if name in (".", ".."):
+                    continue
+                result.append({
+                    "name": name,
+                    "is_directory": parts[0].startswith("d"),
+                    "size": int(parts[4]) if parts[4].isdigit() else None,
+                    "modified": self._parse_list_date(parts[5], parts[6], parts[7])
+                })
+            return result
+
+    # List all directories on the printer.
+    def list_all_directories(self, root: str = "/") -> list[str]:
+        """Return every directory path on the printer, including the root."""
+        result: list[str] = []
+
+        with self._create_connection() as ftp:
+            def walk(path: str) -> None:
+                result.append(path)
+                lines: list[str] = []
+                try:
+                    ftp.cwd(path)
+                    ftp.retrlines("LIST", lines.append)
+                except ftplib.error_perm:
+                    return  # unreadable or empty directory
+
+                for line in lines:
+                    parts = line.split(maxsplit=8)
+                    if len(parts) < 9 or not parts[0].startswith("d"):
+                        continue
+                    name = parts[8]
+                    if name in (".", ".."):
+                        continue
+                    walk(f"{path.rstrip('/')}/{name}")
+
+            walk(root)
+
+        return result
+
+    # Move a list of files from one location to another.
+    def move_files(self, paths: list[str], destination: str) -> None:
+        """Move files or folders into the destination directory."""
+        with self._create_connection() as ftp:
+            for source in paths:
+                name = source.rstrip("/").rsplit("/", 1)[-1]
+                ftp.rename(source, f"{destination.rstrip('/')}/{name}")
+
+    # Download a file from the printer.
+    def download_files(self, folder: str, names: list[str], destination) -> None:
+        """Write the file into `destination`; several files are written as a zip."""
+        base = folder.rstrip("/")
+
+        with self._create_connection() as ftp:
+            if len(names) == 1:
+                ftp.retrbinary(f"RETR {base}/{names[0]}", destination.write)
+                return
+
+            # Print files and videos are already compressed, so store rather than deflate
+            with zipfile.ZipFile(destination, "w", zipfile.ZIP_STORED) as archive:
+                for name in names:
+                    with archive.open(name, "w") as entry:
+                        ftp.retrbinary(f"RETR {base}/{name}", entry.write)
+
+    # Upload a file to the printer.
+    def upload_file(self, fileobj, remote_path: str) -> None:
+        """Upload a Django UplaodedFile to the printer."""
+        with self._create_connection() as ftp:
+            ftp.storbinary(f"STOR {remote_path}",fileobj)
+
+    # Delete files or folders (including their contents) on the printer.
+    def delete_files(self, folder: str, names: list[str]) -> None:
+        """Delete items within a folder on the printer. Folders are deleted with their contents."""
+        base = folder.rstrip("/")
+
+        with self._create_connection() as ftp:
+            def delete(path: str) -> None:
+                try:
+                    ftp.delete(path)
+                    return  # It was a file
+                except ftplib.error_perm:
+                    pass  # Probably a folder
+
+                # Delete the folder's contents first, then the folder itself
+                lines: list[str] = []
+                ftp.cwd(path)
+                ftp.retrlines("LIST", lines.append)
+
+                for line in lines:
+                    parts = line.split(maxsplit=8)
+                    if len(parts) < 9 or parts[8] in (".", ".."):
+                        continue
+                    delete(f"{path}/{parts[8]}")
+
+                ftp.cwd("/")  # Step out before removing it
+                ftp.rmd(path)
+
+            for name in names:
+                delete(f"{base}/{name}")
+
+    # Rename a file on the printer.
+    def rename_file(self, folder: str, old_name: str, new_name: str) -> None:
+        """Rename an item within a folder on the printer"""
+        base = folder.rstrip("/")
+
+        with self._create_connection() as ftp:
+            ftp.rename(f"{base}/{old_name}", f"{base}/{new_name}")
+
+    # Create a new directory on the printer.
+    def create_directory(self, path: str) -> None:
+        """Create a directory on the printer."""
+        with self._create_connection() as ftp:
+            ftp.mkd(path)
+
+    # Delete a directory on the printer.
+    def remove_directory(self, path: str) -> None:
+        """Remove an empty directory on the printer."""
+        with self._create_connection() as ftp:
+            ftp.rmd(path)
+
+    @contextmanager
+    # Create a new connection using the IP and Access Token
+    def _create_connection(self) -> Generator[ImplicitFTP_TLS, None, None]:
+        
+        ftp = ImplicitFTP_TLS(timeout=self.TIMEOUT)
+        
+        try:
+            ftp.set_pasv(True)
+            ftp.connect(host=self.host, port=self.PORT)
+            ftp.login(self.USERNAME, self.access_token)
+            ftp.prot_p()
+
+            yield ftp
+
+        finally:
+            try:
+                if ftp.sock is not None:
+                    ftp.quit()
+            except (Exception):
+                ftp.close()
+
+    # Take the file date and output it as a DateTimeString.
+    def _parse_list_date(self, month: str, day: str, time_or_year: str) -> str | None:
+        try:
+            if ":" in time_or_year:
+                now = datetime.now()
+                dt = datetime.strptime(f"{month} {day} {now.year} {time_or_year}", "%b %d %Y %H:%M")
+                # No year given means "within the last ~6 months", so a future date belongs to last year
+                if dt > now:
+                    dt = dt.replace(year=now.year - 1)
+            else:
+                dt = datetime.strptime(f"{month} {day} {time_or_year}", "%b %d %Y")
+            return dt.isoformat()
+        except ValueError:
+            return None
