@@ -22,14 +22,12 @@ class MovePrinterFiles(generics.GenericAPIView):
         base = data["path"].rstrip("/")
 
         try:
-            return Response({"directories": BambuUtils.get_printer_ftps_service(pk).move_files([f"{base}/{name}" for name in data["names"]], data["destination"])})
+            BambuUtils.get_printer_ftps_service(pk).move_files([f"{base}/{name}" for name in data["names"]], data["destination"])
         
         except PrinterNotFound:
             return Response({"error": "Printer not found"}, status=404)
-            raise serializers.ValidationError({"name": "Printer not found"})
         
         except PrinterFTPSServiceNotFound:
             return Response({"error": "Printer FTPS Service not found"}, status=404)
-            raise serializers.ValidationError({"name": "Printer FTPS Service not found"})
         
         return Response(status=200)

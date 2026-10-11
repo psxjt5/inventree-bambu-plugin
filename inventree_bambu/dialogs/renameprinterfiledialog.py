@@ -29,14 +29,12 @@ class RenamePrinterFileDialog(generics.GenericAPIView):
         base = data["path"].rstrip("/")
 
         try:
-            return Response({"directories": BambuUtils.get_printer_ftps_service(pk).rename_file(base, data['old_name'], data['new_name'])})
+            BambuUtils.get_printer_ftps_service(pk).rename_file(base, data['old_name'], data['new_name'])
         
         except PrinterNotFound:
             return Response({"error": "Printer not found"}, status=404)
-            raise serializers.ValidationError({"name": "Printer not found"})
         
         except PrinterFTPSServiceNotFound:
             return Response({"error": "Printer FTPS Service not found"}, status=404)
-            raise serializers.ValidationError({"name": "Printer FTPS Service not found"})
         
         return Response(status=200)

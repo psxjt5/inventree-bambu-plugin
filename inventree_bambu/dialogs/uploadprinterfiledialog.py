@@ -31,14 +31,12 @@ class UploadPrinterFile(generics.GenericAPIView):
         remote_path = f"{base}/{os.path.basename(upload.name)}"
 
         try:
-            return Response({"directories": BambuUtils.get_printer_ftps_service(pk).upload_file(upload, remote_path)})
+            BambuUtils.get_printer_ftps_service(pk).upload_file(upload, remote_path)
         
         except PrinterNotFound:
             return Response({"error": "Printer not found"}, status=404)
-            raise serializers.ValidationError({"name": "Printer not found"})
         
         except PrinterFTPSServiceNotFound:
             return Response({"error": "Printer FTPS Service not found"}, status=404)
-            raise serializers.ValidationError({"name": "Printer FTPS Service not found"})
         
         return Response({"path": remote_path}, status=201)
