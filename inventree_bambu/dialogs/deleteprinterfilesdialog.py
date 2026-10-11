@@ -2,10 +2,11 @@ from rest_framework import generics, serializers
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from ..bambuutils import BambuUtils, PrinterNotFound, PrinterFTPSServiceNotFound
+
 class DeleteSerializer(serializers.Serializer):
     path = serializers.CharField()
     names = serializers.ListField(child=serializers.CharField(), allow_empty=False)
-
 
 class DeletePrinterFilesDialog(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
@@ -18,13 +19,13 @@ class DeletePrinterFilesDialog(generics.GenericAPIView):
 
         base = data["path"].rstrip("/")
 
-        # ...look up ip_address / access_token...
-
         try:
-            BambuFTPSService(ip_address, access_token).delete_paths(
-                [f"{base}/{name}" for name in data["names"]]
-            )
-        except ftplib.error_perm as e:
-            raise serializers.ValidationError({"non_field_errors": [str(e)]})
-
+            BambuUtils.get_printer_ftps_service(pk).delete_files(data["path"], data["names"])
+        
+        except PrinterNotFound:
+            return Response({"error": "Printer not found"}, status=404)
+        
+        except PrinterFTPSServiceNotFound:
+            return Response({"error": "Printer FTPS Service not found"}, status=404)
+        
         return Response(status=200)

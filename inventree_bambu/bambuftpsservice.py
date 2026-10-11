@@ -113,7 +113,7 @@ class BambuFTPSService:
         return result
 
     # Move a list of files from one location to another.
-    def move_paths(self, paths: list[str], destination: str) -> None:
+    def move_files(self, paths: list[str], destination: str) -> None:
         """Move files or folders into the destination directory."""
         with self._create_connection() as ftp:
             for source in paths:
@@ -133,11 +133,35 @@ class BambuFTPSService:
         with self._create_connection() as ftp:
             ftp.storbinary(f"STOR {remote_path}",fileobj)
 
-    # Delete a file on the printer.
-    def delete_file(self, remote_path: str) -> None:
-        """Delete a file on the printer."""
+    # Delete files or folders (including their contents) on the printer.
+    def delete_files(self, folder: str, names: list[str]) -> None:
+        """Delete items within a folder on the printer. Folders are deleted with their contents."""
+        base = folder.rstrip("/")
+
         with self._create_connection() as ftp:
-            ftp.delete(remote_path)
+            def delete(path: str) -> None:
+                try:
+                    ftp.delete(path)
+                    return  # It was a file
+                except ftplib.error_perm:
+                    pass  # Probably a folder
+
+                # Delete the folder's contents first, then the folder itself
+                lines: list[str] = []
+                ftp.cwd(path)
+                ftp.retrlines("LIST", lines.append)
+
+                for line in lines:
+                    parts = line.split(maxsplit=8)
+                    if len(parts) < 9 or parts[8] in (".", ".."):
+                        continue
+                    delete(f"{path}/{parts[8]}")
+
+                ftp.cwd("/")  # Step out before removing it
+                ftp.rmd(path)
+
+            for name in names:
+                delete(f"{base}/{name}")
 
     # Rename a file on the printer.
     def rename_file(self, folder: str, old_name: str, new_name: str) -> None:

@@ -272,7 +272,7 @@ export function FilesPanel({
     const deleteFiles = context.forms.delete({
         url: `/plugin/inventree_bambu/delete_printer_files/${encodeURIComponent(printer.pk)}`,
         method: 'POST',
-        title: 'Delete Files on ${printer.name}',
+        title: `Delete Files on ${printer.name}`,
         fields: {
             path: { hidden: true },
             names: { hidden: true },
