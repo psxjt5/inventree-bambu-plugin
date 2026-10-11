@@ -13,6 +13,9 @@ Development of this plugin is still ongoing. Current capabilities include the ab
 - Receive notifications for various printer events (Printer Online, Printer Offline, Print Started, Print Stopped, Printer Error, Print Paused, Print Resumed, Print Finished).
 - Monitor all printers in the "3D Printing" panel in under the InvenTree Manufacturing module.
 - Use the "Details" buttons in the Manufacturing module to see printer details.
+  - View printer properties and details.
+  - Monitor AMS filaments.
+  - Manage files on the printer's SD card.
 
 Admin Center Machine Registry with Bambu Lab printers connected:
 
