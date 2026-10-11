@@ -2,6 +2,8 @@ from rest_framework import generics, serializers
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from ..bambuutils import BambuUtils, PrinterNotFound, PrinterFTPSServiceNotFound
+
 class MoveSerializer(serializers.Serializer):
     path = serializers.CharField()
     names = serializers.ListField(child=serializers.CharField(), allow_empty=False)
@@ -19,14 +21,15 @@ class MovePrinterFiles(generics.GenericAPIView):
 
         base = data["path"].rstrip("/")
 
-        # ...look up ip_address / access_token...
-
         try:
-            BambuFTPSService(ip_address, access_token).move_paths(
-                [f"{base}/{name}" for name in data["names"]],
-                data["destination"],
-            )
-        except ftplib.error_perm as e:
-            raise serializers.ValidationError({"destination": str(e)})
-
+            return Response({"directories": BambuUtils.get_printer_ftps_service(pk).move_paths([f"{base}/{name}" for name in data["names"]], data["destination"])})
+        
+        except PrinterNotFound:
+            return Response({"error": "Printer not found"}, status=404)
+            raise serializers.ValidationError({"name": "Printer not found"})
+        
+        except PrinterFTPSServiceNotFound:
+            return Response({"error": "Printer FTPS Service not found"}, status=404)
+            raise serializers.ValidationError({"name": "Printer FTPS Service not found"})
+        
         return Response(status=200)
