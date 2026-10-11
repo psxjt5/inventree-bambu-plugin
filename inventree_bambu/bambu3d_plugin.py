@@ -146,6 +146,7 @@ class Bambu3DPlugin(MachineDriverMixin, UrlsMixin, UserInterfaceMixin, SettingsM
             path("get_printer_tiles_data", BambuAPI.get_printer_tiles_data),
             path("get_printer_files/<str:pk>", BambuAPI.get_printer_files),
             path("get_printer_directories/<str:pk>", BambuAPI.get_printer_directories),
+            path("download_printer_files/<str:pk>", BambuAPI.download_printer_files),
 
 
             # Dialogs

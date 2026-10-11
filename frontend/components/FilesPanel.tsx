@@ -333,11 +333,26 @@ export function FilesPanel({
             .finally(() => setFoldersLoading(false));
     };
 
+    // Download the selected files.
+    const downloadFiles = () => {
+        const params = new URLSearchParams({ path });
+        table.selectedRecords.forEach((r: PrinterFile) => params.append('names', r.name));
+
+        const link = document.createElement('a');
+        link.href = `/plugin/inventree_bambu/download_printer_files/${encodeURIComponent(printer.pk)}?${params}`;
+        link.download = '';
+        link.click();
+    };
+
     // Determines if the current selection can be printed (1 file, not a dir, .gcode.3mf)
     const canPrint =
     table.selectedRecords.length === 1 &&
     !table.selectedRecords[0].is_directory &&
     table.selectedRecords[0].name.toLowerCase().endsWith('.gcode.3mf');
+
+    const canDownload =
+    table.selectedRecords.length > 0 &&
+    table.selectedRecords.every((r: PrinterFile) => !r.is_directory);
 
     // Table Action Buttons
     const tableActions = useMemo(
@@ -371,7 +386,7 @@ export function FilesPanel({
                 </Menu.Dropdown>
             </Menu>,
 
-            <ActionButton variant='transparent' icon={<IconFileDownload />} tooltip='Download' disabled={!table.hasSelectedRecords} onClick={() => {}}/>,
+            <ActionButton variant='transparent' icon={<IconFileDownload />} tooltip='Download' disabled={!canDownload} onClick={() => {downloadFiles()}}/>,
             <ActionButton variant='transparent' icon={<IconCursorText />} tooltip='Rename' disabled={table.selectedRecords.length !== 1} onClick={() => renameFile.open()}/>,
             <ActionButton variant='transparent' icon={<IconFileArrowRight />} tooltip='Move' disabled={!table.hasSelectedRecords} onClick={() => openMove()} />,
             <ActionButton variant='transparent' icon={<IconTrash />} tooltip='Delete' color='red' disabled={!table.hasSelectedRecords} onClick={() => deleteFiles.open()}/>,

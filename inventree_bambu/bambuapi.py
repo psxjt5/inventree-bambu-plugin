@@ -2,9 +2,13 @@
 BambuAPI: API methods for Bambu Lab printers.
 """
 
+import tempfile
+
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+
+from django.http import FileResponse
 
 from machine.models import MachineConfig
 from machine.models import MachineSetting
@@ -229,4 +233,29 @@ class BambuAPI:
 
         except PrinterFTPSServiceNotFound:
             return Response({"error": "Printer FTPS Service not found"}, status=404)
+
+    @api_view(["GET"])
+    @permission_classes([IsAuthenticated])
+    def download_printer_files(request, pk):
+        """Download the selected files (one file as-is, several as a zip)."""
+        path = request.query_params.get("path", "/")
+        names = request.query_params.getlist("names")
+
+        if not names:
+            return Response({"error": "No files selected"}, status=400)
+
+        try:
+            ftps = BambuUtils.get_printer_ftps_service(pk)
+        except PrinterNotFound:
+            return Response({"error": "Printer not found"}, status=404)
+        except PrinterFTPSServiceNotFound:
+            return Response({"error": "Printer FTPS Service not found"}, status=404)
+
+        # Temporary file on the server; deleted automatically once the response is sent
+        temp = tempfile.TemporaryFile()
+        ftps.download_files(path, names, temp)
+        temp.seek(0)
+
+        filename = names[0] if len(names) == 1 else "printer-files.zip"
+        return FileResponse(temp, as_attachment=True, filename=filename)
         

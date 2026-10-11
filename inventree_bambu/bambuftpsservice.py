@@ -1,5 +1,6 @@
 import ftplib
 import ssl
+import zipfile
 
 from datetime import datetime
 from contextlib import contextmanager
@@ -121,11 +122,20 @@ class BambuFTPSService:
                 ftp.rename(source, f"{destination.rstrip('/')}/{name}")
 
     # Download a file from the printer.
-    def download_file(self, remote_path: str, local_path: str) -> None:
-        """Download a printer file to a local filesystem path."""
+    def download_files(self, folder: str, names: list[str], destination) -> None:
+        """Write the file into `destination`; several files are written as a zip."""
+        base = folder.rstrip("/")
+
         with self._create_connection() as ftp:
-            with open(local_path, "wb") as destination:
-                ftp.retrbinary(f"RETR {remote_path}", destination.write)
+            if len(names) == 1:
+                ftp.retrbinary(f"RETR {base}/{names[0]}", destination.write)
+                return
+
+            # Print files and videos are already compressed, so store rather than deflate
+            with zipfile.ZipFile(destination, "w", zipfile.ZIP_STORED) as archive:
+                for name in names:
+                    with archive.open(name, "w") as entry:
+                        ftp.retrbinary(f"RETR {base}/{name}", entry.write)
 
     # Upload a file to the printer.
     def upload_file(self, fileobj, remote_path: str) -> None:
