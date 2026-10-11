@@ -265,7 +265,7 @@ export function FilesPanel({
         },
         submitText: 'Rename',
         successMessage: 'File renamed',
-        onFormSuccess: () => table.refreshTable(),
+        onFormSuccess: () => table.refreshTable(true),
     });
 
     // Delete File Confirmation
@@ -372,7 +372,7 @@ export function FilesPanel({
             </Menu>,
 
             <ActionButton variant='transparent' icon={<IconFileDownload />} tooltip='Download' disabled={!table.hasSelectedRecords} onClick={() => {}}/>,
-            <ActionButton variant='transparent' icon={<IconCursorText />} tooltip='Rename' disabled={table.selectedRecords.length != 1} onClick={() => renameFile.open()}/>,
+            <ActionButton variant='transparent' icon={<IconCursorText />} tooltip='Rename' disabled={table.selectedRecords.length !== 1} onClick={() => renameFile.open()}/>,
             <ActionButton variant='transparent' icon={<IconFileArrowRight />} tooltip='Move' disabled={!table.hasSelectedRecords} onClick={() => openMove()} />,
             <ActionButton variant='transparent' icon={<IconTrash />} tooltip='Delete' color='red' disabled={!table.hasSelectedRecords} onClick={() => deleteFiles.open()}/>,
 
