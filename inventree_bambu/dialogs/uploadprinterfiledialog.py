@@ -5,8 +5,7 @@ from rest_framework import generics, serializers
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from ..bambuftpsservice import BambuFTPSService
-
+from ..bambuutils import BambuUtils
 
 class UploadFileSerializer(serializers.Serializer):
     path = serializers.CharField()  # current folder, sent hidden from the UI
@@ -31,11 +30,15 @@ class UploadPrinterFile(generics.GenericAPIView):
         base = serializer.validated_data["path"].rstrip("/")
         remote_path = f"{base}/{os.path.basename(upload.name)}"
 
-        # ...look up ip_address / access_token as in get_printer_files...
-
         try:
-            BambuFTPSService(ip_address, access_token).upload_fileobj(upload, remote_path)
-        except ftplib.error_perm as e:
-            raise serializers.ValidationError({"file": str(e)})
-
+            return Response({"directories": BambuUtils.get_printer_ftps_service(pk).upload_file(upload, remote_path)})
+        
+        except PrinterNotFound:
+            return Response({"error": "Printer not found"}, status=404)
+            raise serializers.ValidationError({"name": "Printer not found"})
+        
+        except PrinterFTPSServiceNotFound:
+            return Response({"error": "Printer FTPS Service not found"}, status=404)
+            raise serializers.ValidationError({"name": "Printer FTPS Service not found"})
+        
         return Response({"path": remote_path}, status=201)

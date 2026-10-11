@@ -125,20 +125,13 @@ class BambuFTPSService:
         """Download a printer file to a local filesystem path."""
         with self._create_connection() as ftp:
             with open(local_path, "wb") as destination:
-                ftp.retrbinary(
-                    f"RETR {remote_path}",
-                    destination.write,
-                )
+                ftp.retrbinary(f"RETR {remote_path}", destination.write)
 
     # Upload a file to the printer.
-    def upload_file(self, local_path: str, remote_path: str) -> None:
-        """Upload a local file to the printer."""
+    def upload_file(self, fileobj, remote_path: str) -> None:
+        """Upload a Django UplaodedFile to the printer."""
         with self._create_connection() as ftp:
-            with open(local_path, "rb") as source:
-                ftp.storbinary(
-                    f"STOR {remote_path}",
-                    source,
-                )
+            ftp.storbinary(f"STOR {remote_path}",fileobj)
 
     # Delete a file on the printer.
     def delete_file(self, remote_path: str) -> None:

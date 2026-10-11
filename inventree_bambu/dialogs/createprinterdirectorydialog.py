@@ -2,8 +2,6 @@ from rest_framework import generics, serializers
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-#from ..bambuftpsservice import get_printer_ftps, printer_errors
-
 from ..bambuutils import BambuUtils
 
 #from machine.models import MachineSetting

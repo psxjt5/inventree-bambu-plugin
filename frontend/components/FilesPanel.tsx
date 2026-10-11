@@ -16,7 +16,7 @@ import {
     TextInput,
     Tooltip,
 } from '@mantine/core';
-import { IconArrowLeft, IconArrowRight, IconArrowUp, IconCalendarPlus, IconChevronDown, IconCube, IconCursorText, IconDots, IconDownload, IconFile, IconFile3d, IconFileArrowRight, IconFileCode, IconFileText, IconFileUpload, IconFileZip, IconFolder, IconFolderPlus, IconHome, IconMovie, IconPhoto, IconPlus, IconPrinter, IconRefresh, IconTrash } from '@tabler/icons-react';
+import { IconArrowLeft, IconArrowRight, IconArrowUp, IconCalendarPlus, IconChevronDown, IconCube, IconCursorText, IconDots, IconDownload, IconFile, IconFile3d, IconFileArrowRight, IconFileCode, IconFileDownload, IconFileText, IconFileUpload, IconFileZip, IconFolder, IconFolderPlus, IconHome, IconMovie, IconPhoto, IconPlus, IconPrinter, IconRefresh, IconTrash } from '@tabler/icons-react';
 import {
     ActionButton,
     InvenTreeTable,
@@ -343,11 +343,8 @@ export function FilesPanel({
     const tableActions = useMemo(
         () => [
             <ActionButton key='back' icon={<IconArrowLeft />} tooltip='Back' disabled={index === 0} onClick={back} />,
-            
             <ActionButton key='forward' icon={<IconArrowRight />} tooltip='Forward' disabled={index === history.length - 1} onClick={forward} />,
-
             <ActionButton variant='transparent' disabled={path === '/'} onClick={() => navigate('/')} icon={<IconHome />} tooltip='Go to Root Folder' />,
-            
             <ActionButton variant='transparent' disabled={path === '/'} onClick={() => navigate(getParentPath(path))} icon={<IconArrowUp />} tooltip='Up one level' />,
 
             <Divider key='divider-1' orientation='vertical' />,
@@ -374,17 +371,15 @@ export function FilesPanel({
                 </Menu.Dropdown>
             </Menu>,
 
+            <ActionButton variant='transparent' icon={<IconFileDownload />} tooltip='Download' disabled={!table.hasSelectedRecords} onClick={() => {}}/>,
             <ActionButton variant='transparent' icon={<IconCursorText />} tooltip='Rename' disabled={!table.hasSelectedRecords} onClick={() => renameFile.open()}/>,
-
             <ActionButton variant='transparent' icon={<IconFileArrowRight />} tooltip='Move' disabled={!table.hasSelectedRecords} onClick={() => openMove()} />,
-
             <ActionButton variant='transparent' icon={<IconTrash />} tooltip='Delete' color='red' disabled={!table.hasSelectedRecords} onClick={() => deleteFiles.open()}/>,
 
-            <Divider key='divider-1' orientation='vertical' />,
+            // <Divider key='divider-1' orientation='vertical' />,
 
-            <ActionButton variant='transparent' onClick={() => {}} icon={<IconPrinter />} tooltip='Print' disabled={!canPrint} />,
-
-            <ActionButton variant='transparent' onClick={() => {}} icon={<IconCalendarPlus />} tooltip='Schedule Print' disabled={!canPrint} />,
+            // <ActionButton variant='transparent' onClick={() => {}} icon={<IconPrinter />} tooltip='Print' disabled={!canPrint} />,
+            // <ActionButton variant='transparent' onClick={() => {}} icon={<IconCalendarPlus />} tooltip='Schedule Print' disabled={!canPrint} />,
         ],
         [path, table.hasSelectedRecords, table.selectedRecords],
     );
