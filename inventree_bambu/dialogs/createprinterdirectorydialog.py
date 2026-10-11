@@ -2,7 +2,7 @@ from rest_framework import generics, serializers
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from ..bambuutils import BambuUtils
+from ..bambuutils import BambuUtils, PrinterNotFound, PrinterFTPSServiceNotFound
 
 #from machine.models import MachineSetting
 class CreateDirectorySerializer(serializers.Serializer):

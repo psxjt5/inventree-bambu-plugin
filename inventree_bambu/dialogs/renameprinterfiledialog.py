@@ -2,6 +2,8 @@ from rest_framework import generics, serializers
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from ..bambuutils import BambuUtils, PrinterNotFound, PrinterFTPSServiceNotFound
+
 
 class RenamePrinterFileSerializer(serializers.Serializer):
     path = serializers.CharField() # current folder, sent hidden from the UI
@@ -26,14 +28,15 @@ class RenamePrinterFileDialog(generics.GenericAPIView):
 
         base = data["path"].rstrip("/")
 
-        # ...look up ip_address / access_token...
-
         try:
-            BambuFTPSService(ip_address, access_token).rename(
-                f"{base}/{data['old_name']}",
-                f"{base}/{data['new_name']}",
-            )
-        except ftplib.error_perm as e:
-            raise serializers.ValidationError({"new_name": str(e)})
-
+            return Response({"directories": BambuUtils.get_printer_ftps_service(pk).rename_file(base, data['old_name'], data['new_name'])})
+        
+        except PrinterNotFound:
+            return Response({"error": "Printer not found"}, status=404)
+            raise serializers.ValidationError({"name": "Printer not found"})
+        
+        except PrinterFTPSServiceNotFound:
+            return Response({"error": "Printer FTPS Service not found"}, status=404)
+            raise serializers.ValidationError({"name": "Printer FTPS Service not found"})
+        
         return Response(status=200)

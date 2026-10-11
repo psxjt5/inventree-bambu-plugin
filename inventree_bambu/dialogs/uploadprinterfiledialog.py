@@ -5,7 +5,7 @@ from rest_framework import generics, serializers
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from ..bambuutils import BambuUtils
+from ..bambuutils import BambuUtils, PrinterNotFound, PrinterFTPSServiceNotFound
 
 class UploadFileSerializer(serializers.Serializer):
     path = serializers.CharField()  # current folder, sent hidden from the UI

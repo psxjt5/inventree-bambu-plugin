@@ -139,6 +139,14 @@ class BambuFTPSService:
         with self._create_connection() as ftp:
             ftp.delete(remote_path)
 
+    # Rename a file on the printer.
+    def rename_file(self, folder: str, old_name: str, new_name: str) -> None:
+        """Rename an item within a folder on the printer"""
+        base = folder.rstrip("/")
+
+        with self._create_connection() as ftp:
+            ftp.rename(f"{base}/{old_name}", f"{base}/{new_name}")
+
     # Create a new directory on the printer.
     def create_directory(self, path: str) -> None:
         """Create a directory on the printer."""
