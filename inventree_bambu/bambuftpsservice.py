@@ -90,6 +90,40 @@ class BambuFTPSService:
             ftp.retrlines("LIST", entries.append)
             return entries
 
+    def list_all_directories(self, root: str = "/") -> list[str]:
+        """Return every directory path on the printer, including the root."""
+        result: list[str] = []
+
+        with self._create_connection() as ftp:
+            def walk(path: str) -> None:
+                result.append(path)
+                lines: list[str] = []
+                try:
+                    ftp.cwd(path)
+                    ftp.retrlines("LIST", lines.append)
+                except ftplib.error_perm:
+                    return  # unreadable or empty directory
+
+                for line in lines:
+                    parts = line.split(maxsplit=8)
+                    if len(parts) < 9 or not parts[0].startswith("d"):
+                        continue
+                    name = parts[8]
+                    if name in (".", ".."):
+                        continue
+                    walk(f"{path.rstrip('/')}/{name}")
+
+            walk(root)
+
+        return result
+
+    def move_paths(self, paths: list[str], destination: str) -> None:
+        """Move files or folders into the destination directory."""
+        with self._create_connection() as ftp:
+            for source in paths:
+                name = source.rstrip("/").rsplit("/", 1)[-1]
+                ftp.rename(source, f"{destination.rstrip('/')}/{name}")
+
     def download_file(self, remote_path: str, local_path: str) -> None:
         """Download a printer file to a local filesystem path."""
         with self._create_connection() as ftp:

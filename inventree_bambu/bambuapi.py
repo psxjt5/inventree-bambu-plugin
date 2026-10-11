@@ -258,4 +258,44 @@ class BambuAPI:
                 {"error": str(e)},
                 status=500,
             )
+
+    @api_view(["GET"])
+    @permission_classes([IsAuthenticated])
+    def get_printer_directories(request, pk):
+
+        try:
+            machine = MachineConfig.objects.get(
+                machine_type="3d-printer",
+                pk=pk,
+                active=True,
+            )
+        except MachineConfig.DoesNotExist:
+            return Response(
+                {"error": "Printer not found"},
+                status=404,
+            )
+        
+        ip_address = MachineSetting.objects.get(
+                    machine_config_id=pk,
+                    key="IP_ADDRESS",
+                ).value
+        
+        access_token = MachineSetting.objects.get(
+                            machine_config_id=pk,
+                            key="ACCESS_TOKEN",
+                        ).value
+        
+        if not isinstance(ip_address, str) or not ip_address:
+            return Response(
+                {"error": "Printer IP address is not configured"},
+                status=400,
+            )
+        
+        if not isinstance(access_token, str) or not access_token:
+            return Response(
+                {"error": "Printer access token is not configured"},
+                status=400,
+            )
+        
+        return Response({"directories": BambuFTPSService(ip_address, access_token).list_all_directories()})
         

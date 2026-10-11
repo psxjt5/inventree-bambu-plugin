@@ -21,6 +21,7 @@ from .dialogs.createprinterdirectorydialog import CreatePrinterDirectoryDialog
 from .dialogs.uploadprinterfiledialog import UploadPrinterFile
 from .dialogs.renameprinterfiledialog import RenamePrinterFileDialog
 from .dialogs.deleteprinterfilesdialog import DeletePrinterFilesDialog
+from .dialogs.moveprinterfiledialog import MovePrinterFiles
 
 from django.urls import path
 from django.shortcuts import render
@@ -139,16 +140,20 @@ class Bambu3DPlugin(MachineDriverMixin, UrlsMixin, UserInterfaceMixin, SettingsM
         print("[BambuLab3DPrinterPlugin] Registering BambuLab 3D API URLs")
 
         return [
+            # API Endpoints
             path("get_printer_data/<str:pk>", BambuAPI.get_printer_data),
             path("get_dashboard_widget_data", BambuAPI.get_dashboard_widget_data),
             path("get_printer_tiles_data", BambuAPI.get_printer_tiles_data),
             path("get_printer_files/<str:pk>", BambuAPI.get_printer_files),
+            path("get_printer_directories/<str:pk>", BambuAPI.get_printer_directories),
+
 
             # Dialogs
             path("create_printer_directory/<str:pk>", CreatePrinterDirectoryDialog.as_view()),
             path("upload_printer_file/<str:pk>", UploadPrinterFile.as_view()),
             path("rename_printer_file/<str:pk>", RenamePrinterFileDialog.as_view()),
             path("delete_printer_files/<str:pk>", DeletePrinterFilesDialog.as_view()),
+            path("move_printer_files/<str:pk>", MovePrinterFiles.as_view()),
         ]
 
     def view_3d_printer_details(self, request, pk):

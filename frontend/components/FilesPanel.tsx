@@ -208,6 +208,21 @@ export function FilesPanel({
     // Currently selected file
     const selectedFile: PrinterFile | undefined = table.selectedRecords[0];
 
+    // Load folder list for the move dialog
+    const [folders, setFolders] = useState<string[]>([]);
+    const [foldersLoading, setFoldersLoading] = useState(false);
+
+    // Valid move targets. Not the current folder, and not a selected folder or anything inside it.
+    const moveTargets = folders.filter(
+        (folder) =>
+            folder !== path &&
+            !table.selectedRecords.some((r: PrinterFile) => {
+                if (!r.is_directory) return false;
+                const selectedPath = joinPath(path, r.name);
+                return folder === selectedPath || folder.startsWith(`${selectedPath}/`);
+            }),
+    );
+
     // New Folder Dialog
     const newFolder = context.forms.create({
         url: `/plugin/inventree_bambu/create_printer_directory/${encodeURIComponent(printer.pk)}`,
@@ -257,7 +272,7 @@ export function FilesPanel({
     const deleteFiles = context.forms.delete({
         url: `/plugin/inventree_bambu/delete_printer_files/${encodeURIComponent(printer.pk)}`,
         method: 'POST',
-        title: 'Delete',
+        title: 'Delete Files on ${printer.name}',
         fields: {
             path: { hidden: true },
             names: { hidden: true },
@@ -279,6 +294,44 @@ export function FilesPanel({
             table.refreshTable();
         },
     });
+
+    // Delete File Confirmation
+    const moveFiles = context.forms.create({
+        url: `/plugin/inventree_bambu/move_printer_files/${encodeURIComponent(printer.pk)}`,
+        title: `Move Files on ${printer.name}`,
+        fields: {
+            path: { hidden: true },
+            names: { hidden: true },
+            destination: {
+                field_type: 'choice',
+                choices: moveTargets.map((f) => ({ value: f, display_name: f })),
+                disabled: foldersLoading,
+                placeholder: foldersLoading ? 'Loading folders…' : 'Select a folder',
+            },
+        },
+        initialData: {
+            path,
+            names: table.selectedRecords.map((r: PrinterFile) => r.name),
+        },
+        submitText: 'Move',
+        successMessage: 'Moved',
+        onFormSuccess: () => {
+            table.clearSelectedRecords();
+            table.refreshTable();
+        },
+    });
+
+    // Open the move dialog and then get the list of directories.
+    const openMove = () => {
+        setFolders([]);
+        setFoldersLoading(true);
+        moveFiles.open();
+
+        context.api
+            .get(`/plugin/inventree_bambu/get_printer_directories/${encodeURIComponent(printer.pk)}`)
+            .then((response) => setFolders(response.data?.directories ?? []))
+            .finally(() => setFoldersLoading(false));
+    };
 
     // Determines if the current selection can be printed (1 file, not a dir, .gcode.3mf)
     const canPrint =
@@ -323,7 +376,7 @@ export function FilesPanel({
 
             <ActionButton variant='transparent' icon={<IconCursorText />} tooltip='Rename' disabled={!table.hasSelectedRecords} onClick={() => renameFile.open()}/>,
 
-            <ActionButton variant='transparent' onClick={() => {}} icon={<IconFileArrowRight />} tooltip='Move' disabled={!table.hasSelectedRecords} />,
+            <ActionButton variant='transparent' icon={<IconFileArrowRight />} tooltip='Move' disabled={!table.hasSelectedRecords} onClick={() => openMove()} />,
 
             <ActionButton variant='transparent' icon={<IconTrash />} tooltip='Delete' color='red' disabled={!table.hasSelectedRecords} onClick={() => deleteFiles.open()}/>,
 
@@ -405,6 +458,7 @@ export function FilesPanel({
             {uploadFile.modal}
             {renameFile.modal}
             {deleteFiles.modal}
+            {moveFiles.modal}
         </Stack>
     );
 }
