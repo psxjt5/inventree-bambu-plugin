@@ -48,10 +48,12 @@ class BambuFTPSService:
         self.host = host
         self.access_token = access_token
 
+    # Create a connection to the printer and test that it succeeds
     def test_connection(self) -> bool:
         with self._create_connection() as ftp:
             return ftp.voidcmd("NOOP").startswith("200")
 
+    # List the contents of an printer directory (with the name, whether it's a dir, size and date modified).
     def list_directory(self, path: str = "/",) -> list[dict[str, str | bool]]:
         with self._create_connection() as ftp:
             try:
@@ -82,14 +84,7 @@ class BambuFTPSService:
                 })
             return result
 
-    def list_directory_details(self, path: str = "/") -> list[str]:
-        """Return detailed LIST output for a path."""
-        with self._create_connection() as ftp:
-            entries: list[str] = []
-            ftp.cwd(path)
-            ftp.retrlines("LIST", entries.append)
-            return entries
-
+    # List all directories on the printer.
     def list_all_directories(self, root: str = "/") -> list[str]:
         """Return every directory path on the printer, including the root."""
         result: list[str] = []
@@ -117,6 +112,7 @@ class BambuFTPSService:
 
         return result
 
+    # Move a list of files from one location to another.
     def move_paths(self, paths: list[str], destination: str) -> None:
         """Move files or folders into the destination directory."""
         with self._create_connection() as ftp:
@@ -124,6 +120,7 @@ class BambuFTPSService:
                 name = source.rstrip("/").rsplit("/", 1)[-1]
                 ftp.rename(source, f"{destination.rstrip('/')}/{name}")
 
+    # Download a file from the printer.
     def download_file(self, remote_path: str, local_path: str) -> None:
         """Download a printer file to a local filesystem path."""
         with self._create_connection() as ftp:
@@ -133,6 +130,7 @@ class BambuFTPSService:
                     destination.write,
                 )
 
+    # Upload a file to the printer.
     def upload_file(self, local_path: str, remote_path: str) -> None:
         """Upload a local file to the printer."""
         with self._create_connection() as ftp:
@@ -142,22 +140,26 @@ class BambuFTPSService:
                     source,
                 )
 
+    # Delete a file on the printer.
     def delete_file(self, remote_path: str) -> None:
         """Delete a file on the printer."""
         with self._create_connection() as ftp:
             ftp.delete(remote_path)
 
+    # Create a new directory on the printer.
     def create_directory(self, path: str) -> None:
         """Create a directory on the printer."""
         with self._create_connection() as ftp:
             ftp.mkd(path)
 
+    # Delete a directory on the printer.
     def remove_directory(self, path: str) -> None:
         """Remove an empty directory on the printer."""
         with self._create_connection() as ftp:
             ftp.rmd(path)
 
     @contextmanager
+    # Create a new connection using the IP and Access Token
     def _create_connection(self) -> Generator[ImplicitFTP_TLS, None, None]:
         
         ftp = ImplicitFTP_TLS(timeout=self.TIMEOUT)
@@ -177,6 +179,7 @@ class BambuFTPSService:
             except (Exception):
                 ftp.close()
 
+    # Take the file date and output it as a DateTimeString.
     def _parse_list_date(self, month: str, day: str, time_or_year: str) -> str | None:
         try:
             if ":" in time_or_year:

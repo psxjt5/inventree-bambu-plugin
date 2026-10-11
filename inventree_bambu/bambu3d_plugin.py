@@ -156,6 +156,7 @@ class Bambu3DPlugin(MachineDriverMixin, UrlsMixin, UserInterfaceMixin, SettingsM
             path("move_printer_files/<str:pk>", MovePrinterFiles.as_view()),
         ]
 
+    # Unused?
     def view_3d_printer_details(self, request, pk):
         return TemplateResponse(request, "3dprinterdetails.html", {
             "printer_id": pk,
