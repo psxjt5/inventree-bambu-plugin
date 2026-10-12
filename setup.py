@@ -31,7 +31,8 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     install_requires=[
         "inventree-3d-printing",
-        "paho-mqtt>=1.6.1"
+        "paho-mqtt>=1.6.1",
+        "av"
     ],
     setup_requires=[
         "wheel",

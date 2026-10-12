@@ -9,6 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from django.http import FileResponse
+from django.http import HttpResponse
 
 from machine.models import MachineConfig
 from machine.models import MachineSetting
@@ -17,7 +18,7 @@ from stock.models import StockLocation
 
 from .bambudata import BambuData
 from .bambuftpsservice import BambuFTPSService, BambuFTPSPathError
-from .bambuutils import BambuUtils, PrinterNotFound, PrinterFTPSServiceNotFound
+from .bambuutils import BambuUtils, PrinterNotFound, PrinterFTPSServiceNotFound, PrinterCameraServiceNotFound
 
 class BambuAPI:
 
@@ -258,4 +259,26 @@ class BambuAPI:
 
         filename = names[0] if len(names) == 1 else "printer-files.zip"
         return FileResponse(temp, as_attachment=True, filename=filename)
-        
+
+    @api_view(["GET"])
+    @permission_classes([IsAuthenticated])
+    def get_camera_frame(request, pk):
+        """Return the latest camera frame for a printer as a JPEG."""
+        try:
+            camera = BambuUtils.get_printer_camera_service(pk)
+        except PrinterNotFound:
+            return Response({"error": "Printer not found"}, status=404)
+        except PrinterCameraServiceNotFound:
+            return Response({"error": "Printer camera not available"}, status=404)
+
+        frame = camera.get_frame()
+
+        if frame is None:
+            # Camera is still connecting; the modal keeps polling until a frame arrives
+            return Response({"error": "Camera starting"}, status=503)
+
+        return HttpResponse(
+            frame,
+            content_type="image/jpeg",
+            headers={"Cache-Control": "no-store"},
+        )
