@@ -45,12 +45,14 @@ export default defineConfig({
     rollupOptions: {
       preserveEntrySignatures: "exports-only",
       input: [
-        
         './src/Dashboard.tsx',
         './src/3DPrintersPanel.tsx',
         './src/3DPrinterDetails.tsx',
         './components/PanelGroup.tsx',
-        './components/PrinterDetailsPanel.tsx'
+        './components/PrinterDetailsPanel.tsx',
+        './components/AMSDetailsPanel.tsx',
+        './components/FilesPanel.tsx',
+        './components/CameraModal.tsx',
       ],
       output: {
         dir: '../inventree_bambu/static',

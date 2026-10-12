@@ -8,8 +8,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from django.http import FileResponse
-from django.http import HttpResponse
+from django.http import FileResponse, HttpResponse, StreamingHttpResponse
 
 from machine.models import MachineConfig
 from machine.models import MachineSetting
@@ -282,3 +281,21 @@ class BambuAPI:
             content_type="image/jpeg",
             headers={"Cache-Control": "no-store"},
         )
+
+    @api_view(["GET"])
+    @permission_classes([IsAuthenticated])
+    def get_camera_video(request, pk):
+        """Stream an RTSP printer's camera as MP4 (404 for JPEG-only cameras)."""
+        try:
+            camera = BambuUtils.get_printer_camera_service(pk)
+        except PrinterNotFound:
+            return Response({"error": "Printer not found"}, status=404)
+        except PrinterCameraServiceNotFound:
+            return Response({"error": "Printer camera not available"}, status=404)
+
+        if not camera.supports_video():
+            return Response({"error": "This camera does not support video"}, status=404)
+
+        response = StreamingHttpResponse(camera.stream_mp4(), content_type="video/mp4")
+        response["Cache-Control"] = "no-store"
+        return response

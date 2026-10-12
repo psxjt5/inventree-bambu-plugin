@@ -2,6 +2,8 @@ import { Badge, Card, Group, Progress, SimpleGrid, Stack, Text, ActionIcon, Butt
 import { IconPlayerPlay, IconArrowRight, IconCamera, IconBulb } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 
+import { CameraButton } from '../components/CameraModal'
+
 import {
     checkPluginVersion,
     type InvenTreePluginContext,
@@ -139,19 +141,15 @@ function PrinterTile({
 
                 <Group justify="space-between">
                     <Group gap="xs">
-                        <Tooltip label="Live Camera" withArrow>
-                            <ActionIcon variant="light" size="lg" onClick={() => console.log('Camera', printer.pk)}>
-                                <IconCamera size={18} />
-                            </ActionIcon>
-                        </Tooltip>
+                        <CameraButton printerPk={printer.pk} printerName={printer.name} />
                         <Tooltip label="Run Job" withArrow>
                             <ActionIcon variant="light" size="lg" onClick={() => console.log('Camera', printer.pk)}>
-                                <IconPlayerPlay size={18} />
+                                <IconPlayerPlay />
                             </ActionIcon>
                         </Tooltip>
                         <Tooltip label="Toggle Chamber Light" withArrow>
                             <ActionIcon variant="light" size="lg" onClick={() => console.log('Camera', printer.pk)}>
-                                <IconBulb size={18} />
+                                <IconBulb />
                             </ActionIcon>
                         </Tooltip>
                     </Group>

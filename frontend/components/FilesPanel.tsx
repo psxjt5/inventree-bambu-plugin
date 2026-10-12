@@ -1,22 +1,17 @@
 import { useCallback, useMemo, useState } from 'react';
 import {
-    ActionBarDivider,
     ActionIcon,
     Alert,
     Anchor,
     Breadcrumbs,
-    Button,
     Divider,
     Group,
     Menu,
-    Modal,
-    Paper,
     Stack,
     Text,
-    TextInput,
     Tooltip,
 } from '@mantine/core';
-import { IconArrowLeft, IconArrowRight, IconArrowUp, IconCalendarPlus, IconChevronDown, IconCube, IconCursorText, IconDots, IconDownload, IconFile, IconFile3d, IconFileArrowRight, IconFileCode, IconFileDownload, IconFileText, IconFileUpload, IconFileZip, IconFolder, IconFolderPlus, IconHome, IconMovie, IconPhoto, IconPlus, IconPrinter, IconRefresh, IconTrash } from '@tabler/icons-react';
+import { IconArrowLeft, IconArrowRight, IconArrowUp, IconChevronDown, IconCursorText, IconFile, IconFile3d, IconFileArrowRight, IconFileCode, IconFileDownload, IconFileText, IconFileUpload, IconFileZip, IconFolder, IconFolderPlus, IconHome, IconMovie, IconPhoto, IconPlus, IconTrash } from '@tabler/icons-react';
 import {
     ActionButton,
     InvenTreeTable,

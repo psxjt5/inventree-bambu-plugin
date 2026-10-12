@@ -82,6 +82,14 @@ class BambuCameraService:
 
     # X1 / H2D: H.264 video over RTSPS
 
+    def supports_video(self) -> bool:
+        if self._mode is None:
+            try:
+                self._mode = self._detect_mode()
+            except ConnectionError:
+                return False
+        return self._mode == "rtsp"
+
     def _stream_rtsp(self) -> None:
         import av  # imported here so P1/A1 users don't need PyAV installed
         import av.logging
@@ -111,6 +119,64 @@ class BambuCameraService:
                 frame.to_image().save(buffer, format="JPEG", quality=80)
                 self._set_frame(buffer.getvalue())
                 last_saved = now
+
+    def stream_mp4(self):
+        """Yield the RTSP camera's video as a fragmented MP4, without re-encoding it.
+
+        Each viewer gets their own connection, which closes when they stop watching.
+        """
+        import av
+
+        url = (
+            f"rtsps://bblp:{quote(self.access_token)}@{self.host}:"
+            f"{self.RTSP_PORT}/streaming/live/1"
+        )
+        output_buffer = _ChunkCollector()
+
+        with av.open(
+            url,
+            options={"rtsp_transport": "tcp", "tls_verify": "0"},
+            timeout=10,
+        ) as source:
+            in_stream = source.streams.video[0]
+
+            output = av.open(
+                output_buffer,
+                mode="w",
+                format="mp4",
+                # Fragmented MP4 that can be played while it's still being written
+                options={"movflags": "frag_keyframe+empty_moov+default_base_moof"},
+            )
+            out_stream = output.add_stream_from_template(in_stream)
+
+            try:
+                offset = None
+
+                for packet in source.demux(in_stream):
+                    if packet.dts is None:
+                        continue
+
+                    # Start on a keyframe, with timestamps from zero, so the browser can play it
+                    if offset is None:
+                        if not packet.is_keyframe:
+                            continue
+                        offset = packet.dts
+
+                    packet.dts -= offset
+                    if packet.pts is not None:
+                        packet.pts -= offset
+
+                    packet.stream = out_stream
+                    output.mux(packet)
+
+                    data = output_buffer.take()
+                    if data:
+                        yield data
+            finally:
+                try:
+                    output.close()
+                except Exception:
+                    pass  # viewer disconnected mid-write; nothing to finish
 
     # P1 / A1: JPEG frames over a TLS socket
 
@@ -146,3 +212,18 @@ class BambuCameraService:
                 raise ConnectionError("Camera closed the connection")
             data.extend(chunk)
         return bytes(data)
+
+class _ChunkCollector:
+    """File-like object that collects what PyAV writes, so it can be sent on."""
+
+    def __init__(self):
+        self._data = bytearray()
+
+    def write(self, data) -> int:
+        self._data.extend(data)
+        return len(data)
+
+    def take(self) -> bytes:
+        data = bytes(self._data)
+        self._data.clear()
+        return data
