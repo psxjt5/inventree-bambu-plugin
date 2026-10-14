@@ -186,7 +186,7 @@ function BasePanelGroup({
 
     return (
         <Boundary label='PanelGroup'>
-            <Paper p='sm' radius='xs' shadow='xs' style={{flex: 1, minHeight: 0}}>
+            <Paper pt='sm' pb='sm' pl='sm' radius='xs' shadow='xs' style={{flex: 1, minHeight: 0}}>
                 <Tabs
                     orientation='vertical'
                     keepMounted={false}

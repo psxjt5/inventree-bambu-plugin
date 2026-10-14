@@ -261,8 +261,9 @@ class BambuAPI:
 
     @api_view(["GET"])
     @permission_classes([IsAuthenticated])
-    def get_camera_frame(request, pk):
-        """Return the latest camera frame for a printer as a JPEG."""
+    def get_camera_stream(request, pk):
+
+        """ Returns the technology used for the printer's camera (MP4/MJPEG) """
         try:
             camera = BambuUtils.get_printer_camera_service(pk)
         except PrinterNotFound:
@@ -270,32 +271,16 @@ class BambuAPI:
         except PrinterCameraServiceNotFound:
             return Response({"error": "Printer camera not available"}, status=404)
 
-        frame = camera.get_frame()
-
-        if frame is None:
-            # Camera is still connecting; the modal keeps polling until a frame arrives
-            return Response({"error": "Camera starting"}, status=503)
-
-        return HttpResponse(
-            frame,
-            content_type="image/jpeg",
-            headers={"Cache-Control": "no-store"},
-        )
-
-    @api_view(["GET"])
-    @permission_classes([IsAuthenticated])
-    def get_camera_video(request, pk):
-        """Stream an RTSP printer's camera as MP4 (404 for JPEG-only cameras)."""
         try:
-            camera = BambuUtils.get_printer_camera_service(pk)
-        except PrinterNotFound:
-            return Response({"error": "Printer not found"}, status=404)
-        except PrinterCameraServiceNotFound:
-            return Response({"error": "Printer camera not available"}, status=404)
+            if camera.supports_video():
+                response = StreamingHttpResponse(camera.stream_mp4(), content_type="video/mp4")
+            else:
+                response = StreamingHttpResponse(
+                    camera.stream_mjpeg(),
+                    content_type="multipart/x-mixed-replace; boundary=frame",
+                )
 
-        if not camera.supports_video():
-            return Response({"error": "This camera does not support video"}, status=404)
-
-        response = StreamingHttpResponse(camera.stream_mp4(), content_type="video/mp4")
-        response["Cache-Control"] = "no-store"
-        return response
+            response["Cache-Control"] = "no-store"
+            return response
+        except ConnectionError as e:
+            return Response({"error": f"str(e)"}, status=500)

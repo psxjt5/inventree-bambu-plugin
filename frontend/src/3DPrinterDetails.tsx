@@ -1,4 +1,4 @@
-import { Group, Paper, Stack, Text } from '@mantine/core';
+import { Badge, Group, Paper, Stack, Text } from '@mantine/core';
 import {
     checkPluginVersion,
     StylishText,
@@ -26,9 +26,59 @@ import { FilesPanel } from '../components/FilesPanel';
 
 import type { ThreeDPrinter } from '../types';
 
+import { CameraButton } from '../components/CameraModal'
+
+function getStatusColor(status: number): string {
+    switch (Number(status)) {
+        case 101: // Idle
+        case 102: // Preparing
+        case 103: // Printing
+        case 300: // Connected
+            return 'blue';
+
+        case 104: // Paused
+        case 500: // Unknown
+            return 'gray';
+
+        case 105: // Finished
+            return 'green';
+
+        case 301: // Disconnected
+        case 302: // Failed
+        case 303: // Error
+        case 400: // Misconfigured
+            return 'red';
+
+        default:
+            return 'gray';
+    }
+}
+
+function getShowPrintingStats(status: number): boolean {
+     switch (Number(status)) {
+        case 101: // Idle
+        case 300: // Connected
+        case 500: // Unknown
+        case 301: // Disconnected
+        case 400: // Misconfigured
+            return false;
+
+        case 102: // Preparing
+        case 103: // Printing
+        case 302: // Failed
+        case 303: // Error
+        case 104: // Paused
+        case 105: // Finished
+            return true;
+
+        default:
+            return false;
+    }
+}
+
 function PrinterDetailHeader({ printer }: { printer: ThreeDPrinter }) {
     return (
-        <Paper p='xs' radius='xs' shadow='xs'>
+        <Paper p='sm' radius='xs' shadow='xs'>
             <Group
                 justify='space-between'
                 gap='xs'
@@ -63,12 +113,25 @@ function PrinterDetailHeader({ printer }: { printer: ThreeDPrinter }) {
                     </Group>
                 </Group>
 
-                <Group
+                 <Group
                     gap={5}
                     justify='right'
                     wrap='nowrap'
                     align='center'
-                />
+                    style={{ alignSelf: 'center' }}
+                >
+                    <Badge
+                        color={getStatusColor(printer.status)}
+                        variant='light'
+                        size='lg'
+                    >
+                        {printer.status_text}
+                    </Badge>
+                    <CameraButton
+                        printerPk={printer.pk}
+                        printerName={printer.name}
+                    />
+                </Group>
             </Group>
         </Paper>
     );
@@ -121,17 +184,10 @@ function PrinterDetailsPage({
             const url =
                 `/plugin/inventree_bambu/get_printer_data/${encodeURIComponent(pk)}`;
 
-            console.log('[Bambu] Calling printer data endpoint:', url);
-
             fetch(url, {
                 cache: 'no-store',
             })
                 .then((res) => {
-                    console.log(
-                        '[Bambu] Printer data response:',
-                        res.status,
-                    );
-
                     if (!res.ok) {
                         throw new Error(
                             `get_printer_data failed: ${res.status}`,
@@ -141,17 +197,10 @@ function PrinterDetailsPage({
                     return res.json();
                 })
                 .then((data: ThreeDPrinter) => {
-                    console.log('[Bambu] Live printer data:', data);
-
                     setPrinter(data);
                 })
                 .catch((error) => {
-                    console.error(
-                        '[Bambu] Live printer request failed:',
-                        error,
-                    );
-
-                    setPrinter(null);
+                    console.error('[Bambu] Live printer request failed:', error);
                 });
         };
 

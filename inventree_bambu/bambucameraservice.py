@@ -6,147 +6,82 @@ import threading
 import time
 from urllib.parse import quote
 
-
 class BambuCameraService:
-    """Provides the latest camera frame as a JPEG, for both Bambu camera types.
+    """Provides the latest camera frame as either RTSP or JPEG, depending on the Bambu camera type.
 
-    The camera connection only runs while someone is viewing it, and
-    closes after IDLE_TIMEOUT seconds without a request.
+    RTSP streaming is not possible on the P1 / A1 printers.
+    JPEG streaming is possible on all printers (and is used as a fallback for all printers).
+
+    The printer camera connection closes when the last peer disconnects, after the IDLE_TIMEOUT.
     """
 
-    RTSP_PORT = 322     # X1 / H2D series: H.264 over RTSPS
-    JPEG_PORT = 6000    # P1 / A1 series: JPEG frames over TLS
-    IDLE_TIMEOUT = 30   # seconds without a viewer before disconnecting
-    RETRY_DELAY = 2     # seconds between reconnection attempts
-    RTSP_MAX_FPS = 2    # how often to convert RTSP video frames to JPEG
+    # H.264 over RTSPS
+    RTSP_PORT = 322
 
-    def __init__(self, host: str, access_token: str):
-        self.host = host
-        self.access_token = access_token
+    # JPEG frames over TLS
+    JPEG_PORT = 6000
 
-        self._mode: str | None = None  # "rtsp" or "jpeg", detected on first use
-        self._frame: bytes | None = None
-        self._lock = threading.Lock()
-        self._thread: threading.Thread | None = None
-        self._last_request = 0.0
+    # Seconds without a viewer before disconnecting from the camera
+    IDLE_TIMEOUT = 30
 
-    # Public
+    # Seconds between reconnection attempts
+    RETRY_DELAY = 2
 
-    def get_frame(self) -> bytes | None:
-        """Return the latest frame, starting the camera connection if needed."""
-        self._last_request = time.monotonic()
+    # RTSP FPS (how often RTSP video frames are delivered as JPEG frames).
+    RTSP_MAX_FPS = 2
 
-        with self._lock:
-            if self._thread is None or not self._thread.is_alive():
-                self._thread = threading.Thread(target=self._run, daemon=True)
-                self._thread.start()
-            return self._frame
+    def __init__(self, ip: str, token: str):
+        self.ip_address = ip
+        self.token = token
 
-    # Background thread
+        # Printer video mode
+        self.camera_model: str | None = None  # "rtsp" or "jpeg", detected on first use
 
-    def _viewer_active(self) -> bool:
-        return time.monotonic() - self._last_request < self.IDLE_TIMEOUT
+        # Current Frame
+        self.latest_frame: bytes | None = None
 
-    def _set_frame(self, jpeg: bytes) -> None:
-        with self._lock:
-            self._frame = jpeg
+        # Update Lock
+        self.lock = threading.Lock()
 
-    def _run(self) -> None:
-        while self._viewer_active():
-            try:
-                if self._mode is None:
-                    self._mode = self._detect_mode()
+        # Video fetch thread
+        self.video_thread: threading.Thread | None = None
 
-                if self._mode == "rtsp":
-                    self._stream_rtsp()
-                else:
-                    self._stream_jpeg()
-            except Exception as e:
-                message = str(e).replace(self.access_token, "***")
-                print(f"[BambuCamera] {self.host}: {message}")
-                time.sleep(self.RETRY_DELAY)
+        # Time of the last request (for timeout)
+        self.last_request_time = 0.0
 
-        with self._lock:
-            self._frame = None
+    # Determines if the printer supports a video stream.
+    def supports_video(self):
 
-    def _detect_mode(self) -> str:
-        """Work out which camera type the printer has (raises if neither is reachable)."""
-        for port, mode in ((self.RTSP_PORT, "rtsp"), (self.JPEG_PORT, "jpeg")):
-            try:
-                socket.create_connection((self.host, port), timeout=3).close()
-                return mode
-            except OSError:
-                continue
+        # Check for RTSP
+        try:
+            socket.create_connection((self.ip_address, self.RTSP_PORT), timeout=3).close()
+            return True
+        except OSError:
+            pass
 
+        # Check for JPEG
+        try:
+            socket.create_connection((self.ip_address, self.JPEG_PORT), timeout=3).close()
+            return False
+        except OSError:
+            pass
+
+        # Neither?
         raise ConnectionError("No camera found (is LAN liveview enabled?)")
 
-    # X1 / H2D: H.264 video over RTSPS
-
-    def supports_video(self) -> bool:
-        if self._mode is None:
-            try:
-                self._mode = self._detect_mode()
-            except ConnectionError:
-                return False
-        return self._mode == "rtsp"
-
-    def _stream_rtsp(self) -> None:
-        import av  # imported here so P1/A1 users don't need PyAV installed
-        import av.logging
-
-        av.logging.set_level(av.logging.VERBOSE)
-
-        url = (
-            f"rtsps://bblp:{quote(self.access_token)}@{self.host}:"
-            f"{self.RTSP_PORT}/streaming/live/1"
-        )
-
-        with av.open(url, options={"rtsp_transport": "tcp", "tls_verify": "0"}, timeout=10) as container:
-            interval = 1 / self.RTSP_MAX_FPS
-            last_saved = 0.0
-
-            # Every frame has to be decoded (H.264 depends on previous frames),
-            # but only a couple per second are converted to JPEG
-            for frame in container.decode(video=0):
-                if not self._viewer_active():
-                    return
-
-                now = time.monotonic()
-                if now - last_saved < interval:
-                    continue
-
-                buffer = io.BytesIO()
-                frame.to_image().save(buffer, format="JPEG", quality=80)
-                self._set_frame(buffer.getvalue())
-                last_saved = now
-
+    # Camera RTSP Stream -> MP4 Stream
     def stream_mp4(self):
-        """Yield the RTSP camera's video as a fragmented MP4, without re-encoding it.
-
-        Each viewer gets their own connection, which closes when they stop watching.
-        """
         import av
 
-        url = (
-            f"rtsps://bblp:{quote(self.access_token)}@{self.host}:"
-            f"{self.RTSP_PORT}/streaming/live/1"
-        )
+        url = f"rtsps://bblp:{quote(self.token)}@{self.ip_address}:{self.RTSP_PORT}/streaming/live/1"
+
         output_buffer = _ChunkCollector()
 
-        with av.open(
-            url,
-            options={"rtsp_transport": "tcp", "tls_verify": "0"},
-            timeout=10,
-        ) as source:
+        with av.open(url, options={"rtsp_transport": "tcp", "tls_verify": "0"}, timeout=10) as source:
             in_stream = source.streams.video[0]
 
-            output = av.open(
-                output_buffer,
-                mode="w",
-                format="mp4",
-                # Fragmented MP4 that can be played while it's still being written
-                options={"movflags": "frag_keyframe+empty_moov+default_base_moof"},
-            )
+            output = av.open(output_buffer, mode="w", format="mp4", options={"movflags": "frag_keyframe+empty_moov+default_base_moof"})
+
             out_stream = output.add_stream_from_template(in_stream)
 
             try:
@@ -161,38 +96,82 @@ class BambuCameraService:
                         if not packet.is_keyframe:
                             continue
                         offset = packet.dts
-
+                
                     packet.dts -= offset
                     if packet.pts is not None:
                         packet.pts -= offset
-
+                
                     packet.stream = out_stream
                     output.mux(packet)
-
+                
                     data = output_buffer.take()
                     if data:
                         yield data
             finally:
-                try:
-                    output.close()
-                except Exception:
-                    pass  # viewer disconnected mid-write; nothing to finish
+                    try:
+                        output.close()
+                    except Exception:
+                        pass  # viewer disconnected mid-write; nothing to finish
+        
+    # JPEG
+    def stream_mjpeg(self):
+        last_sent = None
 
-    # P1 / A1: JPEG frames over a TLS socket
+        while True:
+            frame = self.get_frame()
 
+
+            if frame is not None and frame is not last_sent:
+                yield ()
+
+
+    # Get the latest frame (start a new thread if needed).
+    def get_frame(self) -> bytes | None:
+
+        # Update the last request time.
+        self.last_request_time = time.monotonic()
+
+        # Process the next frame.
+        with self.lock:
+
+            # Start a new thread if one doesn't exist.
+            if self.video_thread is None or not self.video_thread.is_alive():
+                self.video_thread = threading.Thread(target=self._run, daemon=True)
+                self.video_thread.start()
+
+            # Return the new frame
+            return self.latest_frame
+
+    # Background thread methods
+
+    # Background thread run loop.
+    def _run(self) -> None:
+        while self._viewer_active():
+            try:
+                self._stream_jpeg()
+            except Exception as e:
+                message = str(e).replace(self.token, "***")
+                print(f"[BambuCamera] {self.ip_address}: {message}")
+                time.sleep(self.RETRY_DELAY)
+
+    # Determine if a viewer is connected.
+    def _viewer_active(self) -> bool:
+        return time.monotonic() - self.last_request_time < self.IDLE_TIMEOUT
+
+    # Get the latest frame from the printer and store it.
     def _stream_jpeg(self) -> None:
         auth = (
             struct.pack("<IIII", 0x40, 0x3000, 0, 0)
             + b"bblp".ljust(32, b"\0")
-            + self.access_token.encode().ljust(32, b"\0")
+            + self.token.encode().ljust(32, b"\0")
         )
 
         context = ssl.create_default_context()
         context.check_hostname = False
         context.verify_mode = ssl.CERT_NONE  # printer uses a self-signed certificate
 
-        with socket.create_connection((self.host, self.JPEG_PORT), timeout=10) as raw:
-            with context.wrap_socket(raw, server_hostname=self.host) as sock:
+        with socket.create_connection((self.ip_address, self.JPEG_PORT), timeout=10) as raw:
+            with context.wrap_socket(raw, server_hostname=self.ip_address) as sock:
                 sock.sendall(auth)
 
                 while self._viewer_active():
@@ -202,7 +181,16 @@ class BambuCameraService:
 
                     if jpeg.startswith(b"\xff\xd8"):  # valid JPEG
                         self._set_frame(jpeg)
+    
+    # Update the latest frame.
+    def _set_frame(self, jpeg: bytes) -> None:
+        with self.lock:
+            self.latest_frame = jpeg
 
+        with self.lock:
+            self.latest_frame = None
+
+    # Receive the correct amount of data over the socket.
     @staticmethod
     def _recv_exact(sock, length: int) -> bytes:
         data = bytearray()

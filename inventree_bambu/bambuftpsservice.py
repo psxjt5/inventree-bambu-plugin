@@ -46,8 +46,8 @@ class BambuFTPSService:
     TIMEOUT = 10
 
     def __init__(self, host: str, access_token: str):
-        self.host = host
-        self.access_token = access_token
+        self.ip_address = host
+        self.token = access_token
 
     # Create a connection to the printer and test that it succeeds
     def test_connection(self) -> bool:
@@ -201,8 +201,8 @@ class BambuFTPSService:
         
         try:
             ftp.set_pasv(True)
-            ftp.connect(host=self.host, port=self.PORT)
-            ftp.login(self.USERNAME, self.access_token)
+            ftp.connect(host=self.ip_address, port=self.PORT)
+            ftp.login(self.USERNAME, self.token)
             ftp.prot_p()
 
             yield ftp
