@@ -2,7 +2,7 @@ import { Badge, Card, Group, Progress, SimpleGrid, Stack, Text, ActionIcon, Butt
 import { IconPlayerPlay, IconArrowRight, IconCamera, IconBulb } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 
-import { CameraButton } from '../components/CameraModal'
+import { CameraModal } from '../components/CameraModal'
 
 import {
     checkPluginVersion,
@@ -82,6 +82,34 @@ function getFinishTime(minutes: string | number | null): string {
         hour: '2-digit',
         minute: '2-digit',
     });
+}
+
+export function CameraButton({ printerPk, printerName }: { printerPk: string; printerName: string }) {
+    const [opened, setOpened] = useState(false);
+
+    return (
+        <>
+            <Tooltip label='Live Camera'>
+                <ActionIcon
+                    variant='light'
+                    size='lg'
+                    onClick={(e) => {
+                        e.stopPropagation(); // don't trigger a clickable tile or row underneath
+                        setOpened(true);
+                    }}
+                >
+                    <IconCamera />
+                </ActionIcon>
+            </Tooltip>
+
+            <CameraModal
+                printerPk={printerPk}
+                printerName={printerName}
+                opened={opened}
+                onClose={() => setOpened(false)}
+            />
+        </>
+    );
 }
 
 function PrinterTile({

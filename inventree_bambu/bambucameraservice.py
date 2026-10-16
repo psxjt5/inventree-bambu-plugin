@@ -10,7 +10,6 @@ class BambuCameraService:
     """Provides the latest camera frame as either RTSP or JPEG, depending on the Bambu camera type.
 
     RTSP streaming is not possible on the P1 / A1 printers.
-    JPEG streaming is possible on all printers (and is used as a fallback for all printers).
 
     The printer camera connection closes when the last peer disconnects, after the IDLE_TIMEOUT.
     """
@@ -30,9 +29,10 @@ class BambuCameraService:
     # RTSP FPS (how often RTSP video frames are delivered as JPEG frames).
     RTSP_MAX_FPS = 2
 
-    def __init__(self, ip: str, token: str):
+    def __init__(self, ip: str, token: str, name: str):
         self.ip_address = ip
         self.token = token
+        self.name = name
 
         # Printer video mode
         self.camera_model: str | None = None  # "rtsp" or "jpeg", detected on first use
@@ -55,6 +55,7 @@ class BambuCameraService:
         # Check for RTSP
         try:
             socket.create_connection((self.ip_address, self.RTSP_PORT), timeout=3).close()
+            self.log("RTSP Connection Test Successful")
             return True
         except OSError:
             pass
@@ -62,6 +63,7 @@ class BambuCameraService:
         # Check for JPEG
         try:
             socket.create_connection((self.ip_address, self.JPEG_PORT), timeout=3).close()
+            self.log("JPEG Connection Test Successful")
             return False
         except OSError:
             pass
@@ -118,11 +120,19 @@ class BambuCameraService:
         last_sent = None
 
         while True:
-            frame = self.get_frame()
-
+            frame = self.get_frame()  # also keeps the camera connection alive
 
             if frame is not None and frame is not last_sent:
-                yield ()
+                yield (
+                    b"--frame\r\n"
+                    b"Content-Type: image/jpeg\r\n"
+                    + f"Content-Length: {len(frame)}\r\n\r\n".encode()
+                    + frame
+                    + b"\r\n"
+                )
+                last_sent = frame
+
+            time.sleep(0.2)
 
 
     # Get the latest frame (start a new thread if needed).
@@ -153,6 +163,9 @@ class BambuCameraService:
                 message = str(e).replace(self.token, "***")
                 print(f"[BambuCamera] {self.ip_address}: {message}")
                 time.sleep(self.RETRY_DELAY)
+
+        with self.lock:
+            self.latest_frame = None
 
     # Determine if a viewer is connected.
     def _viewer_active(self) -> bool:
@@ -187,9 +200,6 @@ class BambuCameraService:
         with self.lock:
             self.latest_frame = jpeg
 
-        with self.lock:
-            self.latest_frame = None
-
     # Receive the correct amount of data over the socket.
     @staticmethod
     def _recv_exact(sock, length: int) -> bytes:
@@ -200,6 +210,10 @@ class BambuCameraService:
                 raise ConnectionError("Camera closed the connection")
             data.extend(chunk)
         return bytes(data)
+
+    # Log a message about this machine
+    def log(self, message):
+            print(f"[BambuCameraService - {self.name}] - {message}")
 
 class _ChunkCollector:
     """File-like object that collects what PyAV writes, so it can be sent on."""

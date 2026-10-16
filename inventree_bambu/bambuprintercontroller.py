@@ -151,7 +151,7 @@ class BambuPrinterController:
     # Create a Camera Service for the machine
     def init_camera_service(self):
 
-        self.camera_service = BambuCameraService(self.ipAddress, self.accessToken)
+        self.camera_service = BambuCameraService(self.ipAddress, self.accessToken, self.machine.name)
 
         self.log("Started Camera Service")
 

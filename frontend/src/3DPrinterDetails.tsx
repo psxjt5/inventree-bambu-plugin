@@ -4,6 +4,7 @@ import {
     StylishText,
     type PanelType,
     type InvenTreePluginContext,
+    ActionButton,
 } from '@inventreedb/ui';
 import { useEffect, useState } from 'react';
 import {
@@ -26,7 +27,7 @@ import { FilesPanel } from '../components/FilesPanel';
 
 import type { ThreeDPrinter } from '../types';
 
-import { CameraButton } from '../components/CameraModal'
+import { CameraModal } from '../components/CameraModal'
 
 function getStatusColor(status: number): string {
     switch (Number(status)) {
@@ -54,48 +55,12 @@ function getStatusColor(status: number): string {
     }
 }
 
-function getShowPrintingStats(status: number): boolean {
-     switch (Number(status)) {
-        case 101: // Idle
-        case 300: // Connected
-        case 500: // Unknown
-        case 301: // Disconnected
-        case 400: // Misconfigured
-            return false;
-
-        case 102: // Preparing
-        case 103: // Printing
-        case 302: // Failed
-        case 303: // Error
-        case 104: // Paused
-        case 105: // Finished
-            return true;
-
-        default:
-            return false;
-    }
-}
-
-function PrinterDetailHeader({ printer }: { printer: ThreeDPrinter }) {
+function PrinterDetailHeader({ printer, onOpenCamera }: { printer: ThreeDPrinter, onOpenCamera: () => void; }) {
     return (
         <Paper p='sm' radius='xs' shadow='xs'>
-            <Group
-                justify='space-between'
-                gap='xs'
-                wrap='nowrap'
-                align='flex-start'
-            >
-                <Group
-                    justify='space-between'
-                    wrap='nowrap'
-                    align='flex-start'
-                    style={{ flexGrow: 1 }}
-                >
-                    <Group
-                        justify='start'
-                        wrap='nowrap'
-                        align='flex-start'
-                    >
+            <Group justify='space-between' gap='xs' wrap='nowrap' align='flex-start'>
+                <Group justify='space-between' wrap='nowrap' align='flex-start' style={{ flexGrow: 1 }}>
+                    <Group justify='start' wrap='nowrap' align='flex-start'>
                         <Stack gap='xs'>
                             <StylishText size='lg'>
                                 {printer.name}
@@ -113,24 +78,12 @@ function PrinterDetailHeader({ printer }: { printer: ThreeDPrinter }) {
                     </Group>
                 </Group>
 
-                 <Group
-                    gap={5}
-                    justify='right'
-                    wrap='nowrap'
-                    align='center'
-                    style={{ alignSelf: 'center' }}
-                >
-                    <Badge
-                        color={getStatusColor(printer.status)}
-                        variant='light'
-                        size='lg'
-                    >
+                <Group gap={5} justify='right' wrap='nowrap' align='center' style={{ alignSelf: 'center' }}>
+                    <Badge color={getStatusColor(printer.status)} variant='light' size='lg'>
                         {printer.status_text}
                     </Badge>
-                    <CameraButton
-                        printerPk={printer.pk}
-                        printerName={printer.name}
-                    />
+
+                    <ActionButton variant='transparent' icon={<IconCamera />} tooltip='View Printer Camera' onClick={onOpenCamera}/>
                 </Group>
             </Group>
         </Paper>
@@ -171,8 +124,8 @@ function PrinterDetailsPage({
             ? pathParts[detailsIndex + 1]
             : undefined;
 
-    const [printer, setPrinter] =
-        useState<ThreeDPrinter | null>(null);
+    const [printer, setPrinter] = useState<ThreeDPrinter | null>(null);
+    const [cameraOpened, setCameraOpened] = useState(false);
 
     useEffect(() => {
         if (!pk) {
@@ -306,9 +259,11 @@ function PrinterDetailsPage({
                 height: '100%',
             }}
         >
-            <PrinterDetailHeader printer={printer} />
+            <PrinterDetailHeader printer={printer} onOpenCamera={() => setCameraOpened(true)} />
 
             <PanelGroup panels={printerPanels} />
+
+            <CameraModal printerPk={printer.pk} printerName={printer.name} opened={cameraOpened} onClose={() => setCameraOpened(false)}/>
         </Stack>
     );
 }

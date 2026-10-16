@@ -262,25 +262,25 @@ class BambuAPI:
     @api_view(["GET"])
     @permission_classes([IsAuthenticated])
     def get_camera_stream(request, pk):
-
+        print(f"[BambuAPI] get_camera_stream {pk}")
         """ Returns the technology used for the printer's camera (MP4/MJPEG) """
         try:
             camera = BambuUtils.get_printer_camera_service(pk)
+            use_video = request.query_params.get("stream") != "mjpeg" and camera.supports_video()
         except PrinterNotFound:
-            return Response({"error": "Printer not found"}, status=404)
+            return Response({"error": "Printer not found"}, status=503)
         except PrinterCameraServiceNotFound:
-            return Response({"error": "Printer camera not available"}, status=404)
-
-        try:
-            if camera.supports_video():
-                response = StreamingHttpResponse(camera.stream_mp4(), content_type="video/mp4")
-            else:
-                response = StreamingHttpResponse(
-                    camera.stream_mjpeg(),
-                    content_type="multipart/x-mixed-replace; boundary=frame",
-                )
-
-            response["Cache-Control"] = "no-store"
-            return response
+            return Response({"error": "Printer camera not available"}, status=503)
         except ConnectionError as e:
-            return Response({"error": f"str(e)"}, status=500)
+            return Response({"error": str(e)}, status=503)
+
+        if use_video:
+            response = StreamingHttpResponse(camera.stream_mp4(), content_type="video/mp4")
+        else:
+            response = StreamingHttpResponse(
+                camera.stream_mjpeg(),
+                content_type="multipart/x-mixed-replace; boundary=frame",
+            )
+
+        response["Cache-Control"] = "no-store"
+        return response
