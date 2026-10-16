@@ -83,7 +83,7 @@ function PrinterDetailHeader({ printer, onOpenCamera }: { printer: ThreeDPrinter
                         {printer.status_text}
                     </Badge>
 
-                    <ActionButton variant='transparent' icon={<IconCamera />} tooltip='View Printer Camera' onClick={onOpenCamera}/>
+                    <ActionButton variant='light' icon={<IconCamera />} tooltip='View Printer Camera' onClick={onOpenCamera}/>
                 </Group>
             </Group>
         </Paper>

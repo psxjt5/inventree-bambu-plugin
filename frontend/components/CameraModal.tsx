@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ActionIcon, Alert, Center, Loader, Modal, Tooltip } from '@mantine/core';
+import { ActionIcon, Alert, Center, Loader, Modal, Stack, Tooltip, Text } from '@mantine/core';
 import { IconCamera } from '@tabler/icons-react';
 import { StylishText } from '@inventreedb/ui';
 
@@ -36,12 +36,7 @@ export function CameraModal({
     };
 
     return (
-        <Modal
-            opened={opened}
-            onClose={onClose}
-            title={<StylishText size='xl'>{`${printerName} - Live Camera`}</StylishText>}
-            size='xl'
-        >
+        <Modal opened={opened} onClose={onClose} title={<StylishText size='xl'>{`${printerName} - Live Camera`}</StylishText>} size='xl'>
             {failed ? (
                 <Alert color='red' title='Camera unavailable'>
                     Failed to connect to the printer's camera.
@@ -49,27 +44,18 @@ export function CameraModal({
             ) : (
                 <div style={{ position: 'relative', minHeight: 300 }}>
                     <Center pos='absolute' inset={0}>
-                        <Loader />
+                        <Stack align='center' gap='xs'>
+                            <Loader />
+                            <Text size='sm' c='dimmed'>Connecting to the printer's camera…</Text>
+                        </Stack>
                     </Center>
 
                     {mode === 'video' ? (
-                        <video
-                            key='video'
-                            src={streamUrl}
-                            autoPlay
-                            muted
-                            playsInline
-                            onError={() => setMode('mjpeg')} // no video (P1/A1) or it failed; use JPEG
-                            style={mediaStyle}
-                        />
+                        // On failure, switch to JPEG
+                        <video key='video' src={streamUrl} autoPlay muted playsInline onError={() => setMode('mjpeg')} style={mediaStyle}/>
                     ) : (
-                        <img
-                            key='mjpeg'
-                            src={streamUrl}
-                            alt={`${printerName} camera`}
-                            onError={() => setFailed(true)}
-                            style={mediaStyle}
-                        />
+                        // On failure, display an error message
+                        <img key='mjpeg' src={streamUrl} alt={`${printerName} camera`} onError={() => setFailed(true)} style={mediaStyle}/>
                     )}
                 </div>
             )}

@@ -88,6 +88,7 @@ class BambuCameraService:
 
             try:
                 offset = None
+                last_dts = None
 
                 for packet in source.demux(in_stream):
                     if packet.dts is None:
@@ -102,6 +103,13 @@ class BambuCameraService:
                     packet.dts -= offset
                     if packet.pts is not None:
                         packet.pts -= offset
+
+                    # Change arrival time if necessary to display all frames.
+                    if last_dts is not None and packet.dts <= last_dts:
+                        packet.dts = last_dts + 1
+                    if packet.pts is not None and packet.pts < packet.dts:
+                        packet.pts = packet.dts
+                    last_dts = packet.dts
                 
                     packet.stream = out_stream
                     output.mux(packet)
