@@ -24,6 +24,7 @@ import { PanelGroup } from '../components/PanelGroup';
 import { PrinterDetailsPanel } from '../components/PrinterDetailsPanel';
 import { AMSDetailsPanel } from '../components/AMSDetailsPanel';
 import { FilesPanel } from '../components/FilesPanel';
+import { CameraFeedPanel } from '../components/CameraFeedPanel';
 
 import type { ThreeDPrinter } from '../types';
 
@@ -83,32 +84,10 @@ function PrinterDetailHeader({ printer, onOpenCamera }: { printer: ThreeDPrinter
                         {printer.status_text}
                     </Badge>
 
-                    <ActionButton variant='light' icon={<IconCamera />} tooltip='View Printer Camera' onClick={onOpenCamera}/>
+                    <ActionButton variant='light' icon={<IconCamera />} tooltip='View Printer Camera' tooltipAlignment='bottom' onClick={onOpenCamera}/>
                 </Group>
             </Group>
         </Paper>
-    );
-}
-
-function PrinterCamera() {
-    return (
-        <Stack gap='md'>
-            <Text>Printer camera</Text>
-            <Text c='dimmed'>
-                Camera feed will be displayed here.
-            </Text>
-        </Stack>
-    );
-}
-
-function PrinterControls() {
-    return (
-        <Stack gap='md'>
-            <Text>Printer controls</Text>
-            <Text c='dimmed'>
-                Printer controls will be displayed here.
-            </Text>
-        </Stack>
     );
 }
 
@@ -244,12 +223,15 @@ function PrinterDetailsPage({
                 />
             ),
         },
-        // {
-        //     name: 'camera',
-        //     label: 'Camera',
-        //     icon: <IconCamera />,
-        //     content: <PrinterCamera />,
-        // },
+        {
+            name: 'camera',
+            label: 'Camera',
+            icon: <IconCamera />,
+            content: <CameraFeedPanel
+                        printer={printer}
+                        context={_context}
+                />,
+        },
     ];
 
     return (
