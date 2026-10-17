@@ -1,6 +1,7 @@
 from inventree_3d.threed import ThreeDPrinterBaseDriver, ThreeDPrinterMachine
 from .bambumqttservice import BambuMQTTService
 from .bambuftpsservice import BambuFTPSService
+from .bambucameraservice import BambuCameraService
 from .bambudata import BambuData
 from .notifications import Notifications
 
@@ -21,6 +22,7 @@ class BambuPrinterController:
         self.connected: bool = False
         self.mqtt_service: BambuMQTTService | None = None
         self.ftps_service: BambuFTPSService | None = None
+        self.camera_service: BambuCameraService | None = None
         
         self.status: str | None = None
         self.hms_codes = []
@@ -46,6 +48,8 @@ class BambuPrinterController:
         self.init_mqtt_service()
 
         self.init_ftps_service()
+
+        self.init_camera_service()
 
         return
 
@@ -143,6 +147,13 @@ class BambuPrinterController:
 
         if self.ftps_service.test_connection():
             self.log("Started FTPS Service")
+
+    # Create a Camera Service for the machine
+    def init_camera_service(self):
+
+        self.camera_service = BambuCameraService(self.ipAddress, self.accessToken, self.machine.name)
+
+        self.log("Started Camera Service")
 
 
     # Gets triggered by the MQTT service when a new MQTT message is received.

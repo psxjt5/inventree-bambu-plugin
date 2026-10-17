@@ -1,9 +1,10 @@
-import { Group, Paper, Stack, Text } from '@mantine/core';
+import { Badge, Group, Paper, Stack, Text } from '@mantine/core';
 import {
     checkPluginVersion,
     StylishText,
     type PanelType,
     type InvenTreePluginContext,
+    ActionButton,
 } from '@inventreedb/ui';
 import { useEffect, useState } from 'react';
 import {
@@ -23,29 +24,44 @@ import { PanelGroup } from '../components/PanelGroup';
 import { PrinterDetailsPanel } from '../components/PrinterDetailsPanel';
 import { AMSDetailsPanel } from '../components/AMSDetailsPanel';
 import { FilesPanel } from '../components/FilesPanel';
+import { CameraFeedPanel } from '../components/CameraFeedPanel';
 
 import type { ThreeDPrinter } from '../types';
 
-function PrinterDetailHeader({ printer }: { printer: ThreeDPrinter }) {
+import { CameraModal } from '../components/CameraModal'
+
+function getStatusColor(status: number): string {
+    switch (Number(status)) {
+        case 101: // Idle
+        case 102: // Preparing
+        case 103: // Printing
+        case 300: // Connected
+            return 'blue';
+
+        case 104: // Paused
+        case 500: // Unknown
+            return 'gray';
+
+        case 105: // Finished
+            return 'green';
+
+        case 301: // Disconnected
+        case 302: // Failed
+        case 303: // Error
+        case 400: // Misconfigured
+            return 'red';
+
+        default:
+            return 'gray';
+    }
+}
+
+function PrinterDetailHeader({ printer, onOpenCamera, cameraDisabled }: { printer: ThreeDPrinter; onOpenCamera: () => void; cameraDisabled: boolean;}) {
     return (
-        <Paper p='xs' radius='xs' shadow='xs'>
-            <Group
-                justify='space-between'
-                gap='xs'
-                wrap='nowrap'
-                align='flex-start'
-            >
-                <Group
-                    justify='space-between'
-                    wrap='nowrap'
-                    align='flex-start'
-                    style={{ flexGrow: 1 }}
-                >
-                    <Group
-                        justify='start'
-                        wrap='nowrap'
-                        align='flex-start'
-                    >
+        <Paper p='sm' radius='xs' shadow='xs'>
+            <Group justify='space-between' gap='xs' wrap='nowrap' align='flex-start'>
+                <Group justify='space-between' wrap='nowrap' align='flex-start' style={{ flexGrow: 1 }}>
+                    <Group justify='start' wrap='nowrap' align='flex-start'>
                         <Stack gap='xs'>
                             <StylishText size='lg'>
                                 {printer.name}
@@ -63,36 +79,15 @@ function PrinterDetailHeader({ printer }: { printer: ThreeDPrinter }) {
                     </Group>
                 </Group>
 
-                <Group
-                    gap={5}
-                    justify='right'
-                    wrap='nowrap'
-                    align='center'
-                />
+                <Group gap={5} justify='right' wrap='nowrap' align='center' style={{ alignSelf: 'center' }}>
+                    <Badge color={getStatusColor(printer.status)} variant='light' size='lg'>
+                        {printer.status_text}
+                    </Badge>
+
+                    <ActionButton variant='light' icon={<IconCamera />} tooltip='View Printer Camera' disabled={cameraDisabled} tooltipAlignment='bottom' onClick={onOpenCamera}/>
+                </Group>
             </Group>
         </Paper>
-    );
-}
-
-function PrinterCamera() {
-    return (
-        <Stack gap='md'>
-            <Text>Printer camera</Text>
-            <Text c='dimmed'>
-                Camera feed will be displayed here.
-            </Text>
-        </Stack>
-    );
-}
-
-function PrinterControls() {
-    return (
-        <Stack gap='md'>
-            <Text>Printer controls</Text>
-            <Text c='dimmed'>
-                Printer controls will be displayed here.
-            </Text>
-        </Stack>
     );
 }
 
@@ -108,8 +103,9 @@ function PrinterDetailsPage({
             ? pathParts[detailsIndex + 1]
             : undefined;
 
-    const [printer, setPrinter] =
-        useState<ThreeDPrinter | null>(null);
+    const [printer, setPrinter] = useState<ThreeDPrinter | null>(null);
+    const [cameraOpened, setCameraOpened] = useState(false);
+    const [activePanel, setActivePanel] = useState<string>('');
 
     useEffect(() => {
         if (!pk) {
@@ -118,20 +114,12 @@ function PrinterDetailsPage({
         }
 
         const fetchLiveData = () => {
-            const url =
-                `/plugin/inventree_bambu/get_printer_data/${encodeURIComponent(pk)}`;
-
-            console.log('[Bambu] Calling printer data endpoint:', url);
+            const url = `/plugin/inventree_bambu/get_printer_data/${encodeURIComponent(pk)}`;
 
             fetch(url, {
                 cache: 'no-store',
             })
                 .then((res) => {
-                    console.log(
-                        '[Bambu] Printer data response:',
-                        res.status,
-                    );
-
                     if (!res.ok) {
                         throw new Error(
                             `get_printer_data failed: ${res.status}`,
@@ -141,17 +129,10 @@ function PrinterDetailsPage({
                     return res.json();
                 })
                 .then((data: ThreeDPrinter) => {
-                    console.log('[Bambu] Live printer data:', data);
-
                     setPrinter(data);
                 })
                 .catch((error) => {
-                    console.error(
-                        '[Bambu] Live printer request failed:',
-                        error,
-                    );
-
-                    setPrinter(null);
+                    console.error('[Bambu] Live printer request failed:', error);
                 });
         };
 
@@ -175,12 +156,7 @@ function PrinterDetailsPage({
             name: 'details',
             label: 'Printer Details',
             icon: <IconInfoCircle />,
-            content: (
-                <PrinterDetailsPanel
-                    printer={printer}
-                    context={_context}
-                />
-            ),
+            content: <PrinterDetailsPanel printer={printer} context={_context}/>,
         },
         // {
         //     name: 'controls',
@@ -192,12 +168,7 @@ function PrinterDetailsPage({
             name: 'ams',
             label: 'AMS',
             icon: <IconCircleLetterA />,
-            content: (
-                <AMSDetailsPanel
-                    printer={printer}
-                    context={_context}
-                />
-            ),
+            content: <AMSDetailsPanel printer={printer} context={_context} />,
         },
         // {
         //     name: 'scheduledjobs',
@@ -235,19 +206,14 @@ function PrinterDetailsPage({
             name: 'files',
             label: 'Printer Files',
             icon: <IconFile />,
-            content: (
-                <FilesPanel
-                        printer={printer}
-                        context={_context}
-                />
-            ),
+            content: <FilesPanel printer={printer} context={_context} />,
         },
-        // {
-        //     name: 'camera',
-        //     label: 'Camera',
-        //     icon: <IconCamera />,
-        //     content: <PrinterCamera />,
-        // },
+        {
+            name: 'camera',
+            label: 'Live Camera',
+            icon: <IconCamera />,
+            content: <CameraFeedPanel printer={printer} context={_context} />,
+        },
     ];
 
     return (
@@ -257,9 +223,11 @@ function PrinterDetailsPage({
                 height: '100%',
             }}
         >
-            <PrinterDetailHeader printer={printer} />
+            <PrinterDetailHeader printer={printer} onOpenCamera={() => setCameraOpened(true)} cameraDisabled={activePanel === 'camera'} />
 
-            <PanelGroup panels={printerPanels} />
+            <PanelGroup panels={printerPanels} onPanelChange={setActivePanel} />
+
+            <CameraModal printerPk={printer.pk} printerName={printer.name} opened={cameraOpened} onClose={() => setCameraOpened(false)}/>
         </Stack>
     );
 }

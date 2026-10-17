@@ -8,7 +8,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from django.http import FileResponse
+from django.http import FileResponse, HttpResponse, StreamingHttpResponse
 
 from machine.models import MachineConfig
 from machine.models import MachineSetting
@@ -17,7 +17,7 @@ from stock.models import StockLocation
 
 from .bambudata import BambuData
 from .bambuftpsservice import BambuFTPSService, BambuFTPSPathError
-from .bambuutils import BambuUtils, PrinterNotFound, PrinterFTPSServiceNotFound
+from .bambuutils import BambuUtils, PrinterNotFound, PrinterFTPSServiceNotFound, PrinterCameraServiceNotFound
 
 class BambuAPI:
 
@@ -258,4 +258,29 @@ class BambuAPI:
 
         filename = names[0] if len(names) == 1 else "printer-files.zip"
         return FileResponse(temp, as_attachment=True, filename=filename)
-        
+
+    @api_view(["GET"])
+    @permission_classes([IsAuthenticated])
+    def get_camera_stream(request, pk):
+        print(f"[BambuAPI] get_camera_stream {pk}")
+        """ Returns the technology used for the printer's camera (MP4/MJPEG) """
+        try:
+            camera = BambuUtils.get_printer_camera_service(pk)
+            use_video = request.query_params.get("stream") != "mjpeg" and camera.supports_video()
+        except PrinterNotFound:
+            return Response({"error": "Printer not found"}, status=503)
+        except PrinterCameraServiceNotFound:
+            return Response({"error": "Printer camera not available"}, status=503)
+        except ConnectionError as e:
+            return Response({"error": str(e)}, status=503)
+
+        if use_video:
+            response = StreamingHttpResponse(camera.stream_mp4(), content_type="video/mp4")
+        else:
+            response = StreamingHttpResponse(
+                camera.stream_mjpeg(),
+                content_type="multipart/x-mixed-replace; boundary=frame",
+            )
+
+        response["Cache-Control"] = "no-store"
+        return response

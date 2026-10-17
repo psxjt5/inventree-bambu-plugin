@@ -2,6 +2,8 @@ import { Badge, Card, Group, Progress, SimpleGrid, Stack, Text, ActionIcon, Butt
 import { IconPlayerPlay, IconArrowRight, IconCamera, IconBulb } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 
+import { CameraModal } from '../components/CameraModal'
+
 import {
     checkPluginVersion,
     type InvenTreePluginContext,
@@ -82,6 +84,34 @@ function getFinishTime(minutes: string | number | null): string {
     });
 }
 
+export function CameraButton({ printerPk, printerName }: { printerPk: string; printerName: string }) {
+    const [opened, setOpened] = useState(false);
+
+    return (
+        <>
+            <Tooltip label='Live Camera'>
+                <ActionIcon
+                    variant='light'
+                    size='lg'
+                    onClick={(e) => {
+                        e.stopPropagation(); // don't trigger a clickable tile or row underneath
+                        setOpened(true);
+                    }}
+                >
+                    <IconCamera />
+                </ActionIcon>
+            </Tooltip>
+
+            <CameraModal
+                printerPk={printerPk}
+                printerName={printerName}
+                opened={opened}
+                onClose={() => setOpened(false)}
+            />
+        </>
+    );
+}
+
 function PrinterTile({
     printer,
     context,
@@ -139,19 +169,15 @@ function PrinterTile({
 
                 <Group justify="space-between">
                     <Group gap="xs">
-                        <Tooltip label="Live Camera" withArrow>
-                            <ActionIcon variant="light" size="lg" onClick={() => console.log('Camera', printer.pk)}>
-                                <IconCamera size={18} />
-                            </ActionIcon>
-                        </Tooltip>
+                        <CameraButton printerPk={printer.pk} printerName={printer.name} />
                         <Tooltip label="Run Job" withArrow>
                             <ActionIcon variant="light" size="lg" onClick={() => console.log('Camera', printer.pk)}>
-                                <IconPlayerPlay size={18} />
+                                <IconPlayerPlay />
                             </ActionIcon>
                         </Tooltip>
                         <Tooltip label="Toggle Chamber Light" withArrow>
                             <ActionIcon variant="light" size="lg" onClick={() => console.log('Camera', printer.pk)}>
-                                <IconBulb size={18} />
+                                <IconBulb />
                             </ActionIcon>
                         </Tooltip>
                     </Group>
