@@ -17,7 +17,7 @@ from stock.models import StockLocation
 
 from .bambudata import BambuData
 from .bambuftpsservice import BambuFTPSService, BambuFTPSPathError
-from .bambuutils import BambuUtils, PrinterNotFound, PrinterFTPSServiceNotFound, PrinterCameraServiceNotFound
+from .bambuutils import BambuUtils, PrinterNotFound, PrinterFTPSServiceNotFound, PrinterCameraServiceNotFound, PrinterMQTTServiceNotFound
 
 class BambuAPI:
 
@@ -294,6 +294,8 @@ class BambuAPI:
             mqtt = BambuUtils.get_printer_mqtt_service(pk)  # however you look up the controller
         except PrinterNotFound:
             return Response({"error": "Printer not found"}, status=404)
+        except PrinterMQTTServiceNotFound:
+            return Response({"error": "Printer MQTT Service not available"}, status=503)
 
         mqtt.request_stop_print()
         
@@ -307,7 +309,24 @@ class BambuAPI:
             mqtt = BambuUtils.get_printer_mqtt_service(pk)  # however you look up the controller
         except PrinterNotFound:
             return Response({"error": "Printer not found"}, status=404)
+        except PrinterMQTTServiceNotFound:
+            return Response({"error": "Printer MQTT Service not available"}, status=503)
 
         mqtt.request_pause_print()
+
+        return Response(status=202)
+
+    @api_view(["POST"])
+    @permission_classes([IsAuthenticated])
+    def resume_print(request, pk):
+        """Resmes the current print."""
+        try:
+            mqtt = BambuUtils.get_printer_mqtt_service(pk)  # however you look up the controller
+        except PrinterNotFound:
+            return Response({"error": "Printer not found"}, status=404)
+        except PrinterMQTTServiceNotFound:
+            return Response({"error": "Printer MQTT Service not available"}, status=503)
+
+        mqtt.request_resume_print()
 
         return Response(status=202)

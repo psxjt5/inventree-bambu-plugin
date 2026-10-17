@@ -243,6 +243,12 @@ class BambuMQTTService:
 
         self._log(f"Requested to Pause the Print")
 
+    # Resume the current print
+    def request_resume_print(self):
+        self._send_request_payload("print", "resume", {"param" : ""})
+
+        self._log(f"Requested to Resume the Print")
+
     # Helpers
 
     # Sends a command to the printer.

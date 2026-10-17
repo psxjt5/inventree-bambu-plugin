@@ -20,6 +20,7 @@ import {
     IconDeviceGamepad3,
     IconPlayerStop,
     IconPlayerPause,
+    IconPlayerPlay,
 } from '@tabler/icons-react';
 
 import { PanelGroup } from '../components/PanelGroup';
@@ -81,6 +82,15 @@ function printerPausable(status: number): boolean {
     }
 }
 
+function printerResumable(status: number): boolean {
+    switch (Number(status)) {
+        case 104: // Paused
+            return true;
+        default:
+            return false;
+    }
+}
+
 function PrinterDetailHeader({ printer, context, onOpenCamera, cameraDisabled,  }: { printer: ThreeDPrinter; context: InvenTreePluginContext; onOpenCamera: () => void; cameraDisabled: boolean;}) {
 
     // Stop Print Confirmation
@@ -116,6 +126,38 @@ function PrinterDetailHeader({ printer, context, onOpenCamera, cameraDisabled,  
             });
     };
 
+    // Pause Print Request
+    const resumePrint = () => {
+        context.api
+            .post(`/plugin/inventree_bambu/resume_print/${encodeURIComponent(printer.pk)}`)
+            .then(() => {
+                notifications.show({
+                    title: 'Resume requested',
+                    message: `Resume command sent to ${printer.name}`,
+                    color: 'green',
+                });
+            })
+            .catch((error) => {
+                notifications.show({
+                    title: 'Could not resume print',
+                    message: error.response?.data?.error ?? 'The request failed',
+                    color: 'red',
+                });
+            });
+    };
+
+    let pauseResumeButton;
+
+    if (printerResumable(printer.status)) {
+        pauseResumeButton = (
+            <ActionButton variant='light' color='green' icon={<IconPlayerPlay />} tooltip='Resume Current Print' tooltipAlignment='bottom' onClick={() => pausePrint()} />
+        );
+    } else {
+        pauseResumeButton = (
+            <ActionButton variant='light' color='orange' icon={<IconPlayerPause />} tooltip='Pause Current Print' tooltipAlignment='bottom' disabled={!printerPausable(printer.status)} onClick={() => resumePrint()} />
+        );
+    }
+
     return (
         <Paper p='sm' radius='xs' shadow='xs'>
             <Group justify='space-between' gap='xs' wrap='nowrap' align='flex-start'>
@@ -146,8 +188,9 @@ function PrinterDetailHeader({ printer, context, onOpenCamera, cameraDisabled,  
                     <ActionButton variant='light' icon={<IconCamera />} tooltip='View Printer Camera' disabled={cameraDisabled} tooltipAlignment='bottom' onClick={onOpenCamera}/>
 
                     <Divider key='divider-1' orientation='vertical' />
-                    
-                    <ActionButton variant='light' color='#FFA500' icon={<IconPlayerPause />} tooltip='Pause Current Print' disabled={!printerPausable(printer.status)} tooltipAlignment='bottom' onClick={() => pausePrint()}/>
+
+                    {pauseResumeButton}
+
                     <ActionButton variant='light' color='#FF0000' icon={<IconPlayerStop />} tooltip='Stop Current Print' disabled={!printerStoppable(printer.status)} tooltipAlignment='bottom' onClick={() => stopPrint.open()}/>
                 </Group>
             </Group>
