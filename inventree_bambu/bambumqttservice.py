@@ -191,36 +191,6 @@ class BambuMQTTService:
             except Exception as e:
                 self._log(f"Callback error: {e}")
 
-    # Send a "pushall" command to the printer to get all field values.
-    def request_pushall(self):
-
-        if not self.client.is_connected():
-            return
-
-        now = time.monotonic()
-
-        # Only send a pushall if required.
-        if now - self.last_pushall < 10:
-            return
-
-        topic = f"device/{self.serial}/request"
-
-        payload = {
-            "pushing": {
-                "sequence_id": "0",
-                "command": "pushall"
-            }
-        }
-
-        result = self.client.publish(topic, json.dumps(payload))
-
-        if result.rc != mqtt.MQTT_ERR_SUCCESS:
-            self._log(f"PushAll publish failed: {result.rc}")
-
-        self.last_pushall = time.monotonic()
-
-        self._log(f"Requested PushAll")
-
     # Merge updated fields with existing fields (where all data hasn't been received).
     def deep_merge(self, old, new):
 
@@ -242,10 +212,29 @@ class BambuMQTTService:
         return merged
 
     ## Printer Operations
-    
+
+    # Send a "pushall" command to the printer to get all field values.
+    def request_pushall(self):
+
+        if not self.client.is_connected():
+            return
+
+        now = time.monotonic()
+
+        # Only send a pushall if required.
+        if now - self.last_pushall < 10:
+            return
+
+        self._send_request_payload("pushing", "pushall")
+
+        self.last_pushall = time.monotonic()
+
+        self._log(f"Requested PushAll")
+
+    # Helpers
 
     # Sends a command to the printer.
-    def _send_request_payload(self, commandCategory, commandName, customParameters):
+    def _send_request_payload(self, commandCategory: str, commandName: str, customParameters: dict = {}):
         self._log(f"Sending Command - {commandCategory}.{commandName}")
 
         topic = f"device/{self.serial}/request"
