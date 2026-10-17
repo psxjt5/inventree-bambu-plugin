@@ -231,6 +231,12 @@ class BambuMQTTService:
 
         self._log(f"Requested PushAll")
 
+    # Stop the current print
+    def request_stop_print(self):
+        self._send_request_payload("print", "stop", {"param" : ""})
+
+        self._log(f"Requested to Stop the Print")
+
     # Helpers
 
     # Sends a command to the printer.

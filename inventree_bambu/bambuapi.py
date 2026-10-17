@@ -284,3 +284,16 @@ class BambuAPI:
 
         response["Cache-Control"] = "no-store"
         return response
+
+    # Printer Commands
+    @api_view(["POST"])
+    @permission_classes([IsAuthenticated])
+    def stop_print(request, pk):
+        """Stops the current print."""
+        try:
+            mqtt = BambuUtils.get_printer_mqtt_service(pk)  # however you look up the controller
+        except PrinterNotFound:
+            return Response({"error": "Printer not found"}, status=404)
+
+        mqtt.request_stop_print()
+        return Response(status=202)
