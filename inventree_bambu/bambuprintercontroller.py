@@ -304,6 +304,28 @@ class BambuPrinterController:
         # Reapply properties with metadata preserved
         self.machine.set_properties(list(properties.values()))
 
+    # Convert an MQTT status to status text
+    def convert_status_text(self, status):
+        match status:
+            case "IDLE":
+                return "Printer Idle"
+            case "PREPARE":
+                return "Print Preparing"
+            case "SLICING":
+                return "Print Preparing"
+            case "RUNNING":
+                return f"Printing - {BambuData.getFileName(self.machine.pk)}"
+            case "PAUSE":
+                return "Print Paused"
+            case "FINISH":
+                return "Print Completed"
+            case "FAILED":
+                return "Print Stopped"
+            case "ERROR":
+                return "Printer Error"
+            case _:
+                return ""
+
     # Log a message about this machine
     def log(self, message):
          print(f"[BambuPrinterController - {self.machine.name}] - {message}")
@@ -330,26 +352,3 @@ class BambuPrinterController:
                 return ThreeDPrinterMachine.MACHINE_STATUS.ERROR
             case _:
                 return ThreeDPrinterMachine.MACHINE_STATUS.UNKNOWN
-
-    # Convert an MQTT status to status text
-    @staticmethod
-    def convert_status_text(status):
-        match status:
-            case "IDLE":
-                return "Printer Idle"
-            case "PREPARE":
-                return "Print Preparing"
-            case "SLICING":
-                return "Print Preparing"
-            case "RUNNING":
-                return "Printing"
-            case "PAUSE":
-                return "Print Paused"
-            case "FINISH":
-                return "Print Completed"
-            case "FAILED":
-                return "Print Stopped"
-            case "ERROR":
-                return "Printer Error"
-            case _:
-                return ""
