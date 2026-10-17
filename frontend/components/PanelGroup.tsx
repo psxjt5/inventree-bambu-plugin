@@ -18,6 +18,7 @@ import {
 import {
     type ReactNode,
     useCallback,
+    useEffect,
     useMemo,
     useState,
 } from 'react';
@@ -37,6 +38,7 @@ import { modals } from '@mantine/modals';
 export type PanelProps = {
     panels: PanelType[];
     groups?: PanelGroupType[];
+    onPanelChange?: (panel: string) => void;
 };
 
 /**
@@ -390,6 +392,10 @@ export function PanelGroup(props: Readonly<PanelProps>) {
 
     const [selectedPanel, setSelectedPanel] =
         useState(getPanelFromPath);
+
+    useEffect(() => {
+        props.onPanelChange?.(selectedPanel);
+    }, [selectedPanel]);
 
     const handlePanelChange = (panel: string) => {
         const pathParts = window.location.pathname.split('/');

@@ -56,7 +56,7 @@ function getStatusColor(status: number): string {
     }
 }
 
-function PrinterDetailHeader({ printer, onOpenCamera }: { printer: ThreeDPrinter, onOpenCamera: () => void; }) {
+function PrinterDetailHeader({ printer, onOpenCamera, cameraDisabled }: { printer: ThreeDPrinter; onOpenCamera: () => void; cameraDisabled: boolean;}) {
     return (
         <Paper p='sm' radius='xs' shadow='xs'>
             <Group justify='space-between' gap='xs' wrap='nowrap' align='flex-start'>
@@ -84,7 +84,7 @@ function PrinterDetailHeader({ printer, onOpenCamera }: { printer: ThreeDPrinter
                         {printer.status_text}
                     </Badge>
 
-                    <ActionButton variant='light' icon={<IconCamera />} tooltip='View Printer Camera' tooltipAlignment='bottom' onClick={onOpenCamera}/>
+                    <ActionButton variant='light' icon={<IconCamera />} tooltip='View Printer Camera' disabled={cameraDisabled} tooltipAlignment='bottom' onClick={onOpenCamera}/>
                 </Group>
             </Group>
         </Paper>
@@ -105,6 +105,7 @@ function PrinterDetailsPage({
 
     const [printer, setPrinter] = useState<ThreeDPrinter | null>(null);
     const [cameraOpened, setCameraOpened] = useState(false);
+    const [activePanel, setActivePanel] = useState<string>('');
 
     useEffect(() => {
         if (!pk) {
@@ -113,8 +114,7 @@ function PrinterDetailsPage({
         }
 
         const fetchLiveData = () => {
-            const url =
-                `/plugin/inventree_bambu/get_printer_data/${encodeURIComponent(pk)}`;
+            const url = `/plugin/inventree_bambu/get_printer_data/${encodeURIComponent(pk)}`;
 
             fetch(url, {
                 cache: 'no-store',
@@ -156,12 +156,7 @@ function PrinterDetailsPage({
             name: 'details',
             label: 'Printer Details',
             icon: <IconInfoCircle />,
-            content: (
-                <PrinterDetailsPanel
-                    printer={printer}
-                    context={_context}
-                />
-            ),
+            content: <PrinterDetailsPanel printer={printer} context={_context}/>,
         },
         // {
         //     name: 'controls',
@@ -173,12 +168,7 @@ function PrinterDetailsPage({
             name: 'ams',
             label: 'AMS',
             icon: <IconCircleLetterA />,
-            content: (
-                <AMSDetailsPanel
-                    printer={printer}
-                    context={_context}
-                />
-            ),
+            content: <AMSDetailsPanel printer={printer} context={_context} />,
         },
         // {
         //     name: 'scheduledjobs',
@@ -216,21 +206,13 @@ function PrinterDetailsPage({
             name: 'files',
             label: 'Printer Files',
             icon: <IconFile />,
-            content: (
-                <FilesPanel
-                        printer={printer}
-                        context={_context}
-                />
-            ),
+            content: <FilesPanel printer={printer} context={_context} />,
         },
         {
             name: 'camera',
-            label: 'Camera',
+            label: 'Live Camera',
             icon: <IconCamera />,
-            content: <CameraFeedPanel
-                        printer={printer}
-                        context={_context}
-                />,
+            content: <CameraFeedPanel printer={printer} context={_context} />,
         },
     ];
 
@@ -241,9 +223,9 @@ function PrinterDetailsPage({
                 height: '100%',
             }}
         >
-            <PrinterDetailHeader printer={printer} onOpenCamera={() => setCameraOpened(true)} />
+            <PrinterDetailHeader printer={printer} onOpenCamera={() => setCameraOpened(true)} cameraDisabled={activePanel === 'camera'} />
 
-            <PanelGroup panels={printerPanels} />
+            <PanelGroup panels={printerPanels} onPanelChange={setActivePanel} />
 
             <CameraModal printerPk={printer.pk} printerName={printer.name} opened={cameraOpened} onClose={() => setCameraOpened(false)}/>
         </Stack>
