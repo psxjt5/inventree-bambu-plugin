@@ -62,7 +62,7 @@ class BambuMQTTService:
 
     # Open a connection to the printer over MQTT
     def start(self):
-        self.log("Starting MQTT Listener")
+        self._log("Starting MQTT Listener")
 
         self.thread = threading.Thread(
             target=self.run,
@@ -89,7 +89,7 @@ class BambuMQTTService:
 
                     self.connection_pending = True
 
-                    self.log(f"MQTT Connection Requested: {result}")
+                    self._log(f"MQTT Connection Requested: {result}")
                 
                 self.client.loop(timeout=1.0)
 
@@ -107,7 +107,7 @@ class BambuMQTTService:
 
                 # Detect if printer seems to have gone silent
                 if self.client.is_connected() and self.last_message is not None and now - self.last_message > self.STALE_TIMEOUT:
-                    self.log(f"Printer stale")
+                    self._log(f"Printer stale")
                     self.client.disconnect()
 
                 # Send periodic PushAll messages
@@ -117,7 +117,7 @@ class BambuMQTTService:
 
             except Exception as exc:
                 self.connection_pending = False
-                self.log(f"MQTT loop error: {exc}")
+                self._log(f"MQTT loop error: {exc}")
                 time.sleep(1)
 
     # Connect Event
@@ -125,17 +125,17 @@ class BambuMQTTService:
         self.connection_pending = False
 
         if rc == 0:
-            self.log("MQTT Connected Successfully")
+            self._log("MQTT Connected Successfully")
 
             client.subscribe(f"device/{self.serial}/report")
 
             self.connection_callback(True)
         else:
-            self.log(f"MQTT Connection Failed: {rc}")
+            self._log(f"MQTT Connection Failed: {rc}")
 
     # Subscribe Event
     def on_subscribe(self, client, userdata, mid, granted_qos):
-        self.log(f"MQTT Subscription active")
+        self._log(f"MQTT Subscription active")
 
         self.request_pushall()
 
@@ -145,9 +145,9 @@ class BambuMQTTService:
         self.last_message = None
 
         if rc != 0:
-            self.log(f"Unexpected Disconnect (rc={rc})")
+            self._log(f"Unexpected Disconnect (rc={rc})")
         else:
-            self.log(f"Clean Disconnect")
+            self._log(f"Clean Disconnect")
 
         self.disconnected_at = time.monotonic()
 
@@ -159,7 +159,7 @@ class BambuMQTTService:
         try:
             payload = json.loads(msg.payload.decode())
         except Exception as e:
-            self.log(f"JSON error: {e}")
+            self._log(f"JSON error: {e}")
             return
         
         self.last_message = time.monotonic()
@@ -189,7 +189,7 @@ class BambuMQTTService:
             try:
                 self.message_callback()
             except Exception as e:
-                self.log(f"Callback error: {e}")
+                self._log(f"Callback error: {e}")
 
     # Send a "pushall" command to the printer to get all field values.
     def request_pushall(self):
@@ -215,11 +215,11 @@ class BambuMQTTService:
         result = self.client.publish(topic, json.dumps(payload))
 
         if result.rc != mqtt.MQTT_ERR_SUCCESS:
-            self.log(f"PushAll publish failed: {result.rc}")
+            self._log(f"PushAll publish failed: {result.rc}")
 
         self.last_pushall = time.monotonic()
 
-        self.log(f"Requested PushAll")
+        self._log(f"Requested PushAll")
 
     # Merge updated fields with existing fields (where all data hasn't been received).
     def deep_merge(self, old, new):
@@ -241,6 +241,30 @@ class BambuMQTTService:
 
         return merged
 
+    ## Printer Operations
+    
+
+    # Sends a command to the printer.
+    def _send_request_payload(self, commandCategory, commandName, customParameters):
+        self._log(f"Sending Command - {commandCategory}.{commandName}")
+
+        topic = f"device/{self.serial}/request"
+
+        payload = {
+            commandCategory: {
+                # TODO: There's a chance that this needs to be incremented per-command, with the response using the corresponding ID.
+                "sequence_id": "0",
+                "command": commandName,
+            }
+        }
+
+        payload[commandCategory] = self.deep_merge(payload[commandCategory], customParameters)
+
+        result = self.client.publish(topic, json.dumps(payload))
+
+        if result.rc != mqtt.MQTT_ERR_SUCCESS:
+            self._log(f"Command publish failed: {result.rc}")
+
     # Log a message about this MQTT Service
-    def log(self, message):
+    def _log(self, message):
             print(f"[BambuMQTTService - {self.printerName}] - {message}")
