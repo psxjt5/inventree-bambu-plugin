@@ -1,4 +1,4 @@
-import { Alert, Badge, Group, Paper, Stack, Text } from '@mantine/core';
+import { Alert, Badge, Divider, Group, Paper, Stack, Text } from '@mantine/core';
 import {
     checkPluginVersion,
     StylishText,
@@ -19,6 +19,7 @@ import {
     IconExclamationCircle,
     IconDeviceGamepad3,
     IconPlayerStop,
+    IconPlayerPause,
 } from '@tabler/icons-react';
 
 import { PanelGroup } from '../components/PanelGroup';
@@ -30,6 +31,7 @@ import { CameraFeedPanel } from '../components/CameraFeedPanel';
 import type { ThreeDPrinter } from '../types';
 
 import { CameraModal } from '../components/CameraModal'
+import { notifications } from '@mantine/notifications';
 
 function getStatusColor(status: number): string {
     switch (Number(status)) {
@@ -57,12 +59,22 @@ function getStatusColor(status: number): string {
     }
 }
 
-function printerPrinting(status: number): boolean {
+function printerStoppable(status: number): boolean {
     switch (Number(status)) {
         case 102: // Preparing
         case 103: // Printing
         case 104: // Paused
         case 303: // Error
+            return true;
+        default:
+            return false;
+    }
+}
+
+function printerPausable(status: number): boolean {
+    switch (Number(status)) {
+        case 102: // Preparing
+        case 103: // Printing
             return true;
         default:
             return false;
@@ -83,6 +95,26 @@ function PrinterDetailHeader({ printer, context, onOpenCamera, cameraDisabled,  
         ),
         successMessage: 'Stopped',
     });
+
+    // Pause Print Request
+    const pausePrint = () => {
+        context.api
+            .post(`/plugin/inventree_bambu/pause_print/${encodeURIComponent(printer.pk)}`)
+            .then(() => {
+                notifications.show({
+                    title: 'Pause requested',
+                    message: `Pause command sent to ${printer.name}`,
+                    color: 'green',
+                });
+            })
+            .catch((error) => {
+                notifications.show({
+                    title: 'Could not pause print',
+                    message: error.response?.data?.error ?? 'The request failed',
+                    color: 'red',
+                });
+            });
+    };
 
     return (
         <Paper p='sm' radius='xs' shadow='xs'>
@@ -112,7 +144,11 @@ function PrinterDetailHeader({ printer, context, onOpenCamera, cameraDisabled,  
                     </Badge>
 
                     <ActionButton variant='light' icon={<IconCamera />} tooltip='View Printer Camera' disabled={cameraDisabled} tooltipAlignment='bottom' onClick={onOpenCamera}/>
-                    <ActionButton variant='light' color='#FF0000' icon={<IconPlayerStop />} tooltip='Stop Current Print' disabled={!printerPrinting(printer.status)} tooltipAlignment='bottom' onClick={() => stopPrint.open()}/>
+
+                    <Divider key='divider-1' orientation='vertical' />
+                    
+                    <ActionButton variant='light' color='#FFA500' icon={<IconPlayerPause />} tooltip='Pause Current Print' disabled={!printerPausable(printer.status)} tooltipAlignment='bottom' onClick={() => pausePrint()}/>
+                    <ActionButton variant='light' color='#FF0000' icon={<IconPlayerStop />} tooltip='Stop Current Print' disabled={!printerStoppable(printer.status)} tooltipAlignment='bottom' onClick={() => stopPrint.open()}/>
                 </Group>
             </Group>
 

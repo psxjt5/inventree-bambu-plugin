@@ -149,7 +149,7 @@ class Bambu3DPlugin(MachineDriverMixin, UrlsMixin, UserInterfaceMixin, SettingsM
             path("get_printer_directories/<str:pk>", BambuAPI.get_printer_directories),
             path("download_printer_files/<str:pk>", BambuAPI.download_printer_files),
             path("get_camera_stream/<str:pk>", BambuAPI.get_camera_stream),
-
+            path("pause_print/<str:pk>", BambuAPI.pause_print),
 
             # Dialogs
             path("create_printer_directory/<str:pk>", CreatePrinterDirectoryDialog.as_view()),

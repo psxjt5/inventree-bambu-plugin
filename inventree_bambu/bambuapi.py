@@ -298,3 +298,16 @@ class BambuAPI:
         mqtt.request_stop_print()
         
         return Response(status=202)
+
+    @api_view(["POST"])
+    @permission_classes([IsAuthenticated])
+    def pause_print(request, pk):
+        """Pauses the current print."""
+        try:
+            mqtt = BambuUtils.get_printer_mqtt_service(pk)  # however you look up the controller
+        except PrinterNotFound:
+            return Response({"error": "Printer not found"}, status=404)
+
+        mqtt.request_pause_print()
+
+        return Response(status=202)
