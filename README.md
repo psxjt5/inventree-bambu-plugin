@@ -16,6 +16,7 @@ Development of this plugin is still ongoing. Current capabilities include the ab
   - View printer properties and details.
   - Monitor AMS filaments.
   - Manage files on the printer's SD card.
+  - View the printer's camera.
 
 Admin Center Machine Registry with Bambu Lab printers connected:
 
