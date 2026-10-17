@@ -22,6 +22,7 @@ from .dialogs.uploadprinterfiledialog import UploadPrinterFile
 from .dialogs.renameprinterfiledialog import RenamePrinterFileDialog
 from .dialogs.deleteprinterfilesdialog import DeletePrinterFilesDialog
 from .dialogs.moveprinterfiledialog import MovePrinterFiles
+from .dialogs.stopprintdialog import StopPrintDialog
 
 from django.urls import path
 from django.shortcuts import render
@@ -156,6 +157,7 @@ class Bambu3DPlugin(MachineDriverMixin, UrlsMixin, UserInterfaceMixin, SettingsM
             path("rename_printer_file/<str:pk>", RenamePrinterFileDialog.as_view()),
             path("delete_printer_files/<str:pk>", DeletePrinterFilesDialog.as_view()),
             path("move_printer_files/<str:pk>", MovePrinterFiles.as_view()),
+            path("stop_print/<str:pk>", StopPrintDialog.as_view()),
         ]
 
     # Unused?

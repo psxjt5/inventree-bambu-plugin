@@ -296,4 +296,5 @@ class BambuAPI:
             return Response({"error": "Printer not found"}, status=404)
 
         mqtt.request_stop_print()
+        
         return Response(status=202)

@@ -1,4 +1,4 @@
-import { Badge, Group, Paper, Stack, Text } from '@mantine/core';
+import { Alert, Badge, Group, Paper, Stack, Text } from '@mantine/core';
 import {
     checkPluginVersion,
     StylishText,
@@ -18,6 +18,7 @@ import {
     IconCircleLetterA,
     IconExclamationCircle,
     IconDeviceGamepad3,
+    IconPlayerStop,
 } from '@tabler/icons-react';
 
 import { PanelGroup } from '../components/PanelGroup';
@@ -56,7 +57,33 @@ function getStatusColor(status: number): string {
     }
 }
 
-function PrinterDetailHeader({ printer, onOpenCamera, cameraDisabled }: { printer: ThreeDPrinter; onOpenCamera: () => void; cameraDisabled: boolean;}) {
+function printerPrinting(status: number): boolean {
+    switch (Number(status)) {
+        case 102: // Preparing
+        case 103: // Printing
+        case 104: // Paused
+        case 303: // Error
+            return true;
+        default:
+            return false;
+    }
+}
+
+function PrinterDetailHeader({ printer, context, onOpenCamera, cameraDisabled,  }: { printer: ThreeDPrinter; context: InvenTreePluginContext; onOpenCamera: () => void; cameraDisabled: boolean;}) {
+
+    // Stop Print Confirmation
+    const stopPrint = context.forms.delete({
+        url: `/plugin/inventree_bambu/stop_print/${encodeURIComponent(printer.pk)}`,
+        method: 'POST',
+        title: `Stop Current Print on ${printer.name}`,
+        preFormContent: (
+            <Alert color='red' title='This cannot be undone'>
+                Stop the current print on this printer?
+            </Alert>
+        ),
+        successMessage: 'Stopped',
+    });
+
     return (
         <Paper p='sm' radius='xs' shadow='xs'>
             <Group justify='space-between' gap='xs' wrap='nowrap' align='flex-start'>
@@ -85,8 +112,11 @@ function PrinterDetailHeader({ printer, onOpenCamera, cameraDisabled }: { printe
                     </Badge>
 
                     <ActionButton variant='light' icon={<IconCamera />} tooltip='View Printer Camera' disabled={cameraDisabled} tooltipAlignment='bottom' onClick={onOpenCamera}/>
+                    <ActionButton variant='light' color='#FF0000' icon={<IconPlayerStop />} tooltip='Stop Current Print' disabled={!printerPrinting(printer.status)} tooltipAlignment='bottom' onClick={() => stopPrint.open()}/>
                 </Group>
             </Group>
+
+            {stopPrint.modal}
         </Paper>
     );
 }
@@ -223,7 +253,7 @@ function PrinterDetailsPage({
                 height: '100%',
             }}
         >
-            <PrinterDetailHeader printer={printer} onOpenCamera={() => setCameraOpened(true)} cameraDisabled={activePanel === 'camera'} />
+            <PrinterDetailHeader printer={printer} context={_context} onOpenCamera={() => setCameraOpened(true)} cameraDisabled={activePanel === 'camera'} />
 
             <PanelGroup panels={printerPanels} onPanelChange={setActivePanel} />
 
